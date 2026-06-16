@@ -3,67 +3,482 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Главная</title>
+    <title>ZRA | Запорно-регулирующая арматура</title>
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
-    <nav class="navbar">
+
+<!-- NAVBAR -->
+<nav class="navbar">
     <a href="#" class="logo">
-      <div class="logo-icon">🚀</div>
-      <span>Мой Сайт</span>
+        <div class="logo-icon">SP</div>
+        <div class="logo-text">
+            <span class="logo-name">ZRA</span>
+            <span class="logo-sub">ZAVOD</span>
+        </div>
     </a>
-
     <ul class="nav-links">
-      <li><a href="#">Кнопка 1</a></li>
-      <li><a href="#">Кнопка 2</a></li>
-      <li><a href="#">Кнопка 3</a></li>
-      <li><a href="#">Кнопка 4</a></li>
-      <li><a href="#">Кнопка 5</a></li>
-      <li><a href="#">Кнопка 6</a></li>
+        <li><a href="#" class="active">ГЛАВНАЯ</a></li>
+        <li><a href="#">О КОМПАНИИ</a></li>
+        <li><a href="#">КАТАЛОГ ПРОДУКЦИИ <span class="arrow">▾</span></a></li>
+        <li><a href="#">ОСОБЕННОСТИ</a></li>
+        <li><a href="#">ПРЕИМУЩЕСТВА</a></li>
+        <li><a href="#">НОВОСТИ</a></li>
     </ul>
-  </nav>
-
-  <div class="hero-slider">
-      <div class="hero-slide active">
-        <img src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=1920&q=80" alt="Промышленное оборудование 1">
-      </div>
-      <div class="hero-slide">
-        <img src="https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?w=1920&q=80" alt="Промышленное оборудование 2">
-      </div>
-      <div class="hero-slide">
-        <img src="https://images.unsplash.com/photo-1563294434-23ea041e0b98?w=1920&q=80" alt="Промышленное оборудование 3">
-      </div>
-      <div class="hero-slide">
-        <img src="https://images.unsplash.com/photo-1531218550092-ada485e94a0b?w=1920&q=80" alt="Промышленное оборудование 4">
-      </div>
+    <div class="nav-right">
+        <div class="lang-selector">RU <span class="arrow">▾</span></div>
+        <a href="#" class="btn-contacts">КОНТАКТЫ</a>
     </div>
+</nav>
 
-  <section class="hero">
-
+<!-- HERO -->
+<section class="hero">
+    <div class="hero-slider">
+        <div class="hero-slide active">
+            <img src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=1920&q=80" alt="">
+        </div>
+        <div class="hero-slide">
+            <img src="https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?w=1920&q=80" alt="">
+        </div>
+        <div class="hero-slide">
+            <img src="https://images.unsplash.com/photo-1563294434-23ea041e0b98?w=1920&q=80" alt="">
+        </div>
+        <div class="hero-slide">
+            <img src="https://images.unsplash.com/photo-1531218550092-ada485e94a0b?w=1920&q=80" alt="">
+        </div>
+    </div>
     <div class="hero-content">
-      <div class="hero-text">
-        <h1 class="hero-title">Запорно-регулирующая арматура, насосы и трубопроводные системы</h1>
-        <p class="hero-subtitle">Надёжные решения для промышленных процессов</p>
-        <div class="hero-buttons">
-          <a href="#" class="btn btn-primary">Подробнее о нас</a>
-          <a href="#" class="btn btn-secondary">Каталог продукции</a>
+        <div class="hero-text">
+            <h1 class="hero-title">
+                Запорно-регулирующая арматура,<br>
+                насосы <span class="title-accent">и трубопроводные системы</span>
+            </h1>
+            <p class="hero-subtitle"><span class="play-icon">▶</span> Надёжные решения для промышленных процессов</p>
+            <div class="hero-buttons">
+                <a href="#" class="btn btn-white">ПОДРОБНЕЕ О НАС</a>
+                <a href="#" class="btn btn-ghost"><span class="btn-circle">→</span> КАТАЛОГ ПРОДУКЦИИ</a>
+            </div>
         </div>
-      </div>
-
-      <div class="info-block">
-        <div class="info-item">
-          <h3 class="info-title">Надёжные решения для промышленных процессов</h3>
+        <div class="info-card">
+            <div class="info-card-image">
+                <img src="https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?w=300&q=80" alt="">
+            </div>
+            <div class="info-card-content">
+                <span class="info-card-label">ZRA</span>
+                <h3 class="info-card-title">Инженерные решения для промышленности</h3>
+                <p class="info-card-text">Оборудование для работы с пульпой, абразивами и химическими средами.</p>
+            </div>
         </div>
-        <div class="info-item">
-          <h3 class="info-title">Инженерные решения для промышленности</h3>
-        </div>
-        <div class="info-item">
-          <h3 class="info-title">Оборудование для работы с пульпой</h3>
-          <p class="info-text">Абразивами и химическими средами</p>
-        </div>
-      </div>
     </div>
-  </section>
+</section>
+
+<!-- ABOUT -->
+<section class="about section-white section-round-top">
+    <div class="two-col-header">
+        <div class="col-left">
+            <h2 class="sec-title">Инженерный подход<br><span class="t-green">к промышленным задачам</span></h2>
+            <p class="sec-label">ZRA ZAVOD</p>
+        </div>
+        <div class="col-right">
+            <p class="sec-desc">Мы работаем с промышленными объектами, <span class="t-green">где важны надёжность, устойчивость</span> к тяжёлым средам и стабильная работа оборудования.</p>
+            <div class="g-line"></div>
+        </div>
+    </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features section-white">
+    <div class="features-grid">
+        <div class="feat-card feat-light">
+            <div class="feat-badge top-left"><span>1</span></div>
+            <div class="feat-img"><img src="https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?w=700&q=80" alt=""></div>
+            <div class="feat-body">
+                <p class="feat-label">Экспертиза</p>
+                <h3 class="feat-title">Инженерный подбор решений</h3>
+                <p class="feat-text">Подбираем оборудование с учётом среды, нагрузки, давления и условий эксплуатации конкретного объекта.</p>
+            </div>
+        </div>
+        <div class="feat-card feat-dark feat-tall">
+            <div class="feat-badge bot-right"><span>2</span></div>
+            <div class="feat-img"><img src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=700&q=80" alt=""></div>
+            <div class="feat-body">
+                <p class="feat-label">Производство и поставка</p>
+                <h3 class="feat-title">Проверенные промышленные решения</h3>
+                <p class="feat-text">Серийная продукция производится локально, сложные позиции — на партнёрских заводах с обязательным контролем качества.</p>
+            </div>
+        </div>
+        <div class="feat-card feat-light">
+            <div class="feat-badge top-left"><span>3</span></div>
+            <div class="feat-img"><img src="https://images.unsplash.com/photo-1563294434-23ea041e0b98?w=700&q=80" alt=""></div>
+            <div class="feat-body">
+                <p class="feat-label">Сопровождение</p>
+                <h3 class="feat-title">Поддержка на всех этапах</h3>
+                <p class="feat-text">Сопровождаем проект от консультации до ввода в эксплуатацию и дальнейшего сервисного обслуживания.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CATALOG -->
+<section class="catalog section-white">
+    <div class="two-col-header">
+        <div class="col-left">
+            <h2 class="sec-title">Каталог производимой и поставляемой<br><span class="t-green">промышленной продукции</span></h2>
+            <p class="sec-label">Ключевые направления</p>
+        </div>
+        <div class="col-right">
+            <p class="sec-desc">Оборудование для промышленных объектов, рассчитанное на работу с химическими и агрессивными средами в тяжёлых условиях эксплуатации.</p>
+            <div class="g-line"></div>
+        </div>
+    </div>
+    <div class="catalog-grid">
+        <div class="cat-item">
+            <img src="https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?w=700&q=80" alt="">
+            <div class="cat-overlay"></div>
+            <div class="cat-content">
+                <svg class="cat-icon" viewBox="0 0 52 52" fill="none">
+                    <line x1="4" y1="26" x2="48" y2="26" stroke="white" stroke-width="3" stroke-linecap="round"/>
+                    <rect x="16" y="14" width="20" height="24" rx="3" stroke="white" stroke-width="2.5"/>
+                    <line x1="26" y1="6" x2="26" y2="14" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+                    <circle cx="26" cy="5" r="3.5" stroke="white" stroke-width="2"/>
+                </svg>
+                <h3 class="cat-title">Запорно-регулирующая арматура</h3>
+                <p class="cat-sub">Контроль потоков</p>
+            </div>
+        </div>
+        <div class="cat-item">
+            <img src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=700&q=80" alt="">
+            <div class="cat-overlay"></div>
+            <div class="cat-content">
+                <svg class="cat-icon" viewBox="0 0 52 52" fill="none">
+                    <circle cx="26" cy="26" r="14" stroke="white" stroke-width="2.5"/>
+                    <circle cx="26" cy="26" r="5" stroke="white" stroke-width="2"/>
+                    <line x1="26" y1="12" x2="26" y2="4" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+                    <line x1="40" y1="26" x2="48" y2="26" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+                    <line x1="26" y1="40" x2="26" y2="48" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+                </svg>
+                <h3 class="cat-title">Насосное оборудование</h3>
+                <p class="cat-sub">Транспортировка</p>
+            </div>
+        </div>
+        <div class="cat-item">
+            <img src="https://images.unsplash.com/photo-1563294434-23ea041e0b98?w=700&q=80" alt="">
+            <div class="cat-overlay"></div>
+            <div class="cat-content">
+                <svg class="cat-icon" viewBox="0 0 52 52" fill="none">
+                    <line x1="4" y1="22" x2="22" y2="22" stroke="white" stroke-width="3" stroke-linecap="round"/>
+                    <line x1="4" y1="30" x2="22" y2="30" stroke="white" stroke-width="3" stroke-linecap="round"/>
+                    <rect x="22" y="16" width="8" height="20" rx="2" stroke="white" stroke-width="2.5"/>
+                    <line x1="30" y1="26" x2="48" y2="26" stroke="white" stroke-width="3" stroke-linecap="round"/>
+                    <line x1="44" y1="20" x2="48" y2="20" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+                    <line x1="44" y1="32" x2="48" y2="32" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+                </svg>
+                <h3 class="cat-title">Трубопроводные системы</h3>
+                <p class="cat-sub">Инженерные сети</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- PRODUCTION / STATS -->
+<section class="production section-white">
+    <div class="two-col-header">
+        <div class="col-left">
+            <h2 class="sec-title">Комбинированная модель<br><span class="t-green">производства оборудования</span></h2>
+            <p class="sec-label">Производство и инженерный контроль</p>
+        </div>
+        <div class="col-right">
+            <p class="sec-desc">Производство ZRA ведётся по комбинированной модели: серийная продукция выпускается локально, сложные компоненты — на партнёрских заводах Китая.</p>
+            <div class="g-line"></div>
+        </div>
+    </div>
+    <div class="production-body">
+        <div class="stats-col">
+            <div class="stat-item">
+                <div class="stat-num">40+</div>
+                <div class="stat-title t-green">Реализованных проектов</div>
+                <p class="stat-desc">Поставки и внедрение оборудования для промышленных и горнодобывающих объектов.</p>
+            </div>
+            <div class="stat-item">
+                <div class="stat-num">100+</div>
+                <div class="stat-title t-green">Типов продукции</div>
+                <p class="stat-desc">Широкий ассортимент оборудования для различных сред и условий эксплуатации.</p>
+            </div>
+            <div class="stat-item">
+                <div class="stat-num">12–24 <span class="stat-unit">мес.</span></div>
+                <div class="stat-title t-green">Гарантия на оборудование</div>
+                <p class="stat-desc">Гарантийные обязательства при соблюдении условий эксплуатации и технических требований.</p>
+            </div>
+        </div>
+        <div class="map-col">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/World_map_-_low_resolution.svg/1200px-World_map_-_low_resolution.svg.png" alt="Карта" class="map-img">
+        </div>
+    </div>
+</section>
+
+<!-- ENGINEERING DARK -->
+<section class="eng-dark section-dark section-curve-tl">
+    <div class="two-col-header">
+        <div class="col-left">
+            <h2 class="sec-title sec-title-light">Инженерный подход и<br>ответственность <span class="t-green">на каждом этапе</span></h2>
+            <p class="sec-label sec-label-light">Надёжный партнёр для промышленных проектов</p>
+        </div>
+        <div class="col-right">
+            <p class="sec-desc sec-desc-light">Мы сопровождаем проекты <span class="t-green">от подбора оборудования до ввода в эксплуатацию,</span> обеспечивая стабильную работу в сложных условиях и долгосрочную поддержку заказчиков.</p>
+            <div class="g-line"></div>
+        </div>
+    </div>
+</section>
+
+<!-- STEPS -->
+<section class="steps section-dark">
+    <div class="steps-grid">
+        <div class="step-card">
+            <span class="step-num">01</span>
+            <img src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=1200&q=80" alt="" class="step-bg">
+            <div class="step-overlay"></div>
+            <div class="step-body">
+                <div class="step-info">
+                    <p class="step-label">Инжиниринг</p>
+                    <h3 class="step-title">Сопровождение промышленных систем</h3>
+                </div>
+                <div class="step-tags">
+                    <span class="tag">Подбор решений</span>
+                    <span class="tag">Технический анализ</span>
+                    <span class="tag">Проектные требования</span>
+                    <span class="tag">Рабочие среды</span>
+                    <span class="tag">Условия эксплуатации</span>
+                    <span class="tag">Технологические процессы</span>
+                </div>
+            </div>
+        </div>
+        <div class="step-card">
+            <span class="step-num">02</span>
+            <img src="https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?w=1200&q=80" alt="" class="step-bg">
+            <div class="step-overlay"></div>
+            <div class="step-body">
+                <div class="step-info">
+                    <p class="step-label">Испытания</p>
+                    <h3 class="step-title">Инженерные испытания и приёмка</h3>
+                </div>
+                <div class="step-tags">
+                    <span class="tag">Функциональные тесты</span>
+                    <span class="tag">Проверка параметров</span>
+                    <span class="tag">Контроль качества</span>
+                    <span class="tag">Испытательный стенд</span>
+                    <span class="tag">Приёмка оборудования</span>
+                    <span class="tag">Соответствие ТЗ</span>
+                </div>
+            </div>
+        </div>
+        <div class="step-card">
+            <span class="step-num">03</span>
+            <img src="https://images.unsplash.com/photo-1563294434-23ea041e0b98?w=1200&q=80" alt="" class="step-bg">
+            <div class="step-overlay"></div>
+            <div class="step-body">
+                <div class="step-info">
+                    <p class="step-label">Эксплуатация</p>
+                    <h3 class="step-title">Поддержка на этапе эксплуатации</h3>
+                </div>
+                <div class="step-tags">
+                    <span class="tag">Техническое сопровождение</span>
+                    <span class="tag">Гарантийные условия</span>
+                    <span class="tag">Рекомендации</span>
+                    <span class="tag">Запасные части</span>
+                    <span class="tag">Эксплуатационные режимы</span>
+                    <span class="tag">Поддержка оборудования</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- COMPANY -->
+<section class="company section-white section-curve-tr">
+    <div class="two-col-header">
+        <div class="col-left">
+            <h2 class="sec-title"><span class="t-green">Практический опыт</span><br>и ответственность за результат</h2>
+        </div>
+        <div class="col-right">
+            <p class="sec-desc">ZRA специализируется <span class="t-green">на разработке, производстве и поставке оборудования</span> для промышленных объектов и инфраструктурных систем.</p>
+        </div>
+    </div>
+    <div class="company-divider"></div>
+    <div class="company-body">
+        <div class="company-text">
+            <div class="company-logo">
+                <div class="logo-icon">SP</div>
+                <div class="logo-text">
+                    <span class="logo-name">ZRA</span>
+                    <span class="logo-sub">ZAVOD</span>
+                </div>
+            </div>
+            <p class="company-p"><strong class="t-green">Основное направление деятельности</strong> — запорно-регулирующая арматура, насосное оборудование и трубопроводные системы для работы в тяжёлых и агрессивных условиях эксплуатации.</p>
+            <p class="company-p"><strong class="t-green">Мы работаем с предприятиями</strong> горнодобывающей, металлургической, химической, энергетической и нефтегазовой отраслей, где к оборудованию предъявляются повышенные требования по надёжности, износостойкости и стабильности работы. Все решения подбираются с учётом реальных условий эксплуатации, характеристик рабочей среды и технологических процессов заказчика.</p>
+            <p class="company-p">ZRA ориентирована на долгосрочное сотрудничество и технически обоснованные решения. Мы сопровождаем проекты на всех этапах — от инженерного подбора до эксплуатации оборудования, обеспечивая стабильную работу систем и соответствие требованиям промышленной безопасности.</p>
+        </div>
+        <div class="company-img">
+            <img src="https://images.unsplash.com/photo-1531218550092-ada485e94a0b?w=800&q=80" alt="Завод ZRA">
+        </div>
+    </div>
+    <div class="company-cards">
+        <div class="company-card">
+            <img src="https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?w=700&q=80" alt="">
+            <div class="company-card-ov"></div>
+            <div class="company-card-body">
+                <h3>Ориентация на среду эксплуатации</h3>
+                <p>Оборудование подбирается с учётом конкретной рабочей среды — абразивной, химической или агрессивной.</p>
+            </div>
+        </div>
+        <div class="company-card">
+            <img src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=700&q=80" alt="">
+            <div class="company-card-ov"></div>
+            <div class="company-card-body">
+                <h3>Интеграция в существующие системы</h3>
+                <p>Решения ZRA учитывают параметры действующих трубопроводов, насосных и технологических систем без необходимости избыточных доработок.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- NEWS -->
+<section class="news section-light">
+    <div class="two-col-header">
+        <div class="col-left">
+            <h2 class="sec-title">Следите за последними<br><span class="t-green">новостями ZRA</span></h2>
+            <p class="sec-label">Информационный раздел</p>
+        </div>
+        <div class="col-right">
+            <p class="sec-desc">Актуальные новости компании, <span class="t-green">информация о продукции, реализованных</span> проектах и событиях в промышленной отрасли.</p>
+            <div class="g-line"></div>
+        </div>
+    </div>
+    <div class="news-grid">
+        <div class="news-card"><img src="https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?w=700&q=80" alt=""></div>
+        <div class="news-card"><img src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=700&q=80" alt=""></div>
+        <div class="news-card"><img src="https://images.unsplash.com/photo-1563294434-23ea041e0b98?w=700&q=80" alt=""></div>
+    </div>
+</section>
+
+<!-- CONTACT -->
+<section class="contact section-dark section-curve-tl">
+    <div class="two-col-header">
+        <div class="col-left">
+            <h2 class="sec-title sec-title-light">Форма обратной связи<br>для вопросов <span class="t-green">и предложений</span></h2>
+            <p class="sec-label sec-label-light">Технические и коммерческие запросы</p>
+        </div>
+        <div class="col-right">
+            <p class="sec-desc sec-desc-light">Если у вас есть вопросы о продукции, <span class="t-green">требуется консультация</span> или вы хотите направить тех. запрос — наши специалисты свяжутся с вами для уточнения деталей.</p>
+            <div class="g-line"></div>
+        </div>
+    </div>
+    <div class="contact-body">
+        <div class="contact-form-wrap">
+            <h3 class="form-heading">Обратная связь</h3>
+            <form class="contact-form">
+                <div class="form-row">
+                    <input type="text" placeholder="Название организации">
+                    <input type="text" placeholder="Контактное лицо">
+                </div>
+                <div class="form-row">
+                    <input type="email" placeholder="Электронная почта">
+                    <input type="tel" placeholder="+998 (000) 000-000000">
+                </div>
+                <textarea placeholder="Вопросы и предложения"></textarea>
+                <label class="check-label">
+                    <input type="checkbox">
+                    Я соглашаюсь с политикой компании и разрешаю обработку персональных данных
+                </label>
+                <button type="submit" class="btn-submit">ОТПРАВИТЬ</button>
+            </form>
+        </div>
+        <div class="contact-nav">
+            <p class="contact-nav-title">Другие разделы сайта</p>
+            <div class="chips">
+                <a href="#" class="chip">Каталог продукции</a>
+                <a href="#" class="chip">О компании</a>
+                <a href="#" class="chip">Новости</a>
+                <a href="#" class="chip">Контакты</a>
+                <a href="#" class="chip">На главную</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+    <div class="footer-grid">
+        <div class="f-col">
+            <h4 class="f-heading">Навигация</h4>
+            <p class="f-sub">Разделы</p>
+            <ul class="f-list">
+                <li><a href="#">Главная</a></li>
+                <li><a href="#">О компании</a></li>
+                <li><a href="#">Каталог</a></li>
+                <li><a href="#">Новости</a></li>
+                <li><a href="#">Контакты</a></li>
+            </ul>
+        </div>
+        <div class="f-col f-col-wide">
+            <h4 class="f-heading">Каталог</h4>
+            <p class="f-sub">Задвижки и запорная арматура</p>
+            <ul class="f-list">
+                <li><a href="#">Ножевые задвижки</a></li>
+                <li><a href="#">Пульповые задвижки</a></li>
+                <li><a href="#">Дисковые поворотные клапаны</a></li>
+                <li><a href="#">Шиберные задвижки</a></li>
+                <li><a href="#">Обратные клапаны</a></li>
+                <li><a href="#">Шаровые краны</a></li>
+            </ul>
+        </div>
+        <div class="f-col">
+            <p class="f-sub" style="margin-top:2rem">Насосы</p>
+            <ul class="f-list">
+                <li><a href="#">Пульповые насосы</a></li>
+                <li><a href="#">Дренажные насосы</a></li>
+                <li><a href="#">Химические процессные насосы</a></li>
+                <li><a href="#">Шланговые насосы</a></li>
+                <li><a href="#">Водяные насосы</a></li>
+            </ul>
+        </div>
+        <div class="f-col">
+            <p class="f-sub" style="margin-top:2rem">Трубопроводные системы</p>
+            <ul class="f-list">
+                <li><a href="#">ПНД трубы</a></li>
+                <li><a href="#">Стальные трубы</a></li>
+                <li><a href="#">Пульпопроводы</a></li>
+                <li><a href="#">Нержавеющие трубы</a></li>
+                <li><a href="#">Трубы из углеродистой стали</a></li>
+                <li><a href="#">Стеклопластиковые трубы</a></li>
+                <li><a href="#">Фитинги и фланцы</a></li>
+            </ul>
+        </div>
+        <div class="f-col">
+            <h4 class="f-heading">Контакты для связи</h4>
+            <p class="f-sub">Номера телефонов</p>
+            <p class="f-contact">+998 78 122 00 99<br>+998 77 034 99 00</p>
+            <p class="f-sub">Электронная почта</p>
+            <p class="f-contact">info@zra-zavod.uz</p>
+            <p class="f-sub">Адрес</p>
+            <p class="f-contact">Ташкентская обл., г. Алмалык,<br>ул. Мустакиллик, 30</p>
+            <p class="f-sub">График работы</p>
+            <p class="f-contact">пн-пт 09:00–18:00</p>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <a href="#" class="logo footer-logo">
+            <div class="logo-icon">SP</div>
+            <div class="logo-text">
+                <span class="logo-name">ZRA</span>
+                <span class="logo-sub">ZAVOD</span>
+            </div>
+        </a>
+        <p class="f-copy">© ZRA 2026. Все права защищены.</p>
+        <p class="f-dev">Разработано NEX GROUP</p>
+    </div>
+    <div class="footer-watermark">ZRA ZAVOD</div>
+</footer>
+
 <script src="assets/js/script.js"></script>
 </body>
 </html>

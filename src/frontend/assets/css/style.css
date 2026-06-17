@@ -2,9 +2,9 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 :root {
-  --green:      #3dba6b;
-  --green-dark: #0c2415;
-  --green-mid:  #1a4028;
+  --green:      #1976d2;
+  --green-dark: #080f1c;
+  --green-mid:  #0f1e38;
   --white:      #ffffff;
   --light:      #f4f5f6;
   --text:       #1a2b2e;
@@ -46,7 +46,7 @@ body {
 }
 .logo-text { display: flex; flex-direction: column; line-height: 1.1; }
 .logo-name { font-size: 1.25rem; font-weight: 700; color: var(--green-dark); letter-spacing: 2px; }
-.logo-sub  { font-size: 0.58rem; color: #9aaabb; letter-spacing: 3px; }
+.logo-sub  { font-size: 0.58rem; color: var(--green); letter-spacing: 3px; font-weight: 700; }
 
 .nav-links { display: flex; list-style: none; }
 .nav-links a {
@@ -140,7 +140,7 @@ body {
 .section-curve-tl  { border-radius: 60px 0 0 0;   margin-top: -60px; position: relative; z-index: 5; }
 .section-curve-tr  { border-radius: 0 60px 0 0;   margin-top: -60px; position: relative; z-index: 5; }
 
-.t-green { color: var(--green); }
+.t-accent { color: var(--green); }
 
 .two-col-header {
   display: flex; gap: 4rem; padding: 5rem 4rem;
@@ -166,7 +166,7 @@ body {
 }
 .feat-card { border-radius: 20px; overflow: hidden; position: relative; }
 .feat-light { background: #f0f3f5; }
-.feat-dark  { background: #1a2e28; color: #fff; transform: translateY(-30px); }
+.feat-dark  { background: #101d2f; color: #fff; transform: translateY(-30px); }
 .feat-tall .feat-img { height: 380px !important; }
 
 .feat-badge {
@@ -196,7 +196,7 @@ body {
 .cat-item:hover img { transform: scale(1.04); }
 .cat-overlay {
   position: absolute; inset: 0;
-  background: linear-gradient(to bottom, rgba(15,80,40,0.55), rgba(10,50,25,0.75));
+  background: linear-gradient(to bottom, rgba(10,30,80,0.55), rgba(5,15,50,0.80));
 }
 .cat-content {
   position: absolute; inset: 0;
@@ -215,7 +215,7 @@ body {
   gap: 3rem; padding: 0 4rem;
 }
 .stat-item {
-  background: rgba(61,186,107,0.07);
+  background: rgba(25,118,210,0.07);
   border-radius: 16px; padding: 1.4rem 1.8rem; margin-bottom: 1rem;
 }
 .stat-num { font-size: 2.8rem; font-weight: 700; color: var(--green); line-height: 1; margin-bottom: 0.4rem; }
@@ -225,7 +225,7 @@ body {
 .map-col { display: flex; align-items: center; }
 .map-img {
   width: 100%; opacity: 0.55;
-  filter: hue-rotate(100deg) saturate(3) brightness(0.65);
+  filter: hue-rotate(210deg) saturate(3) brightness(0.65);
 }
 
 /* ===== ENGINEERING DARK ===== */
@@ -312,9 +312,9 @@ body {
   font-size: 0.82rem; font-weight: 700; letter-spacing: 0.5px;
   cursor: pointer; transition: background 0.3s;
 }
-.btn-submit:hover { background: #2d9b4e; }
+.btn-submit:hover { background: #1565c0; }
 
-.contact-nav { background: #122b1c; border-radius: 20px; padding: 2rem; min-height: 300px; display: flex; flex-direction: column; justify-content: center; }
+.contact-nav { background: #0c1a30; border-radius: 20px; padding: 2rem; min-height: 300px; display: flex; flex-direction: column; justify-content: center; }
 .contact-nav-title { font-size: 0.88rem; color: rgba(255,255,255,0.4); margin-bottom: 1.5rem; }
 .chips { display: flex; flex-wrap: wrap; gap: 0.6rem; }
 .chip {
@@ -353,7 +353,7 @@ body {
 
 .footer-watermark {
   font-size: 11rem; font-weight: 900;
-  color: rgba(61,186,107,0.07);
+  color: rgba(25,118,210,0.07);
   letter-spacing: -4px; text-align: center;
   line-height: 1; user-select: none;
   margin: 0 -4rem;

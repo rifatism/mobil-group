@@ -104,9 +104,10 @@ body {
 .hero {
   position: relative;
   height: 100vh;
-  overflow: hidden;
+  /* overflow убран — слайдер выходит ниже чтобы быть видным за срезом */
 }
-.hero-slider { position: absolute; inset: 0; }
+/* Слайдер растянут на 140px ниже hero — ровно на размер диагонального среза */
+.hero-slider { position: absolute; top: 0; left: 0; right: 0; bottom: -140px; }
 .hero-slide {
   position: absolute; inset: 0;
   opacity: 0; transition: opacity 1.5s ease-in-out;

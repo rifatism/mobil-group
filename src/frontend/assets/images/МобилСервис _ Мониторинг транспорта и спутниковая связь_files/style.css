@@ -83,23 +83,6 @@ body {
 .navbar.scrolled .btn-contacts { color: #2c3e50; }
 .navbar.scrolled .btn-contacts:hover { color: var(--green); }
 
-.btn-login {
-  display: flex; align-items: center; gap: 7px;
-  padding: 0.5rem 1.1rem;
-  border: 1.5px solid rgba(255,255,255,0.55);
-  border-radius: 50px;
-  color: rgba(255,255,255,0.92);
-  text-decoration: none;
-  font-family: var(--font-nav);
-  font-size: 0.72rem; font-weight: 700;
-  letter-spacing: 0.5px;
-  transition: background 0.25s, border-color 0.25s, color 0.25s;
-  white-space: nowrap;
-}
-.btn-login:hover { background: rgba(255,255,255,0.12); border-color: #fff; color: #fff; }
-.navbar.scrolled .btn-login { border-color: #c8d0d8; color: #2c3e50; }
-.navbar.scrolled .btn-login:hover { background: var(--green); border-color: var(--green); color: #fff; }
-
 /* ===== HERO — 100vh, текст по центру (п.4) ===== */
 .hero {
   position: relative;

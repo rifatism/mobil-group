@@ -588,6 +588,46 @@ button.btn-login:hover { background: rgba(255,255,255,0.12); border-color: #fff;
   border-radius: 8px; padding: 0.55rem 0.9rem; margin: 0;
 }
 
+/* ===== CLIENT DROPDOWN ===== */
+.client-dropdown {
+  position: absolute; top: calc(100% + 10px); right: 0;
+  width: 210px; background: #fff;
+  border: 1px solid rgba(0,0,0,0.1);
+  border-radius: 14px;
+  box-shadow: 0 10px 36px rgba(0,0,0,0.18);
+  padding: 0.5rem; z-index: 9999;
+  opacity: 0; pointer-events: none; transform: translateY(-6px);
+  transition: opacity 0.18s, transform 0.18s;
+}
+.client-dropdown.open { opacity: 1; pointer-events: all; transform: translateY(0); }
+
+.cd-item {
+  display: flex; align-items: center; gap: 9px;
+  width: 100%; padding: 0.6rem 0.8rem;
+  border-radius: 9px; border: none; background: none;
+  font-size: 0.84rem; font-weight: 500; color: #1a2b3c;
+  text-decoration: none; cursor: pointer;
+  transition: background 0.15s; font-family: var(--font);
+}
+.cd-item svg { width: 16px; height: 16px; color: #6b7a8d; flex-shrink: 0; }
+.cd-item:hover { background: #f4f6fb; }
+
+.cd-item--soon { color: #9aabb8; cursor: default; }
+.cd-item--soon:hover { background: none; }
+.cd-item--soon svg { opacity: 0.5; }
+
+.cd-soon {
+  margin-left: auto; font-size: 0.65rem; font-weight: 700;
+  background: #fff3e0; color: #e65100;
+  padding: 2px 7px; border-radius: 50px;
+}
+
+.cd-divider { height: 1px; background: #e4e9f0; margin: 0.3rem 0; }
+
+.cd-item--logout { color: #d32f2f; }
+.cd-item--logout svg { color: #d32f2f; }
+.cd-item--logout:hover { background: #fff3f3; }
+
 .modal-btn {
   width: 100%; padding: 0.9rem; background: var(--green); color: #fff;
   border: none; border-radius: 50px; font-size: 0.88rem; font-weight: 800;

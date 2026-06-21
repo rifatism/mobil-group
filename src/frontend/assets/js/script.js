@@ -151,15 +151,13 @@ const ROLE_LABELS = { admin: 'Администратор', employee: 'Сотру
 function applySession(user) {
   const label = document.getElementById('btn-login-label');
   if (label) label.textContent = (user.full_name || user.username).toUpperCase();
-  const addBtn = document.getElementById('btn-add-user');
-  if (addBtn) addBtn.style.display = user.role === 'admin' ? 'inline-flex' : 'none';
 }
 
 function resetNavbar() {
   const label = document.getElementById('btn-login-label');
   if (label) label.textContent = 'ВОЙТИ';
-  const addBtn = document.getElementById('btn-add-user');
-  if (addBtn) addBtn.style.display = 'none';
+  const dd = document.getElementById('client-dropdown');
+  if (dd) dd.classList.remove('open');
 }
 
 // При загрузке — восстановить сессию
@@ -168,17 +166,34 @@ function resetNavbar() {
   if (user) applySession(user);
 })();
 
-// --- Кнопка ВОЙТИ / ВЫЙТИ ---
+// Закрыть дропдаун при клике вне
+document.addEventListener('click', e => {
+  const dd = document.getElementById('client-dropdown-wrap');
+  if (dd && !dd.contains(e.target)) {
+    const menu = document.getElementById('client-dropdown');
+    if (menu) menu.classList.remove('open');
+  }
+});
+
+// --- Кнопка ВОЙТИ / дропдаун ---
 window.loginBtnClick = function() {
-  if (getSession()) {
-    clearSession();
-    resetNavbar();
+  const user = getSession();
+  if (user) {
+    // Показать дропдаун
+    const dd = document.getElementById('client-dropdown');
+    if (dd) dd.classList.toggle('open');
   } else {
     document.getElementById('login-error').hidden = true;
     document.getElementById('login-form').reset();
     openModal('login-modal');
     setTimeout(() => document.getElementById('login-username').focus(), 150);
   }
+};
+
+window.clientLogout = function() {
+  clearSession();
+  resetNavbar();
+  window.location.reload();
 };
 
 window.closeLoginModal = function() { closeModal('login-modal'); };
@@ -211,6 +226,10 @@ window.handleLogin = async function(e) {
     }
 
     setSession(data.token, data.user);
+    if (data.user.role === 'admin') {
+      window.location.href = 'admin.html';
+      return;
+    }
     applySession(data.user);
     closeModal('login-modal');
 

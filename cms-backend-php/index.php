@@ -16,6 +16,12 @@ if ($uri === '/api/login' && $method === 'POST') {
     exit;
 }
 
+// Profile — текущий пользователь
+if ($uri === '/api/profile') {
+    require_once __DIR__ . '/handlers/ProfileHandler.php';
+    exit;
+}
+
 // Users — список, создание
 if ($uri === '/api/users') {
     require_once __DIR__ . '/handlers/UserHandler.php';

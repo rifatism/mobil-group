@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Профиль — МобилСервис</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/profile.css">
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="p-header">
+  <a href="index.html" class="p-logo">
+    <img src="assets/images/logo.png" alt="МобилСервис">
+  </a>
+  <div class="p-header-right">
+    <div class="p-user-menu" id="p-user-menu">
+      <button class="p-user-trigger" onclick="toggleMenu(event)">
+        <span class="p-avatar" id="p-avatar">?</span>
+        <span class="p-username" id="p-username">Профиль</span>
+        <svg class="p-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div class="p-dropdown" id="p-dropdown">
+        <div class="p-dd-info">
+          <span class="p-dd-avatar" id="p-dd-avatar">?</span>
+          <div>
+            <div class="p-dd-name" id="p-dd-name">—</div>
+            <div class="p-dd-email" id="p-dd-email">—</div>
+          </div>
+        </div>
+        <div class="p-dd-divider"></div>
+        <a class="p-dd-item p-dd-item--active" href="profile.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+          Профиль
+        </a>
+        <a class="p-dd-item p-dd-item--soon" href="#">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          Дашборд
+          <span class="soon-badge">Скоро</span>
+        </a>
+        <a class="p-dd-item p-dd-item--soon" href="#">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          Поддержка
+          <span class="soon-badge">Скоро</span>
+        </a>
+        <div class="p-dd-divider"></div>
+        <button class="p-dd-item p-dd-logout" onclick="logout()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Выйти
+        </button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- PAGE -->
+<div class="p-page">
+
+  <!-- Hero card -->
+  <div class="p-hero-card">
+    <div class="p-hero-avatar" id="hero-avatar">?</div>
+    <div class="p-hero-info">
+      <div class="p-hero-name" id="hero-name">Загрузка...</div>
+      <div class="p-hero-meta">
+        <span class="p-role-badge" id="hero-role">—</span>
+        <span class="p-hero-email" id="hero-email">—</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Form -->
+  <form id="profile-form" class="p-form" onsubmit="saveProfile(event)">
+
+    <!-- Личные данные -->
+    <div class="p-section">
+      <h2 class="p-section-title">Личные данные</h2>
+      <div class="p-grid-3">
+        <div class="p-field">
+          <label>Фамилия</label>
+          <input id="f-last"  type="text" placeholder="Иванов">
+        </div>
+        <div class="p-field">
+          <label>Имя</label>
+          <input id="f-first" type="text" placeholder="Иван">
+        </div>
+        <div class="p-field">
+          <label>Отчество</label>
+          <input id="f-patr"  type="text" placeholder="Иванович">
+        </div>
+      </div>
+      <div class="p-grid-2">
+        <div class="p-field">
+          <label>Телефон</label>
+          <input id="f-phone" type="tel" placeholder="+7 (___) ___-__-__">
+        </div>
+        <div class="p-field">
+          <label>E-mail <span class="p-note">нельзя изменить</span></label>
+          <input id="f-email" type="email" disabled>
+        </div>
+      </div>
+      <div class="p-field">
+        <label>О себе</label>
+        <textarea id="f-desc" rows="3" placeholder="Расскажите о себе или вашем бизнесе..."></textarea>
+      </div>
+    </div>
+
+    <!-- Тип клиента -->
+    <div class="p-section">
+      <h2 class="p-section-title">Тип клиента</h2>
+      <div class="p-type-switcher">
+        <label class="p-type-option">
+          <input type="radio" name="client_type" value="individual" onchange="onTypeChange()">
+          <div class="p-type-card">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+            <span class="p-type-label">Физическое лицо</span>
+            <span class="p-type-desc">Частный клиент</span>
+          </div>
+        </label>
+        <label class="p-type-option">
+          <input type="radio" name="client_type" value="company" onchange="onTypeChange()">
+          <div class="p-type-card">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg>
+            <span class="p-type-label">Компания</span>
+            <span class="p-type-desc">Юридическое лицо</span>
+          </div>
+        </label>
+      </div>
+      <div class="p-field p-company-field" id="company-field" hidden>
+        <label>Название компании</label>
+        <input id="f-company" type="text" placeholder="ООО «Ваша компания»">
+      </div>
+    </div>
+
+    <div class="p-form-footer">
+      <p id="save-msg" class="p-save-msg" hidden></p>
+      <button type="submit" class="p-save-btn" id="save-btn">Сохранить изменения</button>
+    </div>
+
+  </form>
+</div>
+
+<script src="assets/js/profile.js"></script>
+</body>
+</html>

@@ -12,3 +12,11 @@
     }
   }
 }
+{
+    "name": "cms/contact-form",
+    "require": {
+        "php": ">=8.0",
+        "phpmailer/phpmailer": "^6.9",
+        "vlucas/phpdotenv": "^5.5"
+    }
+}

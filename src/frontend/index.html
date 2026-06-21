@@ -26,13 +26,14 @@
     <div class="nav-right">
         <div class="lang-selector">RU <span class="arrow">▾</span></div>
         <a href="#" class="btn-contacts">КОНТАКТЫ</a>
-        <a href="#" class="btn-login" title="Войти в личный кабинет">
+        <button id="btn-add-user" class="btn-add-user" style="display:none" onclick="openAddUser()">+ Добавить</button>
+        <button id="btn-login-open" class="btn-login" onclick="loginBtnClick()">
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="8" r="4"/>
                 <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
             </svg>
-            <span>ВОЙТИ</span>
-        </a>
+            <span id="btn-login-label">ВОЙТИ</span>
+        </button>
     </div>
 </nav>
 
@@ -469,6 +470,78 @@
     <div class="footer-watermark">МОБИЛСЕРВИС</div>
 </footer>
 
-<script src="assets/js/script.js"></script>
+<!-- ===== МОДАЛ ВХОДА ===== -->
+<div id="login-modal" class="modal-backdrop">
+  <div class="modal-card">
+    <button class="modal-close" onclick="closeLoginModal()">&times;</button>
+    <div class="modal-header">
+      <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      <h2 class="modal-title">Вход в систему</h2>
+      <p class="modal-sub">МобилСервис — личный кабинет</p>
+    </div>
+    <form id="login-form" class="modal-form" onsubmit="handleLogin(event)">
+      <div class="modal-field">
+        <label>Логин или E-mail</label>
+        <input id="login-username" type="text" placeholder="Введите логин" autocomplete="username" required>
+      </div>
+      <div class="modal-field">
+        <label>Пароль</label>
+        <input id="login-password" type="password" placeholder="Введите пароль" autocomplete="current-password" required>
+      </div>
+      <p id="login-error" class="modal-error" hidden></p>
+      <button type="submit" id="login-submit" class="modal-btn">ВОЙТИ</button>
+    </form>
+  </div>
+</div>
+
+<!-- ===== МОДАЛ ДОБАВЛЕНИЯ ПОЛЬЗОВАТЕЛЯ (только admin) ===== -->
+<div id="adduser-modal" class="modal-backdrop">
+  <div class="modal-card">
+    <button class="modal-close" onclick="closeAddUser()">&times;</button>
+    <div class="modal-header">
+      <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M12 14c-4 0-7 2-7 5"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="16" y1="11" x2="22" y2="11"/></svg>
+      <h2 class="modal-title">Добавить пользователя</h2>
+      <p class="modal-sub">Сотрудник или клиент</p>
+    </div>
+    <form id="adduser-form" class="modal-form" onsubmit="handleAddUser(event)">
+      <div class="modal-row-2">
+        <div class="modal-field">
+          <label>Роль</label>
+          <select id="au-role" required>
+            <option value="employee">Сотрудник</option>
+            <option value="client">Клиент</option>
+          </select>
+        </div>
+        <div class="modal-field">
+          <label>Логин</label>
+          <input id="au-username" type="text" placeholder="username" required>
+        </div>
+      </div>
+      <div class="modal-field">
+        <label>Полное имя</label>
+        <input id="au-fullname" type="text" placeholder="Иванов Иван Иванович">
+      </div>
+      <div class="modal-row-2">
+        <div class="modal-field">
+          <label>E-mail</label>
+          <input id="au-email" type="email" placeholder="email@example.com" required>
+        </div>
+        <div class="modal-field">
+          <label>Телефон</label>
+          <input id="au-phone" type="tel" placeholder="+7 (___) ___-__-__">
+        </div>
+      </div>
+      <div class="modal-field">
+        <label>Пароль</label>
+        <input id="au-password" type="password" placeholder="Минимум 6 символов" required minlength="6">
+      </div>
+      <p id="adduser-error" class="modal-error" hidden></p>
+      <p id="adduser-success" class="modal-success" hidden></p>
+      <button type="submit" id="adduser-submit" class="modal-btn">СОЗДАТЬ</button>
+    </form>
+  </div>
+</div>
+
+<script src="assets/js/script.js?v=3"></script>
 </body>
 </html>

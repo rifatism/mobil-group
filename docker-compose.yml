@@ -1,4 +1,5 @@
 services:
+
   mysql:
     image: mysql:8.0
     container_name: cms-mysql
@@ -16,17 +17,34 @@ services:
       timeout: 5s
       retries: 5
 
-  php:
-    image: php:8.2-apache
-    container_name: cms-php
+  backend:
+    build: ./cms-backend-php
+    container_name: cms-backend
     ports:
-      - "8080:80"
+      - "8000:80"
+    environment:
+      DB_HOST: mysql
+      DB_NAME: cms_db
+      DB_USER: root
+      DB_PASS: mobilservice123
+      JWT_SECRET: mobilservice_super_secret_jwt_2024_change_in_prod
+      JWT_EXPIRE: "604800"
+      ALLOWED_ORIGIN: "http://localhost:8080"
     volumes:
-      - ./src/frontend:/var/www/html
-      - ./.env:/.env
+      - ./cms-backend-php:/var/www/html
+      - backend_uploads:/var/www/html/uploads
     depends_on:
       mysql:
         condition: service_healthy
 
+  frontend:
+    image: nginx:alpine
+    container_name: cms-frontend
+    ports:
+      - "8080:80"
+    volumes:
+      - ./src/frontend:/usr/share/nginx/html:ro
+
 volumes:
   mysql_data:
+  backend_uploads:

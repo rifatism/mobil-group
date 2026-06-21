@@ -1,0 +1,13 @@
+RewriteEngine On
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php [QSA,L]
+
+<Files ".env">
+    Require all denied
+</Files>
+
+<Files "*.log">
+    Require all denied
+</Files>

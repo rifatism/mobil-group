@@ -105,3 +105,179 @@ document.querySelectorAll('.feat-card').forEach(card => {
     setTimeout(() => { card.style.transform = ''; }, 560);
   });
 });
+
+// ===== AUTH =====
+const API_BASE = 'http://localhost:8000';
+
+// --- Утилиты модалов ---
+function openModal(id) {
+  document.getElementById(id).classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// Закрытие по клику на backdrop
+document.addEventListener('click', e => {
+  if (e.target.classList.contains('modal-backdrop')) {
+    e.target.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal-backdrop.open').forEach(m => m.classList.remove('open'));
+    document.body.style.overflow = '';
+  }
+});
+
+// --- Состояние сессии ---
+function getSession() {
+  try { return JSON.parse(localStorage.getItem('cms_user')); } catch { return null; }
+}
+function setSession(token, user) {
+  localStorage.setItem('cms_token', token);
+  localStorage.setItem('cms_user', JSON.stringify(user));
+}
+function clearSession() {
+  localStorage.removeItem('cms_token');
+  localStorage.removeItem('cms_user');
+}
+
+const ROLE_LABELS = { admin: 'Администратор', employee: 'Сотрудник', client: 'Клиент' };
+
+function applySession(user) {
+  const label = document.getElementById('btn-login-label');
+  if (label) label.textContent = (user.full_name || user.username).toUpperCase();
+  const addBtn = document.getElementById('btn-add-user');
+  if (addBtn) addBtn.style.display = user.role === 'admin' ? 'inline-flex' : 'none';
+}
+
+function resetNavbar() {
+  const label = document.getElementById('btn-login-label');
+  if (label) label.textContent = 'ВОЙТИ';
+  const addBtn = document.getElementById('btn-add-user');
+  if (addBtn) addBtn.style.display = 'none';
+}
+
+// При загрузке — восстановить сессию
+(function restoreSession() {
+  const user = getSession();
+  if (user) applySession(user);
+})();
+
+// --- Кнопка ВОЙТИ / ВЫЙТИ ---
+window.loginBtnClick = function() {
+  if (getSession()) {
+    clearSession();
+    resetNavbar();
+  } else {
+    document.getElementById('login-error').hidden = true;
+    document.getElementById('login-form').reset();
+    openModal('login-modal');
+    setTimeout(() => document.getElementById('login-username').focus(), 150);
+  }
+};
+
+window.closeLoginModal = function() { closeModal('login-modal'); };
+
+// --- Логин ---
+window.handleLogin = async function(e) {
+  e.preventDefault();
+  const errEl  = document.getElementById('login-error');
+  const btn    = document.getElementById('login-submit');
+  errEl.hidden = true;
+
+  const username = document.getElementById('login-username').value.trim();
+  const password = document.getElementById('login-password').value.trim();
+
+  btn.disabled = true;
+  btn.textContent = 'ВХОД...';
+
+  try {
+    const res  = await fetch(API_BASE + '/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password }),
+    });
+    const data = await res.json();
+
+    if (!data.success) {
+      errEl.textContent = data.message || 'Неверный логин или пароль';
+      errEl.hidden = false;
+      return;
+    }
+
+    setSession(data.token, data.user);
+    applySession(data.user);
+    closeModal('login-modal');
+
+  } catch {
+    errEl.textContent = 'Нет связи с сервером. Проверьте подключение.';
+    errEl.hidden = false;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'ВОЙТИ';
+  }
+};
+
+// --- Добавить пользователя (admin) ---
+window.openAddUser = function() {
+  document.getElementById('adduser-error').hidden = true;
+  document.getElementById('adduser-success').hidden = true;
+  document.getElementById('adduser-form').reset();
+  openModal('adduser-modal');
+};
+window.closeAddUser = function() { closeModal('adduser-modal'); };
+
+window.handleAddUser = async function(e) {
+  e.preventDefault();
+  const errEl = document.getElementById('adduser-error');
+  const okEl  = document.getElementById('adduser-success');
+  const btn   = document.getElementById('adduser-submit');
+  errEl.hidden = true;
+  okEl.hidden  = true;
+
+  const token = localStorage.getItem('cms_token');
+  if (!token) { errEl.textContent = 'Сессия истекла, войдите заново.'; errEl.hidden = false; return; }
+
+  const body = {
+    role:      document.getElementById('au-role').value,
+    username:  document.getElementById('au-username').value.trim(),
+    full_name: document.getElementById('au-fullname').value.trim(),
+    email:     document.getElementById('au-email').value.trim(),
+    phone:     document.getElementById('au-phone').value.trim(),
+    password:  document.getElementById('au-password').value,
+  };
+
+  btn.disabled = true;
+  btn.textContent = 'СОЗДАНИЕ...';
+
+  try {
+    const res  = await fetch(API_BASE + '/api/users', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify(body),
+    });
+    const data = await res.json();
+
+    if (!data.success) {
+      errEl.textContent = data.message || 'Ошибка при создании';
+      errEl.hidden = false;
+      return;
+    }
+
+    okEl.textContent = `Пользователь «${data.user.username}» (${ROLE_LABELS[data.user.role]}) создан`;
+    okEl.hidden = false;
+    document.getElementById('adduser-form').reset();
+
+  } catch {
+    errEl.textContent = 'Нет связи с сервером.';
+    errEl.hidden = false;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'СОЗДАТЬ';
+  }
+};

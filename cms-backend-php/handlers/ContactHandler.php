@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/EmailSender.php';
-require_once __DIR__ . '/TelegramSender.php';
+
 
 class ContactHandler {
     private $errors = [];
@@ -51,18 +51,7 @@ class ContactHandler {
         ]);
         $results['email'] = $email_sender->sendContactForm($email_data);
 
-        // Telegram
-        $telegram_sender = new TelegramSender();
-        $results['telegram'] = $telegram_sender->sendContactForm($this->data);
 
-        // Отправка файла в Telegram
-        if ($this->uploaded_file) {
-            $telegram_sender->sendFile(
-                $this->uploaded_file['path'],
-                $this->uploaded_file['name'],
-                " Файл от {$this->data['full_name']}"
-            );
-        }
 
         // Логируем
         $this->logSubmission();

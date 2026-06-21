@@ -9,3 +9,11 @@ RewriteRule ^(.*)$ index.php [QSA,L]
     AllowOverride None
     Require all granted
 </Directory>
+
+<Files ".env">
+    Require all denied
+</Files>
+
+<Files "*.log">
+    Require all denied
+</Files>

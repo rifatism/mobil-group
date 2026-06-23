@@ -43,9 +43,8 @@
       PageDown:   window.innerHeight * 0.88,
       PageUp:    -window.innerHeight * 0.88,
       End:        maxScroll(), Home: -maxScroll(),
-      ' ':        window.innerHeight * 0.88,
     };
-    const delta = e.shiftKey && e.key === ' ' ? -window.innerHeight * 0.88 : map[e.key];
+    const delta = map[e.key];
     if (delta !== undefined) {
       e.preventDefault();
       target = clamp(target + delta, 0, maxScroll());

@@ -378,11 +378,15 @@ async function loadNews() {
 }
 
 function updateNewsCounts() {
-  let pub = 0, draft = 0;
-  allNews.forEach(n => n.published ? pub++ : draft++);
-  document.getElementById('nc-all').textContent   = allNews.length;
+  let pub = 0, draft = 0, arch = 0;
+  allNews.forEach(n => {
+    if (n.archived) { arch++; return; }
+    n.published ? pub++ : draft++;
+  });
+  document.getElementById('nc-all').textContent   = allNews.length - arch;
   document.getElementById('nc-pub').textContent   = pub;
   document.getElementById('nc-draft').textContent = draft;
+  document.getElementById('nc-arch').textContent  = arch;
 }
 
 function setNewsFilter(val, el) {
@@ -395,6 +399,8 @@ function setNewsFilter(val, el) {
 function renderNewsGrid() {
   const q = (document.getElementById('news-search').value || '').toLowerCase().trim();
   const filtered = allNews.filter(n => {
+    if (newsFilter === 'archived') return !!n.archived;
+    if (n.archived) return false; // скрыть архивные из других вкладок
     const matchPub = newsFilter === 'all' || String(n.published) === newsFilter;
     const matchQ   = !q || n.title.toLowerCase().includes(q);
     return matchPub && matchQ;
@@ -411,9 +417,11 @@ function renderNewsGrid() {
       ? `<img src="${esc(n.image)}" alt="${esc(n.title)}" onerror="this.style.display='none'">`
       : `<div class="anc-img-placeholder"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>`;
 
-    const pubBadge = n.published
-      ? '<span class="anc-badge anc-badge--pub">Опубликовано</span>'
-      : '<span class="anc-badge anc-badge--draft">Черновик</span>';
+    const pubBadge = n.archived
+      ? '<span class="anc-badge anc-badge--arch">Архив</span>'
+      : n.published
+        ? '<span class="anc-badge anc-badge--pub">Опубликовано</span>'
+        : '<span class="anc-badge anc-badge--draft">Черновик</span>';
 
     return `<div class="anc-card">
       <div class="anc-img">${imgBlock}</div>
@@ -426,10 +434,19 @@ function renderNewsGrid() {
         ${n.excerpt ? `<p class="anc-excerpt">${esc(n.excerpt)}</p>` : ''}
       </div>
       <div class="anc-actions">
-        ${!n.published ? `<button class="anc-btn anc-btn--pub" onclick="publishNews(${n.id})">
+        ${!n.archived && !n.published ? `<button class="anc-btn anc-btn--pub" onclick="publishNews(${n.id})">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
           Опубликовать
         </button>` : ''}
+        ${n.archived
+          ? `<button class="anc-btn anc-btn--unarch" onclick="toggleArchiveNews(${n.id}, 0)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.51"/></svg>
+              Из архива
+            </button>`
+          : `<button class="anc-btn anc-btn--arch" onclick="toggleArchiveNews(${n.id}, 1)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+              В архив
+            </button>`}
         <button class="anc-btn anc-btn--edit" onclick="openEditNews(${n.id})">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
           Редактировать
@@ -441,6 +458,22 @@ function renderNewsGrid() {
       </div>
     </div>`;
   }).join('');
+}
+
+// --- Архивирование ---
+async function toggleArchiveNews(id, archived) {
+  const n = allNews.find(x => x.id === id);
+  if (!n) return;
+  try {
+    const res = await fetch(`${API}/api/news/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token() },
+      body: JSON.stringify({ title: n.title, content: n.content, excerpt: n.excerpt, image: n.image, published: n.published, archived }),
+    });
+    const data = await res.json();
+    if (!data.success) return;
+    await loadNews();
+  } catch { /* silent */ }
 }
 
 // --- Открыть модал добавления ---
@@ -1387,11 +1420,26 @@ async function loadAssignedList(testId) {
       return `<div class="kba-assigned-row">
         <span class="kba-assigned-name">${esc(a.name)}</span>
         <span class="kba-assigned-meta">${due}${status}</span>
+        <button class="kba-remove-btn" onclick="removeAssignment(${a.id}, ${testId})" title="Снять назначение">✕</button>
       </div>`;
     }).join('');
   } catch {
     el.innerHTML = '<span class="kba-assigned-empty">Ошибка загрузки</span>';
   }
+}
+
+async function removeAssignment(assignId, testId) {
+  if (!confirm('Снять назначение теста?')) return;
+  try {
+    const res  = await fetch(`${API}/api/knowledge/tests/${testId}/assign/${assignId}`, {
+      method: 'DELETE',
+      headers: { Authorization: 'Bearer ' + token() }
+    });
+    const data = await res.json();
+    if (!data.success) { alert(data.message || 'Ошибка'); return; }
+    loadAssignedList(testId);
+    loadKbTests();
+  } catch { alert('Ошибка соединения.'); }
 }
 
 async function handleAssignTest() {

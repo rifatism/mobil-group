@@ -210,13 +210,13 @@ async function openKbAssignModal(id, title) {
     });
   } catch {}
 
-  document.getElementById('kb-assign-modal').style.display = 'flex';
+  document.getElementById('kb-assign-modal').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
 
 function closeKbAssignModal(e) {
   if (e && e.target !== document.getElementById('kb-assign-modal')) return;
-  document.getElementById('kb-assign-modal').style.display = 'none';
+  document.getElementById('kb-assign-modal').classList.remove('open');
   document.body.style.overflow = '';
 }
 
@@ -235,7 +235,7 @@ async function handleKbAssign() {
     });
     const data = await res.json();
     if (!data.success) { errEl.textContent = data.message; errEl.style.display = ''; return; }
-    document.getElementById('kb-assign-modal').style.display = 'none';
+    document.getElementById('kb-assign-modal').classList.remove('open');
     document.body.style.overflow = '';
     // Обновить счётчик на карточке
     loadTests();

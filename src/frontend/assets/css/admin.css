@@ -633,6 +633,7 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); min-
 }
 .anc-badge--pub   { background: #e8f5e9; color: #2e7d32; }
 .anc-badge--draft { background: #fff8e1; color: #f57f17; }
+.anc-badge--arch  { background: #ede7f6; color: #512da8; }
 
 .anc-title {
   font-size: 0.9rem; font-weight: 700; color: var(--text); line-height: 1.4;
@@ -660,6 +661,10 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); min-
 .anc-btn--edit:hover { background: #cce3fb; border-color: var(--blue); }
 .anc-btn--del { background: none; color: var(--red); border-color: #ffcdd2; }
 .anc-btn--del:hover { background: #fff3f3; border-color: var(--red); }
+.anc-btn--arch { background: #ede7f6; color: #512da8; border-color: #d1c4e9; }
+.anc-btn--arch:hover { background: #d1c4e9; border-color: #512da8; }
+.anc-btn--unarch { background: #e3f2fd; color: #1565c0; border-color: #bbdefb; }
+.anc-btn--unarch:hover { background: #bbdefb; border-color: #1565c0; }
 .modal-actions .modal-btn { margin-top: 0; }
 
 /* ===== БАЗА ЗНАНИЙ ===== */
@@ -738,6 +743,14 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); min-
 .kba-assigned-name { font-size: 0.86rem; font-weight: 600; color: var(--text); flex: 1; min-width: 0; }
 .kba-assigned-meta { display: flex; align-items: center; gap: 0.4rem; flex-shrink: 0; }
 .kba-due { font-size: 0.72rem; color: var(--text-muted); }
+.kba-remove-btn {
+  flex-shrink: 0; background: none; border: none; cursor: pointer;
+  color: var(--text-muted); font-size: 0.78rem; line-height: 1;
+  width: 22px; height: 22px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s, color 0.15s;
+}
+.kba-remove-btn:hover { background: #fee2e2; color: #dc2626; }
 .kba-badge {
   font-size: 0.7rem; font-weight: 700; padding: 2px 8px; border-radius: 100px;
   white-space: nowrap;

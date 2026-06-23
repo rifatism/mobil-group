@@ -112,13 +112,9 @@
   color: #1976d2;
 }
 .notif-item-icon svg { width: 18px; height: 18px; }
-.notif-icon--test_assigned .notif-item-icon,
 .notif-item-icon.notif-icon--test_assigned { background: #e8f5e9; color: #388e3c; }
-.notif-icon--file_uploaded .notif-item-icon,
-.notif-item-icon.notif-icon--file_uploaded { background: #fff8e1; color: #f57c00; }
-
-/* make icon inside wrapper use its own class */
-.notif-item-icon.notif-icon--test_assigned { background: #e8f5e9; color: #388e3c; }
+.notif-item-icon.notif-icon--test_passed   { background: #e8f5e9; color: #2e7d32; }
+.notif-item-icon.notif-icon--test_failed   { background: #fce4ec; color: #c62828; }
 .notif-item-icon.notif-icon--file_uploaded { background: #fff8e1; color: #f57c00; }
 
 .notif-item-body { flex: 1; min-width: 0; }

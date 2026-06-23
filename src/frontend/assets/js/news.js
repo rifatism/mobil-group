@@ -85,10 +85,12 @@ function renderRows(list) {
     document.querySelectorAll('.np-row').forEach(el => obs.observe(el));
 }
 
-async function loadPublicNews() {
+async function loadPublicNews(archive = false) {
     const grid = document.getElementById('np-grid');
+    grid.innerHTML = `<div class="np-loading"><span class="np-spinner"></span><p>Загрузка новостей...</p></div>`;
     try {
-        const res  = await fetch(NP_API + '/api/news');
+        const url  = NP_API + '/api/news' + (archive ? '?archive=1' : '');
+        const res  = await fetch(url);
         const data = await res.json();
 
         if (!data.success || !data.news.length) {
@@ -97,7 +99,7 @@ async function loadPublicNews() {
                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
                     <polyline points="14 2 14 8 20 8"/>
                 </svg>
-                <p>Новостей пока нет</p>
+                <p>${archive ? 'В архиве нет новостей' : 'Новостей пока нет'}</p>
             </div>`;
             return;
         }
@@ -111,18 +113,11 @@ async function loadPublicNews() {
 }
 
 // ===== ФИЛЬТРЫ =====
-const curYear = new Date().getFullYear();
-
 document.querySelectorAll('.np-filter-btn').forEach(btn => {
     btn.addEventListener('click', () => {
         document.querySelectorAll('.np-filter-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
-        const filter = btn.dataset.filter;
-        if (filter === 'archive') {
-            renderRows(allNews.filter(n => new Date(n.created_at).getFullYear() < curYear));
-        } else {
-            renderRows(allNews.filter(n => new Date(n.created_at).getFullYear() >= curYear));
-        }
+        loadPublicNews(btn.dataset.filter === 'archive');
     });
 });
 
@@ -160,4 +155,4 @@ document.addEventListener('keydown', e => {
     if (e.key === 'Escape') closeNewsViewBtn();
 });
 
-loadPublicNews();
+loadPublicNews(false);

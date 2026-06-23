@@ -276,6 +276,22 @@ if ($method === 'POST' && $action === 'submit') {
     ");
     $ins->execute([$testId, $uid, $score, $total, json_encode($ans, JSON_UNESCAPED_UNICODE), $passed]);
 
+    // Уведомить всех администраторов о результате теста
+    $userStmt = $db->prepare("SELECT full_name, username FROM users WHERE id=?");
+    $userStmt->execute([$uid]);
+    $userRow = $userStmt->fetch();
+    $userName = $userRow ? ($userRow['full_name'] ?: $userRow['username']) : 'Сотрудник';
+
+    $testStmt = $db->prepare("SELECT title FROM knowledge_tests WHERE id=?");
+    $testStmt->execute([$testId]);
+    $testRow = $testStmt->fetch();
+    $testTitle = $testRow ? $testRow['title'] : 'Тест';
+
+    $resultLabel = $passed ? 'сдал' : 'не сдал';
+    $notifTitle  = $passed ? 'Тест сдан ✓' : 'Тест не сдан ✗';
+    $notifBody   = "{$userName} {$resultLabel} тест «{$testTitle}» — {$percent}%";
+    notifyRole($db, 'admin', $passed ? 'test_passed' : 'test_failed', $notifTitle, $notifBody, 'admin.html');
+
     echo json_encode([
         'success'       => true,
         'score'         => $score,

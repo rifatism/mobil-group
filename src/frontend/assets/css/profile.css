@@ -129,6 +129,11 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); min-
   padding: 3px 10px; border-radius: 50px;
   background: var(--blue-lt); color: var(--blue-dk);
 }
+.p-type-badge {
+  font-size: 0.72rem; font-weight: 600;
+  padding: 3px 10px; border-radius: 50px;
+  background: #f0f2f5; color: var(--muted);
+}
 
 /* ===== FORM ===== */
 .p-form { display: flex; flex-direction: column; gap: 1.2rem; }

@@ -17,9 +17,9 @@ if ($method === 'GET' && !$notifId) {
     $offset = max((int)($_GET['offset'] ?? 0), 0);
 
     $stmt = $db->prepare(
-        "SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?"
+        "SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT $limit OFFSET $offset"
     );
-    $stmt->execute([$uid, $limit, $offset]);
+    $stmt->execute([$uid]);
     $notifications = $stmt->fetchAll();
 
     $cntStmt = $db->prepare("SELECT COUNT(*) FROM notifications WHERE user_id = ? AND is_read = 0");

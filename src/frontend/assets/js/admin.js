@@ -237,7 +237,7 @@ function openEditUser(id) {
   const typeRow    = document.getElementById('eu-type-row');
   const companyRow = document.getElementById('eu-company-row');
   if (typeRow)    typeRow.hidden    = u.role !== 'client';
-  if (companyRow) companyRow.hidden = !['company','ip'].includes(u.client_type);
+  if (companyRow) companyRow.hidden = u.client_type !== 'company';
 
   document.getElementById('edituser-error').hidden = true;
   document.getElementById('eu-modal-title').textContent =
@@ -248,7 +248,7 @@ function openEditUser(id) {
 function onEuTypeChange() {
   const val = document.getElementById('eu-client-type').value;
   const row = document.getElementById('eu-company-row');
-  if (row) row.hidden = !['company','ip'].includes(val);
+  if (row) row.hidden = val !== 'company';
 }
 
 function closeEditUser() { closeModal('edituser-modal'); }
@@ -269,7 +269,7 @@ async function handleEditUser(e) {
     phone:        document.getElementById('eu-phone').value.trim(),
     description:  document.getElementById('eu-desc').value.trim(),
     client_type:  type,
-    company_name: ['company','ip'].includes(type) ? document.getElementById('eu-company').value.trim() : '',
+    company_name: type === 'company' ? document.getElementById('eu-company').value.trim() : '',
   };
 
   btn.disabled = true; btn.textContent = 'СОХРАНЕНИЕ...';

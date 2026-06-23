@@ -82,21 +82,24 @@ function fillForm(u) {
   val('f-phone',   u.phone       || '');
   val('f-email',   u.email       || '');
   val('f-desc',    u.description || '');
-  // Тип клиента — только чтение
-  const type    = u.client_type || 'individual';
-  const typeEl  = document.getElementById('p-type-readonly');
-  if (typeEl) typeEl.textContent = CLIENT_TYPE_LABELS[type] || type;
-
-  const companyField = document.getElementById('company-field');
-  if (companyField) {
-    const showCompany = type === 'company' || type === 'ip';
-    companyField.hidden = !showCompany;
-    val('f-company', u.company_name || '');
+  // Тип клиента — бейдж в hero-карточке, только для клиентов
+  const type = u.client_type || 'individual';
+  const typeBadge = document.getElementById('hero-client-type');
+  if (typeBadge) {
+    if (u.role === 'client') {
+      typeBadge.textContent = CLIENT_TYPE_LABELS[type] || type;
+      typeBadge.hidden = false;
+    } else {
+      typeBadge.hidden = true;
+    }
   }
 
-  // Скрыть блок типа для сотрудников и админов
-  const typeSection = document.getElementById('client-type-section');
-  if (typeSection) typeSection.hidden = u.role !== 'client';
+  // Поле компании — только для юридических лиц (тип company)
+  const companyField = document.getElementById('company-field');
+  if (companyField) {
+    companyField.hidden = type !== 'company';
+    val('f-company', u.company_name || '');
+  }
 }
 
 // ===== SAVE PROFILE =====

@@ -66,6 +66,7 @@
       <div class="p-hero-name" id="hero-name">Загрузка...</div>
       <div class="p-hero-meta">
         <span class="p-role-badge" id="hero-role">—</span>
+        <span class="p-type-badge" id="hero-client-type" hidden></span>
         <span class="p-hero-email" id="hero-email">—</span>
       </div>
     </div>
@@ -101,19 +102,13 @@
           <input id="f-email" type="email" disabled>
         </div>
       </div>
-      <div class="p-field">
-        <label>О себе</label>
-        <textarea id="f-desc" rows="3" placeholder="Расскажите о себе или вашем бизнесе..."></textarea>
-      </div>
-    </div>
-
-    <!-- Тип клиента — только чтение, задаётся администратором -->
-    <div class="p-section" id="client-type-section">
-      <h2 class="p-section-title">Тип клиента <span class="p-note" style="font-size:0.78rem;font-weight:400;color:#9aa8b8">задаётся администратором</span></h2>
-      <div class="p-type-readonly" id="p-type-readonly">—</div>
       <div class="p-field" id="company-field" hidden>
         <label>Название организации <span class="p-note">нельзя изменить</span></label>
         <input id="f-company" type="text" disabled>
+      </div>
+      <div class="p-field">
+        <label>О себе</label>
+        <textarea id="f-desc" rows="3" placeholder="Расскажите о себе или вашем бизнесе..."></textarea>
       </div>
     </div>
 

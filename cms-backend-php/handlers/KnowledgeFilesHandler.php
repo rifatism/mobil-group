@@ -229,7 +229,7 @@ if ($method === 'POST' && !$action) {
 
     // Уведомить всех сотрудников о новом файле
     $folderNote = $curPath ? " (папка: $curPath)" : '';
-    notifyRole($db, 'employee', 'file_uploaded', 'Новый файл в базе знаний', "Добавлен файл: «$title»$folderNote", 'knowledge.html', $uid);
+    notifyRole($db, 'employee', 'file_uploaded', 'Новый файл в базе знаний', 'Добавлен файл: ' . "\u{AB}" . $title . "\u{BB}" . $folderNote, 'knowledge.html', $uid);
 
     echo json_encode(['success' => true, 'file' => $get->fetch()], JSON_UNESCAPED_UNICODE);
     exit;

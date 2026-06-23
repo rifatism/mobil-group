@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/dashboard.css?v=20260623">
+  <link rel="stylesheet" href="assets/css/notifications.css">
 </head>
 <body>
 
@@ -91,6 +92,7 @@
         <span id="tb-vehicle-name" class="tb-vehicle-crumb">Все ТС</span>
       </div>
       <div class="topbar-right">
+        <div id="notif-bell-wrap" class="topbar-notif-wrap"></div>
         <button class="topbar-btn" id="refresh-btn" title="Обновить">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
         </button>
@@ -186,6 +188,7 @@
 </div><!-- .app -->
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="assets/js/notifications.js"></script>
 <script src="assets/js/dashboard.js?v=20260623"></script>
 </body>
 </html>

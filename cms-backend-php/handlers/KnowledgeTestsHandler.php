@@ -129,13 +129,13 @@ if ($method === 'POST' && $testId && $action === 'assign') {
             $ins = $db->prepare("INSERT IGNORE INTO knowledge_assignments (test_id, user_id, assigned_by, due_date) VALUES (?, 0, ?, ?)");
             $ins->execute([$testId, $uid, $due_date ?: null]);
         } catch (\Exception $e) {}
-        notifyRole($db, 'employee', 'test_assigned', 'Новый тест', "Вам назначен тест: «$testTitle»", 'knowledge.html', 0);
+        notifyRole($db, 'employee', 'test_assigned', 'Новый тест', "\u{AB}" . $testTitle . "\u{BB}", 'knowledge.html', 0);
     } else {
         $userId = (int)$target;
         if (!$userId) { http_response_code(400); echo json_encode(['success'=>false,'message'=>'Неверный пользователь'],JSON_UNESCAPED_UNICODE); exit; }
         $ins = $db->prepare("INSERT IGNORE INTO knowledge_assignments (test_id, user_id, assigned_by, due_date) VALUES (?, ?, ?, ?)");
         $ins->execute([$testId, $userId, $uid, $due_date ?: null]);
-        notifyUser($db, $userId, 'test_assigned', 'Новый тест', "Вам назначен тест: «$testTitle»", 'knowledge.html');
+        notifyUser($db, $userId, 'test_assigned', 'Новый тест', "\u{AB}" . $testTitle . "\u{BB}", 'knowledge.html');
     }
     echo json_encode(['success' => true], JSON_UNESCAPED_UNICODE);
     exit;

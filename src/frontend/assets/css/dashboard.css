@@ -359,6 +359,17 @@ html, body { height: 100%; overflow: hidden; font-family: 'Inter', system-ui, sa
 .topbar-btn svg { width: 15px; height: 15px; }
 .topbar-btn.spinning svg { animation: spin .7s linear infinite; }
 
+/* Notification bell in dashboard topbar */
+.topbar-notif-wrap { position: relative; display: flex; align-items: center; }
+.topbar-notif-wrap .notif-btn {
+  width: 34px; height: 34px;
+  border: 1px solid var(--border); border-radius: 6px;
+  background: none; color: var(--text-muted);
+}
+.topbar-notif-wrap .notif-btn:hover { background: var(--ws-bg); color: var(--text); border-color: var(--blue); }
+.topbar-notif-wrap .notif-btn svg { width: 16px; height: 16px; }
+.topbar-notif-wrap .notif-panel { top: calc(100% + 6px); right: 0; }
+
 /* User menu */
 .user-menu-wrap { position: relative; }
 .user-trigger {

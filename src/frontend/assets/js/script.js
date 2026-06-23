@@ -180,6 +180,9 @@ function applySession(user) {
   if (label) label.textContent = (user.full_name || user.username).toUpperCase();
   const adminLink = document.getElementById('cd-admin-link');
   if (adminLink) adminLink.style.display = user.role === 'admin' ? '' : 'none';
+  // База знаний — только для сотрудников и администраторов
+  const kbItem = document.getElementById('nav-knowledge-item');
+  if (kbItem) kbItem.style.display = ['admin','employee'].includes(user.role) ? '' : 'none';
 }
 
 function resetNavbar() {
@@ -189,6 +192,8 @@ function resetNavbar() {
   if (dd) dd.classList.remove('open');
   const adminLink = document.getElementById('cd-admin-link');
   if (adminLink) adminLink.style.display = 'none';
+  const kbItem = document.getElementById('nav-knowledge-item');
+  if (kbItem) kbItem.style.display = 'none';
 }
 
 // При загрузке — восстановить сессию

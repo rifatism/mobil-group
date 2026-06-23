@@ -31,6 +31,10 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
         Вакансии
       </a>
+      <a class="nav-item" data-section="knowledge" onclick="switchSection('knowledge', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        База знаний
+      </a>
     </nav>
 
     <a class="sidebar-back" href="index.html">
@@ -176,6 +180,50 @@
               <tr class="table-loader"><td colspan="6"><span class="loader"></span></td></tr>
             </tbody>
           </table>
+        </div>
+
+      </section>
+
+      <!-- ===== РАЗДЕЛ: БАЗА ЗНАНИЙ ===== -->
+      <section id="section-knowledge" class="content-section">
+
+        <!-- Tabs -->
+        <div class="section-toolbar">
+          <div class="filter-tabs">
+            <button class="filter-tab active" id="kb-tab-files" onclick="switchKbTab('files', this)">Файлы</button>
+            <button class="filter-tab" id="kb-tab-tests" onclick="switchKbTab('tests', this)">Тесты</button>
+          </div>
+        </div>
+
+        <!-- ── ФАЙЛЫ ── -->
+        <div id="kb-admin-files">
+          <div class="section-toolbar" style="margin-top:1rem">
+            <div class="search-wrap">
+              <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input id="kbf-search" type="search" class="search-input" placeholder="Поиск файлов..." oninput="renderAdminFiles()">
+            </div>
+            <button class="btn-header-add" style="margin-left:auto" onclick="openKbAdminUpload()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Загрузить файл
+            </button>
+          </div>
+          <div id="kb-admin-files-grid" class="kb-admin-files-list">
+            <div class="empty-state">Загрузка...</div>
+          </div>
+        </div>
+
+        <!-- ── ТЕСТЫ ── -->
+        <div id="kb-admin-tests" style="display:none">
+          <div class="section-toolbar" style="margin-top:1rem">
+            <span id="kb-tests-count" class="muted" style="font-size:0.85rem"></span>
+            <button class="btn-header-add" style="margin-left:auto" onclick="openKbAddTest()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Создать тест
+            </button>
+          </div>
+          <div id="kb-admin-tests-list">
+            <div class="empty-state">Загрузка...</div>
+          </div>
         </div>
 
       </section>
@@ -389,6 +437,100 @@
       <p id="vac-modal-error" class="modal-msg modal-msg--error" hidden></p>
       <button type="submit" id="vac-modal-submit" class="modal-btn">СОХРАНИТЬ</button>
     </form>
+  </div>
+</div>
+
+<!-- ===== KB: UPLOAD FILE MODAL ===== -->
+<div id="kbf-modal" class="modal-backdrop" onclick="backdropClick(event,'kbf-modal')">
+  <div class="modal-card">
+    <button class="modal-close" onclick="closeModal('kbf-modal')">&times;</button>
+    <div class="modal-header">
+      <div class="modal-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      </div>
+      <h2 class="modal-title">Загрузить файл</h2>
+      <p class="modal-sub">В базу знаний компании</p>
+    </div>
+    <form id="kbf-form" class="modal-form" onsubmit="handleKbAdminUpload(event)">
+      <div class="modal-field">
+        <label>Название</label>
+        <input id="kbf-title" type="text" placeholder="Название документа">
+      </div>
+      <div class="modal-field">
+        <label>Описание</label>
+        <textarea id="kbf-desc" rows="2" placeholder="Краткое описание файла..."></textarea>
+      </div>
+      <div class="modal-field">
+        <label>Файл <span style="color:#e53935">*</span></label>
+        <input id="kbf-file" type="file" required>
+      </div>
+      <p id="kbf-error" class="modal-msg modal-msg--error" hidden></p>
+      <button type="submit" id="kbf-submit" class="modal-btn">ЗАГРУЗИТЬ</button>
+    </form>
+  </div>
+</div>
+
+<!-- ===== KB: ADD/EDIT TEST MODAL ===== -->
+<div id="kbt-modal" class="modal-backdrop" onclick="backdropClick(event,'kbt-modal')">
+  <div class="modal-card" style="max-width:760px">
+    <button class="modal-close" onclick="closeModal('kbt-modal')">&times;</button>
+    <div class="modal-header">
+      <div class="modal-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      </div>
+      <h2 class="modal-title" id="kbt-modal-title">Создать тест</h2>
+      <p class="modal-sub">Вопросы с вариантами ответа</p>
+    </div>
+    <form id="kbt-form" class="modal-form" onsubmit="handleSaveTest(event)">
+      <input type="hidden" id="kbt-id">
+      <div class="modal-row-2">
+        <div class="modal-field" style="grid-column:1/-1">
+          <label>Название теста *</label>
+          <input id="kbt-title" type="text" placeholder="Название" required>
+        </div>
+      </div>
+      <div class="modal-field">
+        <label>Описание</label>
+        <textarea id="kbt-desc" rows="2" placeholder="Краткое описание теста..."></textarea>
+      </div>
+      <!-- Вопросы -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin:1rem 0 0.5rem">
+        <span style="font-size:0.78rem;font-weight:700;color:#6b7a8d;text-transform:uppercase;letter-spacing:.4px">Вопросы</span>
+        <button type="button" class="btn-add-question" onclick="addQuestion()">+ Добавить вопрос</button>
+      </div>
+      <div id="kbt-questions-list"></div>
+      <p id="kbt-error" class="modal-msg modal-msg--error" hidden></p>
+      <button type="submit" id="kbt-submit" class="modal-btn">СОХРАНИТЬ ТЕСТ</button>
+    </form>
+  </div>
+</div>
+
+<!-- ===== KB: ASSIGN TEST MODAL ===== -->
+<div id="kba-modal" class="modal-backdrop" onclick="backdropClick(event,'kba-modal')">
+  <div class="modal-card" style="max-width:480px">
+    <button class="modal-close" onclick="closeModal('kba-modal')">&times;</button>
+    <div class="modal-header">
+      <div class="modal-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      </div>
+      <h2 class="modal-title">Назначить тест</h2>
+      <p class="modal-sub" id="kba-test-name"></p>
+    </div>
+    <div class="modal-form">
+      <input type="hidden" id="kba-test-id">
+      <div class="modal-field">
+        <label>Кому назначить</label>
+        <select id="kba-target">
+          <option value="all">Всем сотрудникам</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <label>Срок выполнения (необязательно)</label>
+        <input id="kba-due" type="date">
+      </div>
+      <p id="kba-error" class="modal-msg modal-msg--error" hidden></p>
+      <button class="modal-btn" onclick="handleAssignTest()">НАЗНАЧИТЬ</button>
+    </div>
   </div>
 </div>
 

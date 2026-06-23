@@ -53,8 +53,8 @@ function logout() {
 }
 
 // ===== SECTIONS =====
-const SECTION_TITLES = { users: 'Пользователи', news: 'Новости', vacancies: 'Вакансии' };
-const ADD_HANDLERS   = { users: 'openAddUser()', news: 'openAddNews()', vacancies: 'openAddVac()' };
+const SECTION_TITLES = { users: 'Пользователи', news: 'Новости', vacancies: 'Вакансии', knowledge: 'База знаний' };
+const ADD_HANDLERS   = { users: 'openAddUser()', news: 'openAddNews()', vacancies: 'openAddVac()', knowledge: '' };
 
 function switchSection(name, el) {
   document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
@@ -62,9 +62,12 @@ function switchSection(name, el) {
   el.classList.add('active');
   document.getElementById('section-' + name).classList.add('active');
   document.getElementById('page-title').textContent = SECTION_TITLES[name] || name;
-  document.querySelector('.btn-header-add').setAttribute('onclick', ADD_HANDLERS[name] || '');
+  const addBtn = document.querySelector('.btn-header-add');
+  addBtn.setAttribute('onclick', ADD_HANDLERS[name] || '');
+  addBtn.style.display = name === 'knowledge' ? 'none' : '';
   if (name === 'news')      loadNews();
   if (name === 'vacancies') loadVacancies();
+  if (name === 'knowledge') loadKnowledgeSection();
 }
 
 // ===== LOAD USERS =====
@@ -799,4 +802,371 @@ function esc(s) {
 function fmtDate(str) {
   const d = new Date(str);
   return isNaN(d) ? str : d.toLocaleDateString('ru-RU', { day:'2-digit', month:'2-digit', year:'numeric' });
+}
+
+// =============================================================================
+// ===== БАЗА ЗНАНИЙ ===========================================================
+// =============================================================================
+
+let kbFiles = [];
+let kbTests = [];
+let kbUsers = [];   // список сотрудников для назначения тестов
+let kbTab   = 'files';
+
+function switchKbTab(tab, el) {
+  kbTab = tab;
+  document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('kb-admin-files').style.display = tab === 'files' ? '' : 'none';
+  document.getElementById('kb-admin-tests').style.display = tab === 'tests' ? '' : 'none';
+}
+
+async function loadKnowledgeSection() {
+  await Promise.all([loadKbFiles(), loadKbTests()]);
+  // Загружаем сотрудников для назначения тестов
+  kbUsers = allUsers.filter(u => u.role === 'employee');
+}
+
+// ─── ФАЙЛЫ ───────────────────────────────────────────────────────────────────
+async function loadKbFiles() {
+  const el = document.getElementById('kb-admin-files-grid');
+  try {
+    const res  = await fetch(API + '/api/knowledge/files', {
+      headers: { Authorization: 'Bearer ' + token() }
+    });
+    const data = await res.json();
+    kbFiles = data.files || [];
+    renderAdminFiles();
+  } catch { el.innerHTML = '<div class="empty-state">Ошибка загрузки файлов</div>'; }
+}
+
+function renderAdminFiles() {
+  const el = document.getElementById('kb-admin-files-grid');
+  const q  = (document.getElementById('kbf-search')?.value || '').toLowerCase().trim();
+  const list = q ? kbFiles.filter(f => (f.title + (f.description||'')).toLowerCase().includes(q)) : kbFiles;
+
+  if (!list.length) {
+    el.innerHTML = '<div class="empty-state">Файлов нет. Загрузите первый файл.</div>';
+    return;
+  }
+
+  el.innerHTML = list.map(f => {
+    const size = fmtFileSize(f.file_size);
+    const date = f.created_at ? fmtDate(f.created_at) : '';
+    const ext  = (f.original_name || '').split('.').pop().toUpperCase();
+    return `<div class="kbf-row">
+      <span class="kbf-ext">${esc(ext)}</span>
+      <div class="kbf-info">
+        <div class="kbf-title">${esc(f.title || f.original_name)}</div>
+        <div class="kbf-meta">${size}${date ? ' · ' + date : ''}${f.uploader ? ' · ' + esc(f.uploader) : ''}</div>
+      </div>
+      <div style="display:flex;gap:.4rem;align-items:center">
+        <a class="btn-edit-user" href="${API}/api/knowledge/files/${f.id || ''}/download" ${f.id ? `download="${esc(f.original_name)}"` : ''} target="_blank" style="text-decoration:none">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Скачать
+        </a>
+        ${f.id ? `<button class="btn-delete" onclick="deleteKbFile(${f.id})">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+          Удалить
+        </button>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function fmtFileSize(bytes) {
+  if (!bytes || isNaN(bytes)) return '—';
+  const b = Number(bytes);
+  if (b < 1024)         return b + ' Б';
+  if (b < 1024 * 1024)  return (b/1024).toFixed(1) + ' КБ';
+  return (b/1024/1024).toFixed(1) + ' МБ';
+}
+
+// Загрузить файл (из admin-панели)
+function openKbAdminUpload() {
+  document.getElementById('kbf-form').reset();
+  document.getElementById('kbf-error').hidden = true;
+  openModal('kbf-modal');
+}
+
+async function handleKbAdminUpload(e) {
+  e.preventDefault();
+  const errEl = document.getElementById('kbf-error');
+  const btn   = document.getElementById('kbf-submit');
+  const file  = document.getElementById('kbf-file').files[0];
+  errEl.hidden = true;
+
+  if (!file) { errEl.textContent = 'Выберите файл'; errEl.hidden = false; return; }
+
+  const fd = new FormData();
+  fd.append('file',        file);
+  fd.append('title',       document.getElementById('kbf-title').value.trim());
+  fd.append('description', document.getElementById('kbf-desc').value.trim());
+
+  btn.disabled = true; btn.textContent = 'ЗАГРУЗКА...';
+  try {
+    const res  = await fetch(API + '/api/knowledge/files', {
+      method: 'POST',
+      headers: { Authorization: 'Bearer ' + token() },
+      body: fd,
+    });
+    const data = await res.json();
+    if (!data.success) { errEl.textContent = data.message; errEl.hidden = false; return; }
+    closeModal('kbf-modal');
+    await loadKbFiles();
+  } catch {
+    errEl.textContent = 'Ошибка соединения.'; errEl.hidden = false;
+  } finally {
+    btn.disabled = false; btn.textContent = 'ЗАГРУЗИТЬ';
+  }
+}
+
+async function deleteKbFile(id) {
+  if (!confirm('Удалить файл? Это действие нельзя отменить.')) return;
+  try {
+    const res  = await fetch(`${API}/api/knowledge/files/${id}`, {
+      method: 'DELETE',
+      headers: { Authorization: 'Bearer ' + token() },
+    });
+    const data = await res.json();
+    if (!data.success) { alert(data.message); return; }
+    await loadKbFiles();
+  } catch { alert('Ошибка соединения.'); }
+}
+
+// ─── ТЕСТЫ ───────────────────────────────────────────────────────────────────
+async function loadKbTests() {
+  const el = document.getElementById('kb-admin-tests-list');
+  try {
+    const res  = await fetch(API + '/api/knowledge/tests', {
+      headers: { Authorization: 'Bearer ' + token() }
+    });
+    const data = await res.json();
+    kbTests = data.tests || [];
+    renderAdminTests();
+  } catch { el.innerHTML = '<div class="empty-state">Ошибка загрузки тестов</div>'; }
+}
+
+function renderAdminTests() {
+  const el = document.getElementById('kb-admin-tests-list');
+  const cnt = document.getElementById('kb-tests-count');
+  if (cnt) cnt.textContent = `Тестов: ${kbTests.length}`;
+
+  if (!kbTests.length) {
+    el.innerHTML = '<div class="empty-state">Тестов пока нет. Создайте первый.</div>';
+    return;
+  }
+
+  el.innerHTML = kbTests.map(t => {
+    const qs   = (() => { try { return JSON.parse(t.questions||'[]'); } catch { return []; } })();
+    const qCnt = qs.length;
+    return `<div class="kbt-admin-row">
+      <div class="kbt-admin-info">
+        <div class="kbt-admin-title">${esc(t.title)}</div>
+        <div class="kbt-admin-meta">
+          ${qCnt} вопр. · ${t.assign_count ?? 0} назначений
+          ${t.description ? ' · ' + esc(t.description.slice(0,60)) : ''}
+        </div>
+      </div>
+      <div style="display:flex;gap:.4rem;flex-wrap:wrap;align-items:center">
+        <button class="btn-edit-user" onclick="openAssignTest(${t.id}, '${esc(t.title)}')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          Назначить
+        </button>
+        <button class="btn-edit-user" onclick="openKbEditTest(${t.id})">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          Изменить
+        </button>
+        <button class="btn-delete" onclick="deleteKbTest(${t.id})">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+          Удалить
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ─── Создать / редактировать тест ────────────────────────────────────────────
+let kbQCount = 0;
+
+function openKbAddTest() {
+  document.getElementById('kbt-id').value    = '';
+  document.getElementById('kbt-title').value = '';
+  document.getElementById('kbt-desc').value  = '';
+  document.getElementById('kbt-error').hidden = true;
+  document.getElementById('kbt-modal-title').textContent = 'Создать тест';
+  document.getElementById('kbt-questions-list').innerHTML = '';
+  kbQCount = 0;
+  addQuestion();  // один вопрос сразу
+  openModal('kbt-modal');
+}
+
+async function openKbEditTest(id) {
+  const t = kbTests.find(x => x.id === id);
+  if (!t) return;
+
+  document.getElementById('kbt-id').value    = t.id;
+  document.getElementById('kbt-title').value = t.title;
+  document.getElementById('kbt-desc').value  = t.description || '';
+  document.getElementById('kbt-error').hidden = true;
+  document.getElementById('kbt-modal-title').textContent = 'Редактировать тест';
+
+  const container = document.getElementById('kbt-questions-list');
+  container.innerHTML = '';
+  kbQCount = 0;
+
+  const qs = (() => { try { return JSON.parse(t.questions || '[]'); } catch { return []; } })();
+  qs.forEach(q => addQuestion(q));
+  if (!qs.length) addQuestion();
+
+  openModal('kbt-modal');
+}
+
+function addQuestion(prefill) {
+  const idx = kbQCount++;
+  const div = document.createElement('div');
+  div.className   = 'kbt-q-block';
+  div.dataset.idx = idx;
+
+  const opts = prefill?.opts || ['', '', '', ''];
+  const ans  = prefill?.ans  ?? 0;
+
+  div.innerHTML = `
+    <div class="kbt-q-header">
+      <span class="kbt-q-num">Вопрос ${idx + 1}</span>
+      <button type="button" class="kbt-q-del" onclick="removeQuestion(this)" title="Удалить">×</button>
+    </div>
+    <div class="modal-field">
+      <label>Текст вопроса *</label>
+      <input type="text" class="kbt-q-text-input" placeholder="Вопрос..." value="${esc(prefill?.q || '')}" required>
+    </div>
+    <div class="kbt-opts-grid">
+      ${opts.map((o, i) => `
+        <label class="kbt-opt-row">
+          <input type="radio" name="kbt-ans-${idx}" value="${i}" ${ans === i ? 'checked' : ''}>
+          <input type="text" class="kbt-opt-input" placeholder="Вариант ${i+1}" value="${esc(o)}">
+        </label>
+      `).join('')}
+    </div>
+    <div class="kbt-opt-hint">Отметьте правильный вариант радиокнопкой слева</div>
+  `;
+
+  document.getElementById('kbt-questions-list').appendChild(div);
+}
+
+function removeQuestion(btn) {
+  const block = btn.closest('.kbt-q-block');
+  if (block) block.remove();
+  // Перенумеровываем
+  document.querySelectorAll('.kbt-q-block').forEach((b, i) => {
+    const num = b.querySelector('.kbt-q-num');
+    if (num) num.textContent = `Вопрос ${i + 1}`;
+  });
+}
+
+function collectQuestions() {
+  const blocks = document.querySelectorAll('#kbt-questions-list .kbt-q-block');
+  const qs = [];
+  for (const b of blocks) {
+    const q    = b.querySelector('.kbt-q-text-input')?.value.trim() || '';
+    const opts = [...b.querySelectorAll('.kbt-opt-input')].map(i => i.value.trim());
+    const ansEl = b.querySelector('input[type="radio"]:checked');
+    const ans  = ansEl ? parseInt(ansEl.value) : 0;
+    if (!q) return null; // Validation fail
+    qs.push({ q, opts, ans });
+  }
+  return qs;
+}
+
+async function handleSaveTest(e) {
+  e.preventDefault();
+  const errEl = document.getElementById('kbt-error');
+  const btn   = document.getElementById('kbt-submit');
+  errEl.hidden = true;
+
+  const id    = document.getElementById('kbt-id').value;
+  const title = document.getElementById('kbt-title').value.trim();
+  const desc  = document.getElementById('kbt-desc').value.trim();
+  const qs    = collectQuestions();
+
+  if (!title) { errEl.textContent = 'Введите название теста'; errEl.hidden = false; return; }
+  if (!qs)    { errEl.textContent = 'Заполните все вопросы'; errEl.hidden = false; return; }
+  if (!qs.length) { errEl.textContent = 'Добавьте хотя бы один вопрос'; errEl.hidden = false; return; }
+
+  btn.disabled = true; btn.textContent = 'СОХРАНЕНИЕ...';
+
+  const body = { title, description: desc, questions: qs };
+  const url  = id ? `${API}/api/knowledge/tests/${id}` : `${API}/api/knowledge/tests`;
+
+  try {
+    const res  = await fetch(url, {
+      method: id ? 'PUT' : 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token() },
+      body: JSON.stringify(body),
+    });
+    const data = await res.json();
+    if (!data.success) { errEl.textContent = data.message; errEl.hidden = false; return; }
+    closeModal('kbt-modal');
+    await loadKbTests();
+  } catch {
+    errEl.textContent = 'Ошибка соединения.'; errEl.hidden = false;
+  } finally {
+    btn.disabled = false; btn.textContent = 'СОХРАНИТЬ ТЕСТ';
+  }
+}
+
+async function deleteKbTest(id) {
+  if (!confirm('Удалить тест? Все назначения и результаты будут удалены.')) return;
+  try {
+    const res  = await fetch(`${API}/api/knowledge/tests/${id}`, {
+      method: 'DELETE',
+      headers: { Authorization: 'Bearer ' + token() },
+    });
+    const data = await res.json();
+    if (!data.success) { alert(data.message); return; }
+    await loadKbTests();
+  } catch { alert('Ошибка соединения.'); }
+}
+
+// ─── Назначить тест ──────────────────────────────────────────────────────────
+function openAssignTest(id, title) {
+  document.getElementById('kba-test-id').value   = id;
+  document.getElementById('kba-test-name').textContent = title;
+  document.getElementById('kba-error').hidden = true;
+  document.getElementById('kba-due').value = '';
+
+  // Заполнить список сотрудников
+  const sel = document.getElementById('kba-target');
+  sel.innerHTML = '<option value="all">Всем сотрудникам</option>';
+  kbUsers.forEach(u => {
+    const opt = document.createElement('option');
+    opt.value       = u.id;
+    opt.textContent = u.full_name || u.username;
+    sel.appendChild(opt);
+  });
+
+  openModal('kba-modal');
+}
+
+async function handleAssignTest() {
+  const errEl  = document.getElementById('kba-error');
+  errEl.hidden = true;
+  const testId = document.getElementById('kba-test-id').value;
+  const target = document.getElementById('kba-target').value;
+  const due    = document.getElementById('kba-due').value;
+
+  try {
+    const res = await fetch(`${API}/api/knowledge/tests/${testId}/assign`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token() },
+      body: JSON.stringify({ target, due_date: due || null }),
+    });
+    const data = await res.json();
+    if (!data.success) { errEl.textContent = data.message; errEl.hidden = false; return; }
+    closeModal('kba-modal');
+    await loadKbTests();
+    alert('Тест назначен!');
+  } catch {
+    errEl.textContent = 'Ошибка соединения.'; errEl.hidden = false;
+  }
 }

@@ -68,6 +68,20 @@ body {
 .navbar.scrolled .nav-links a:hover { color: var(--green); opacity: 1; }
 .arrow { font-size: 0.65rem; }
 
+/* ── БАЗА ЗНАНИЙ — синяя ссылка в навбаре ── */
+.nav-link-knowledge {
+  color: #90caf9 !important;
+  position: relative;
+}
+.nav-link-knowledge::after {
+  content: '';
+  position: absolute; bottom: 2px; left: 0.8rem; right: 0.8rem;
+  height: 2px; background: #90caf9; border-radius: 1px;
+  opacity: 0.6;
+}
+.navbar.scrolled .nav-link-knowledge { color: #1565c0 !important; }
+.navbar.scrolled .nav-link-knowledge::after { background: #1565c0; }
+
 .nav-right { display: flex; align-items: center; gap: 2rem; }
 .lang-selector {
   font-size: 0.82rem; font-weight: 700; color: rgba(255,255,255,0.9);

@@ -38,6 +38,15 @@
 
   // Клавиатура
   window.addEventListener('keydown', e => {
+    const tag = document.activeElement.tagName;
+    const editable = tag === 'INPUT' || tag === 'TEXTAREA' || document.activeElement.isContentEditable;
+
+    // Блокируем пробел везде, кроме полей ввода
+    if (e.key === ' ' && !editable) {
+      e.preventDefault();
+      return;
+    }
+
     const map = {
       ArrowDown:  80, ArrowUp: -80,
       PageDown:   window.innerHeight * 0.88,
@@ -52,11 +61,30 @@
     }
   });
 
+  // Публичный метод плавного скролла к позиции
+  window.smoothScrollTo = function(y) {
+    target = clamp(y, 0, maxScroll());
+    start();
+  };
+
   // Синхронизация со скроллбаром браузера
   window.addEventListener('scroll', () => {
     if (!running) { target = window.scrollY; current = window.scrollY; }
   });
 })();
+
+// ===== ПЛАВНЫЙ ПЕРЕХОД К РАЗДЕЛАМ ПО ЯКОРЮ =====
+document.querySelectorAll('a[href^="#"]').forEach(link => {
+  link.addEventListener('click', e => {
+    const id = link.getAttribute('href').slice(1);
+    const el = document.getElementById(id);
+    if (!el) return;
+    e.preventDefault();
+    const y = el.getBoundingClientRect().top + window.scrollY;
+    if (window.smoothScrollTo) { window.smoothScrollTo(y); }
+    else { window.scrollTo({ top: y, behavior: 'smooth' }); }
+  });
+});
 
 // ===== HERO SLIDER =====
 const slides = document.querySelectorAll('.hero-slide');

@@ -10,8 +10,63 @@ $method = $_SERVER['REQUEST_METHOD'];
 
 // GET /api/users — список всех пользователей (кроме паролей)
 if ($method === 'GET') {
-    $stmt = $db->query("SELECT id, username, full_name, email, phone, role, active, created_at FROM users ORDER BY role, username");
+    $stmt = $db->query("SELECT id, username, full_name, first_name, last_name, patronymic, email, phone, description, client_type, company_name, role, active, created_at FROM users ORDER BY role, username");
     echo json_encode(['success' => true, 'users' => $stmt->fetchAll()], JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
+// PUT /api/users/{id} — редактировать профиль пользователя (только admin)
+if ($method === 'PUT') {
+    $id = (int)($GLOBALS['route_id'] ?? 0);
+    if (!$id) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'message' => 'ID не указан'], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
+    $check = $db->prepare("SELECT id, role FROM users WHERE id = ?");
+    $check->execute([$id]);
+    $target = $check->fetch();
+    if (!$target) {
+        http_response_code(404);
+        echo json_encode(['success' => false, 'message' => 'Пользователь не найден'], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+    if ($target['role'] === 'admin') {
+        http_response_code(403);
+        echo json_encode(['success' => false, 'message' => 'Нельзя редактировать администратора'], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
+    $data        = json_decode(file_get_contents('php://input'), true) ?? [];
+    $first_name  = trim($data['first_name']  ?? '');
+    $last_name   = trim($data['last_name']   ?? '');
+    $patronymic  = trim($data['patronymic']  ?? '');
+    $phone       = trim($data['phone']       ?? '');
+    $description = trim($data['description'] ?? '');
+    $full_name   = trim("$last_name $first_name $patronymic");
+
+    $allowed_types = ['individual', 'ip', 'selfemployed', 'company'];
+    $client_type   = in_array($data['client_type'] ?? '', $allowed_types, true)
+                     ? $data['client_type'] : 'individual';
+    $company_name  = in_array($client_type, ['company', 'ip'], true)
+                     ? trim($data['company_name'] ?? '') : '';
+
+    $stmt = $db->prepare(
+        "UPDATE users SET
+            first_name   = ?, last_name  = ?, patronymic   = ?, full_name    = ?,
+            phone        = ?, description= ?, client_type  = ?, company_name = ?
+         WHERE id = ?"
+    );
+    $stmt->execute([
+        $first_name, $last_name, $patronymic, $full_name,
+        $phone, $description, $client_type, $company_name,
+        $id,
+    ]);
+
+    $get = $db->prepare("SELECT id, username, full_name, first_name, last_name, patronymic, email, phone, description, client_type, company_name, role, active, created_at FROM users WHERE id = ?");
+    $get->execute([$id]);
+    echo json_encode(['success' => true, 'user' => $get->fetch()], JSON_UNESCAPED_UNICODE);
     exit;
 }
 

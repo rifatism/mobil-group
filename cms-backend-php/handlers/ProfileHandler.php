@@ -29,37 +29,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
     $data = json_decode(file_get_contents('php://input'), true) ?? [];
 
-    $first_name   = trim($data['first_name']   ?? '');
-    $last_name    = trim($data['last_name']    ?? '');
-    $patronymic   = trim($data['patronymic']   ?? '');
-    $phone        = trim($data['phone']        ?? '');
-    $description  = trim($data['description']  ?? '');
-    $client_type  = trim($data['client_type']  ?? 'individual');
-    $company_name = trim($data['company_name'] ?? '');
-
-    if (!in_array($client_type, ['individual', 'company'], true)) {
-        $client_type = 'individual';
-    }
-    if ($client_type === 'individual') $company_name = '';
+    $first_name  = trim($data['first_name']  ?? '');
+    $last_name   = trim($data['last_name']   ?? '');
+    $patronymic  = trim($data['patronymic']  ?? '');
+    $phone       = trim($data['phone']       ?? '');
+    $description = trim($data['description'] ?? '');
 
     // Собираем full_name из частей
     $full_name = trim("$last_name $first_name $patronymic");
 
     $stmt = $db->prepare(
         "UPDATE users SET
-            first_name   = ?,
-            last_name    = ?,
-            patronymic   = ?,
-            full_name    = ?,
-            phone        = ?,
-            description  = ?,
-            client_type  = ?,
-            company_name = ?
+            first_name  = ?,
+            last_name   = ?,
+            patronymic  = ?,
+            full_name   = ?,
+            phone       = ?,
+            description = ?
          WHERE id = ?"
     );
     $stmt->execute([
         $first_name, $last_name, $patronymic, $full_name,
-        $phone, $description, $client_type, $company_name,
+        $phone, $description,
         $token->uid
     ]);
 

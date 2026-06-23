@@ -27,6 +27,10 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg>
         Новости
       </a>
+      <a class="nav-item" data-section="vacancies" onclick="switchSection('vacancies', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+        Вакансии
+      </a>
     </nav>
 
     <a class="sidebar-back" href="index.html">
@@ -100,6 +104,33 @@
         </div>
 
         <div id="news-grid" class="admin-news-grid">
+          <div class="table-loader"><span class="loader"></span></div>
+        </div>
+
+      </section>
+
+      <!-- ===== РАЗДЕЛ: ВАКАНСИИ ===== -->
+      <section id="section-vacancies" class="content-section">
+
+        <div class="section-toolbar">
+          <div class="filter-tabs">
+            <button class="filter-tab active" data-pub="all" onclick="setVacFilter('all', this)">
+              Все <span class="tab-count" id="vc-all">0</span>
+            </button>
+            <button class="filter-tab" data-pub="1" onclick="setVacFilter('1', this)">
+              Опубликованные <span class="tab-count" id="vc-pub">0</span>
+            </button>
+            <button class="filter-tab" data-pub="0" onclick="setVacFilter('0', this)">
+              Черновики <span class="tab-count" id="vc-draft">0</span>
+            </button>
+          </div>
+          <div class="search-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="vac-search" placeholder="Поиск по названию..." oninput="renderVacGrid()">
+          </div>
+        </div>
+
+        <div id="vac-grid" class="admin-news-grid">
           <div class="table-loader"><span class="loader"></span></div>
         </div>
 
@@ -284,6 +315,79 @@
 
       <p id="news-modal-error" class="modal-msg modal-msg--error" hidden></p>
       <button type="submit" id="news-modal-submit" class="modal-btn">СОХРАНИТЬ</button>
+    </form>
+  </div>
+</div>
+
+<!-- ===== МОДАЛ ВАКАНСИИ (СОЗДАНИЕ / РЕДАКТИРОВАНИЕ) ===== -->
+<div id="vac-modal" class="modal-backdrop" onclick="backdropClick(event, 'vac-modal')">
+  <div class="modal-card modal-card--wide">
+    <button class="modal-close" onclick="closeVacModal()">&times;</button>
+    <div class="modal-header">
+      <div class="modal-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+      </div>
+      <h2 class="modal-title" id="vac-modal-title">Добавить вакансию</h2>
+      <p class="modal-sub">МобилСервис — раздел карьеры</p>
+    </div>
+    <form id="vac-form" class="modal-form" onsubmit="handleSaveVac(event)">
+      <input type="hidden" id="vm-id">
+
+      <div class="modal-field">
+        <label>Название должности <span class="req">*</span></label>
+        <input id="vm-title" type="text" placeholder="Инженер по монтажу оборудования" required>
+      </div>
+
+      <div class="modal-row-2">
+        <div class="modal-field">
+          <label>Отдел</label>
+          <input id="vm-department" type="text" placeholder="Технический отдел">
+        </div>
+        <div class="modal-field">
+          <label>Город</label>
+          <input id="vm-location" type="text" placeholder="Тюмень" value="Тюмень">
+        </div>
+      </div>
+
+      <div class="modal-row-2">
+        <div class="modal-field">
+          <label>Тип занятости</label>
+          <select id="vm-type">
+            <option>Полная занятость</option>
+            <option>Частичная занятость</option>
+            <option>Удалённая работа</option>
+            <option>Стажировка</option>
+          </select>
+        </div>
+        <div class="modal-field">
+          <label>Зарплата</label>
+          <input id="vm-salary" type="text" placeholder="от 60 000 ₽">
+        </div>
+      </div>
+
+      <div class="modal-field">
+        <label>Описание вакансии</label>
+        <textarea id="vm-description" placeholder="Чем предстоит заниматься..." rows="4"></textarea>
+      </div>
+
+      <div class="modal-field">
+        <label>Требования к кандидату</label>
+        <textarea id="vm-requirements" placeholder="Опыт работы, навыки, образование..." rows="4"></textarea>
+      </div>
+
+      <label class="nm-published-row">
+        <div class="nm-toggle-wrap">
+          <input type="checkbox" id="vm-published" class="nm-toggle-input">
+          <span class="nm-toggle-slider"></span>
+        </div>
+        <div>
+          <span class="nm-toggle-label">Опубликовать</span>
+          <span class="nm-toggle-hint">Снимите галочку, чтобы сохранить как черновик</span>
+        </div>
+      </label>
+
+      <p id="vac-modal-error" class="modal-msg modal-msg--error" hidden></p>
+      <button type="submit" id="vac-modal-submit" class="modal-btn">СОХРАНИТЬ</button>
     </form>
   </div>
 </div>

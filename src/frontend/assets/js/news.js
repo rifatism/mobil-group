@@ -1,5 +1,14 @@
 const NP_API = 'http://localhost:8000';
 
+// Навбар всегда белый на странице новостей
+(function () {
+  const nav = document.querySelector('.navbar');
+  if (nav) {
+    nav.classList.add('scrolled');
+    window.addEventListener('scroll', () => nav.classList.add('scrolled'));
+  }
+})();
+
 function fmtNewsDate(str) {
     const d = new Date(str);
     return isNaN(d) ? '' : d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });

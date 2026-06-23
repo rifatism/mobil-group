@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Карьера | МобилСервис</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/career.css">
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar scrolled">
+    <a href="index.html" class="logo">
+        <img src="assets/images/logo.png" alt="МобилСервис" class="logo-img">
+    </a>
+    <ul class="nav-links">
+        <li><a href="index.html">ГЛАВНАЯ</a></li>
+        <li><a href="about.html">О КОМПАНИИ</a></li>
+        <li><a href="#">УСЛУГИ <span class="arrow">▾</span></a></li>
+        <li><a href="#">ПРОЕКТЫ</a></li>
+        <li><a href="news.html">НОВОСТИ</a></li>
+        <li><a href="career.html" class="active">КАРЬЕРА</a></li>
+    </ul>
+    <div class="nav-right">
+        <div class="lang-selector">RU <span class="arrow">▾</span></div>
+        <a href="index.html#contact" class="btn-contacts">КОНТАКТЫ</a>
+        <div id="client-dropdown-wrap" style="position:relative">
+            <button id="btn-login-open" class="btn-login" onclick="loginBtnClick()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="8" r="4"/>
+                    <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+                </svg>
+                <span id="btn-login-label">ВОЙТИ</span>
+            </button>
+            <div id="client-dropdown" class="client-dropdown">
+                <a id="cd-admin-link" class="cd-item cd-item--admin" href="admin.html" style="display:none">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    Панель администратора
+                </a>
+                <a class="cd-item" href="profile.html">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+                    Профиль
+                </a>
+                <a class="cd-item" href="dashboard.html">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                    Дашборд
+                </a>
+                <div class="cd-divider"></div>
+                <button class="cd-item cd-item--logout" onclick="clientLogout()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                    Выйти
+                </button>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- HERO -->
+<section class="cr-hero section-dark">
+    <div class="two-col-header">
+        <div class="col-left">
+            <h1 class="sec-title sec-title-light">Карьера в <span class="t-accent">МобилСервис</span></h1>
+            <p class="sec-label sec-label-light">Работа и развитие</p>
+        </div>
+        <div class="col-right">
+            <p class="sec-desc sec-desc-light">Мы создаём профессиональную, слаженную рабочую среду — <span class="t-accent">основу нашего успеха</span>. Эффективное взаимодействие ведёт к общим победам.</p>
+            <div class="g-line"></div>
+        </div>
+    </div>
+</section>
+
+<!-- МИССИЯ -->
+<section class="cr-mission section-light">
+    <div class="two-col-header" style="max-width:1200px;margin:0 auto">
+        <div class="col-left">
+            <h2 class="sec-title">Миссия <span class="t-accent-blue">компании</span></h2>
+            <p class="sec-label">Наши цели</p>
+        </div>
+        <div class="col-right">
+            <p class="sec-desc">Мы стремимся создавать инновационные решения, упрощающие рабочие процессы и способствующие достижению успеха клиентов на рынке.</p>
+        </div>
+    </div>
+    <div class="cr-mission-grid">
+        <div class="cr-mission-card">
+            <h4>Развитие клиентов</h4>
+            <p>Развиваемся сами и способствуем развитию и успехам наших клиентов за счёт автоматизации и цифровизации их внутренних процессов.</p>
+        </div>
+        <div class="cr-mission-card">
+            <h4>Инновационные решения</h4>
+            <p>Мы стремимся создавать инновационные решения, упрощающие рабочие процессы и способствующие достижению успеха клиентов на рынке.</p>
+        </div>
+        <div class="cr-mission-card">
+            <h4>Автоматизация и цифровизация</h4>
+            <p>Автоматизация и цифровизация являются ключевыми инструментами роста, направленными на долгосрочное сотрудничество и улучшение результатов.</p>
+        </div>
+    </div>
+</section>
+
+<!-- ЦЕННОСТИ -->
+<section class="cr-values section-light" style="background:#f5f8ff">
+    <div class="two-col-header" style="max-width:1100px;margin:0 auto">
+        <div class="col-left">
+            <h2 class="sec-title">Ценности <span class="t-accent-blue">компании</span></h2>
+            <p class="sec-label">Наши принципы</p>
+        </div>
+        <div class="col-right">
+            <p class="sec-desc">В основе лежат крепкие взаимоотношения с людьми, основанные на взаимном уважении и поддержке в команде и с клиентами.</p>
+        </div>
+    </div>
+    <div class="cr-values-grid">
+        <div class="cr-val-card">
+            <div class="cr-val-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+            <div class="cr-val-body">
+                <h4>Командный дух и уважение</h4>
+                <p>Крепкие взаимоотношения, основанные на взаимном уважении и поддержке — как внутри команды, так и с клиентами. Открытое общение и обмен знаниями для общих побед.</p>
+            </div>
+        </div>
+        <div class="cr-val-card">
+            <div class="cr-val-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            </div>
+            <div class="cr-val-body">
+                <h4>Амбициозность и инновационность</h4>
+                <p>Стремление к постоянному развитию и высоким стандартам работы, поиск новых идей, технологий и подходов, способствующих росту и эффективности.</p>
+            </div>
+        </div>
+        <div class="cr-val-card">
+            <div class="cr-val-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
+            <div class="cr-val-body">
+                <h4>Ответственность и честность</h4>
+                <p>Ключевые принципы взаимодействия внутри коллектива и при выполнении обязательств перед клиентами. Мы выполняем обещания и несём ответственность за результат.</p>
+            </div>
+        </div>
+        <div class="cr-val-card">
+            <div class="cr-val-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            </div>
+            <div class="cr-val-body">
+                <h4>Эффективность и результат</h4>
+                <p>Максимальная отдача через оптимизацию процессов и фокус на достижении целей. Мы ценим рабочее время и стремимся к высоким стандартам качества.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ПОЧЕМУ МЫ -->
+<section class="cr-why section-light">
+    <div class="two-col-header" style="max-width:1200px;margin:0 auto">
+        <div class="col-left">
+            <h2 class="sec-title">Почему <span class="t-accent-blue">МобилСервис</span></h2>
+            <p class="sec-label">Работа у нас</p>
+        </div>
+        <div class="col-right">
+            <p class="sec-desc">Мы — компания с 1998 года, которая ценит каждого сотрудника и создаёт условия для профессионального роста.</p>
+        </div>
+    </div>
+    <div class="cr-why-grid">
+        <div class="cr-why-card">
+            <div class="cr-why-num">25+</div>
+            <h4>Лет на рынке</h4>
+            <p>Стабильная компания с опытом и репутацией, работающая с 1998 года в сфере мониторинга транспорта.</p>
+        </div>
+        <div class="cr-why-card">
+            <div class="cr-why-num">🎯</div>
+            <h4>Развитие и обучение</h4>
+            <p>Активный обмен опытом и знаниями, наставничество, участие в корпоративных проектах и мероприятиях.</p>
+        </div>
+        <div class="cr-why-card">
+            <div class="cr-why-num">💡</div>
+            <h4>Современные технологии</h4>
+            <p>Работа с передовыми системами GPS/ГЛОНАСС, видеоаналитики, спутниковой связи и телематики.</p>
+        </div>
+    </div>
+</section>
+
+<!-- ВАКАНСИИ -->
+<section class="cr-vacancies section-light" style="background:#f5f8ff">
+    <div class="two-col-header" style="max-width:900px;margin:0 auto">
+        <div class="col-left">
+            <h2 class="sec-title">Открытые <span class="t-accent-blue">вакансии</span></h2>
+            <p class="sec-label">Присоединяйтесь к команде</p>
+        </div>
+        <div class="col-right">
+            <p class="sec-desc">Выберите подходящую вакансию и оставьте отклик — мы свяжемся с вами в ближайшее время.</p>
+        </div>
+    </div>
+    <div id="cr-vac-grid" class="cr-vac-grid">
+        <div class="cr-vac-empty"><p>Загрузка вакансий...</p></div>
+    </div>
+</section>
+
+<!-- ФОРМА ОТКЛИКА -->
+<section class="cr-apply section-light" id="cr-apply">
+    <div class="two-col-header" style="max-width:700px;margin:0 auto">
+        <div class="col-left">
+            <h2 class="sec-title">Оставить <span class="t-accent-blue">отклик</span></h2>
+            <p class="sec-label">Форма обратной связи</p>
+        </div>
+        <div class="col-right">
+            <p class="sec-desc">Не нашли подходящую вакансию? Отправьте отклик — мы рассмотрим вашу кандидатуру при появлении новых позиций.</p>
+        </div>
+    </div>
+    <div class="cr-apply-wrap">
+        <form id="cr-form" class="cr-form">
+            <div class="cr-form-row">
+                <div class="cr-field">
+                    <label>ФИО <span style="color:#e53935">*</span></label>
+                    <input id="cr-fullname" type="text" placeholder="Иванов Иван Иванович" required>
+                </div>
+                <div class="cr-field">
+                    <label>Электронная почта <span style="color:#e53935">*</span></label>
+                    <input id="cr-email" type="email" placeholder="email@example.com" required>
+                </div>
+            </div>
+            <div class="cr-form-row">
+                <div class="cr-field">
+                    <label>Телефон</label>
+                    <input id="cr-phone" type="tel" placeholder="+7 (___) ___-__-__">
+                </div>
+                <div class="cr-field">
+                    <label>Вакансия</label>
+                    <select id="cr-position">
+                        <option value="">— Выберите вакансию —</option>
+                    </select>
+                </div>
+            </div>
+            <div class="cr-field">
+                <label>Сопроводительное письмо</label>
+                <textarea id="cr-message" placeholder="Расскажите о себе, опыте работы и почему хотите работать в МобилСервис..."></textarea>
+            </div>
+            <label class="cr-consent-row">
+                <input type="checkbox" id="cr-consent" required>
+                <span>Я согласен(а) на обработку персональных данных в соответствии с политикой конфиденциальности компании МобилСервис.</span>
+            </label>
+            <div id="cr-status" class="cr-status"></div>
+            <button type="submit" id="cr-submit" class="cr-submit-btn">ОТПРАВИТЬ ОТКЛИК</button>
+        </form>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+    <div class="footer-grid">
+        <div class="f-col">
+            <h4 class="f-heading">Навигация</h4>
+            <p class="f-sub">Разделы</p>
+            <ul class="f-list">
+                <li><a href="index.html">Главная</a></li>
+                <li><a href="about.html">О компании</a></li>
+                <li><a href="#">Услуги</a></li>
+                <li><a href="#">Клиенты</a></li>
+                <li><a href="news.html">Новости</a></li>
+                <li><a href="career.html">Карьера</a></li>
+            </ul>
+        </div>
+        <div class="f-col f-col-wide">
+            <h4 class="f-heading">Услуги</h4>
+            <p class="f-sub">Мониторинг и телематика</p>
+            <ul class="f-list">
+                <li><a href="#">Мониторинг транспорта GPS/ГЛОНАСС</a></li>
+                <li><a href="#">Видеоаналитика в транспорте</a></li>
+                <li><a href="#">Резервные каналы связи GSM</a></li>
+            </ul>
+        </div>
+        <div class="f-col">
+            <p class="f-sub" style="margin-top:2rem">Тахография и связь</p>
+            <ul class="f-list">
+                <li><a href="#">Тахографы и карты водителей</a></li>
+                <li><a href="#">Мобильная спутниковая связь Iridium</a></li>
+                <li><a href="#">Спутниковый интернет VSAT</a></li>
+                <li><a href="#">Отопители для транспорта</a></li>
+            </ul>
+        </div>
+        <div class="f-col">
+            <p class="f-sub" style="margin-top:2rem">Клиенты</p>
+            <ul class="f-list">
+                <li><a href="#">Топливно-энергетические компании</a></li>
+                <li><a href="#">Транспортные компании</a></li>
+                <li><a href="#">Строительные компании</a></li>
+                <li><a href="#">Малая авиация</a></li>
+                <li><a href="#">Сельхозпредприятия</a></li>
+            </ul>
+        </div>
+        <div class="f-col">
+            <h4 class="f-heading">Контакты</h4>
+            <p class="f-sub">Телефон</p>
+            <p class="f-contact">+7 (3452) 68-90-90</p>
+            <p class="f-sub">Электронная почта</p>
+            <p class="f-contact">ms@r72.ru</p>
+            <p class="f-sub">Адрес</p>
+            <p class="f-contact">Тюмень,<br>ул. 50 лет Октября 29</p>
+            <p class="f-sub">График работы</p>
+            <p class="f-contact">пн-пт 09:00–18:00</p>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <a href="index.html" class="logo footer-logo">
+            <img src="assets/images/logo.png" alt="МобилСервис" class="logo-img logo-img-footer">
+        </a>
+        <p class="f-copy">© МобилСервис 2026. Все права защищены.</p>
+        <p class="f-dev">Тюмень, с 1998 года</p>
+    </div>
+    <div class="footer-watermark">МОБИЛСЕРВИС</div>
+</footer>
+
+<!-- МОДАЛ ВАКАНСИИ -->
+<div id="cr-modal" class="cr-modal-backdrop" onclick="closeVacancy(event)">
+    <div class="cr-modal-card">
+        <button class="cr-modal-close" onclick="closeVacancyBtn()">&times;</button>
+        <div id="cr-modal-dept" class="cr-modal-dept"></div>
+        <h2 id="cr-modal-title" class="cr-modal-title"></h2>
+        <div id="cr-modal-tags" class="cr-modal-tags"></div>
+        <div id="cr-modal-desc" class="cr-modal-section"></div>
+        <div id="cr-modal-req" class="cr-modal-section"></div>
+        <div class="cr-modal-btns">
+            <button class="cr-modal-apply-btn" onclick="scrollToApply()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                Откликнуться на вакансию
+            </button>
+            <button class="cr-modal-phone-btn" id="cr-modal-phone" onclick="showPhone(this)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1.27h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.87a16 16 0 0 0 6.29 6.29l1.77-1.76a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                Показать номер
+            </button>
+        </div>
+    </div>
+</div>
+
+<script src="assets/js/script.js?v=3"></script>
+<script src="assets/js/career.js"></script>
+</body>
+</html>

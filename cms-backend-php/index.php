@@ -60,6 +60,25 @@ if ($uri === '/api/contact' && $method === 'POST') {
     exit;
 }
 
+// Career contact (job application)
+if ($uri === '/api/career-contact' && $method === 'POST') {
+    require_once __DIR__ . '/handlers/CareerContactHandler.php';
+    exit;
+}
+
+// Vacancies — list / create
+if ($uri === '/api/vacancies') {
+    require_once __DIR__ . '/handlers/VacanciesHandler.php';
+    exit;
+}
+
+// Vacancies — single / update / delete
+if (preg_match('#^/api/vacancies/(\d+)$#', $uri, $m)) {
+    $GLOBALS['vacancy_id'] = (int)$m[1];
+    require_once __DIR__ . '/handlers/VacanciesHandler.php';
+    exit;
+}
+
 // AutoGRAF proxy — /api/autograf/*
 if (str_starts_with($uri, '/api/autograf/')) {
     require_once __DIR__ . '/handlers/AutografHandler.php';

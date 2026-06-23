@@ -105,30 +105,13 @@
       </div>
     </div>
 
-    <!-- Тип клиента -->
-    <div class="p-section">
-      <h2 class="p-section-title">Тип клиента</h2>
-      <div class="p-type-switcher">
-        <label class="p-type-option">
-          <input type="radio" name="client_type" value="individual" onchange="onTypeChange()">
-          <div class="p-type-card">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-            <span class="p-type-label">Физическое лицо</span>
-            <span class="p-type-desc">Частный клиент</span>
-          </div>
-        </label>
-        <label class="p-type-option">
-          <input type="radio" name="client_type" value="company" onchange="onTypeChange()">
-          <div class="p-type-card">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg>
-            <span class="p-type-label">Компания</span>
-            <span class="p-type-desc">Юридическое лицо</span>
-          </div>
-        </label>
-      </div>
-      <div class="p-field p-company-field" id="company-field" hidden>
-        <label>Название компании</label>
-        <input id="f-company" type="text" placeholder="ООО «Ваша компания»">
+    <!-- Тип клиента — только чтение, задаётся администратором -->
+    <div class="p-section" id="client-type-section">
+      <h2 class="p-section-title">Тип клиента <span class="p-note" style="font-size:0.78rem;font-weight:400;color:#9aa8b8">задаётся администратором</span></h2>
+      <div class="p-type-readonly" id="p-type-readonly">—</div>
+      <div class="p-field" id="company-field" hidden>
+        <label>Название организации <span class="p-note">нельзя изменить</span></label>
+        <input id="f-company" type="text" disabled>
       </div>
     </div>
 

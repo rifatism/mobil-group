@@ -12,9 +12,9 @@
 
 .np-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 2rem;
-    max-width: 1300px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2.5rem;
+    max-width: 1200px;
     margin: 0 auto;
 }
 
@@ -87,15 +87,15 @@
 .np-card-img-placeholder svg { width: 48px; height: 48px; stroke: #a0b0c4; }
 
 .np-card-body {
-    padding: 1.4rem 1.5rem 1.8rem;
+    padding: 1.8rem 2rem 2.2rem;
     display: flex;
     flex-direction: column;
-    gap: 0.6rem;
+    gap: 0.75rem;
     flex: 1;
 }
 
 .np-date {
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     font-weight: 600;
     color: #1976d2;
     text-transform: uppercase;
@@ -104,16 +104,16 @@
 
 .np-title {
     font-family: 'Montserrat', Arial, sans-serif;
-    font-size: 1rem;
+    font-size: 1.25rem;
     font-weight: 700;
     color: #1a2b3c;
     line-height: 1.4;
 }
 
 .np-excerpt {
-    font-size: 0.84rem;
+    font-size: 0.92rem;
     color: #6b7a8d;
-    line-height: 1.6;
+    line-height: 1.7;
     display: -webkit-box;
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
@@ -121,15 +121,15 @@
 }
 
 .np-read-more {
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     font-weight: 700;
     color: #1976d2;
     display: flex;
     align-items: center;
     gap: 4px;
-    margin-top: 0.4rem;
+    margin-top: 0.5rem;
 }
-.np-read-more svg { width: 14px; height: 14px; }
+.np-read-more svg { width: 15px; height: 15px; }
 
 /* ===== MODAL (просмотр новости) ===== */
 .np-modal-backdrop {
@@ -176,11 +176,10 @@
 .np-modal-content { font-size: 0.92rem; color: #3a4a5c; line-height: 1.8; white-space: pre-wrap; }
 
 /* ===== RESPONSIVE ===== */
-@media (max-width: 1024px) {
-    .np-grid { grid-template-columns: repeat(2, 1fr); }
+@media (max-width: 900px) {
+    .np-grid { grid-template-columns: 1fr; }
 }
 @media (max-width: 640px) {
     .np-hero { padding: 4rem 1.5rem 3rem; }
     .np-list { padding: 2rem 1.5rem; }
-    .np-grid { grid-template-columns: 1fr; }
 }

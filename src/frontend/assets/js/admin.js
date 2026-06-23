@@ -53,8 +53,8 @@ function logout() {
 }
 
 // ===== SECTIONS =====
-const SECTION_TITLES = { users: 'Пользователи', news: 'Новости' };
-const ADD_HANDLERS   = { users: 'openAddUser()', news: 'openAddNews()' };
+const SECTION_TITLES = { users: 'Пользователи', news: 'Новости', vacancies: 'Вакансии' };
+const ADD_HANDLERS   = { users: 'openAddUser()', news: 'openAddNews()', vacancies: 'openAddVac()' };
 
 function switchSection(name, el) {
   document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
@@ -63,7 +63,8 @@ function switchSection(name, el) {
   document.getElementById('section-' + name).classList.add('active');
   document.getElementById('page-title').textContent = SECTION_TITLES[name] || name;
   document.querySelector('.btn-header-add').setAttribute('onclick', ADD_HANDLERS[name] || '');
-  if (name === 'news') loadNews();
+  if (name === 'news')      loadNews();
+  if (name === 'vacancies') loadVacancies();
 }
 
 // ===== LOAD USERS =====
@@ -494,6 +495,195 @@ async function doDeleteNews() {
   } finally {
     btn.disabled = false; btn.textContent = 'Удалить';
   }
+}
+
+// ===== VACANCIES =====
+let allVacancies  = [];
+let vacFilterPub  = 'all';
+
+async function loadVacancies() {
+  const grid = document.getElementById('vac-grid');
+  if (!grid) return;
+  grid.innerHTML = '<div class="table-loader"><span class="loader"></span></div>';
+
+  try {
+    const res  = await fetch(API + '/api/vacancies?all=1', {
+      headers: { Authorization: 'Bearer ' + token() }
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.message);
+    allVacancies = data.vacancies || [];
+
+    const all   = allVacancies.length;
+    const pub   = allVacancies.filter(v => v.published == 1).length;
+    const draft = all - pub;
+    document.getElementById('vc-all').textContent   = all;
+    document.getElementById('vc-pub').textContent   = pub;
+    document.getElementById('vc-draft').textContent = draft;
+
+    renderVacGrid();
+  } catch (e) {
+    grid.innerHTML = `<p style="padding:2rem;color:#e53935">${e.message}</p>`;
+  }
+}
+
+function setVacFilter(pub, el) {
+  vacFilterPub = pub;
+  document.querySelectorAll('#section-vacancies .filter-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  renderVacGrid();
+}
+
+function renderVacGrid() {
+  const grid = document.getElementById('vac-grid');
+  const q    = (document.getElementById('vac-search')?.value || '').toLowerCase();
+
+  let list = allVacancies;
+  if (vacFilterPub !== 'all') list = list.filter(v => String(v.published) === vacFilterPub);
+  if (q) list = list.filter(v => v.title.toLowerCase().includes(q));
+
+  if (!list.length) {
+    grid.innerHTML = '<p style="padding:2rem;color:#6b7a8d;text-align:center">Вакансии не найдены</p>';
+    return;
+  }
+
+  grid.innerHTML = list.map(v => `
+    <div class="anc-card">
+      <div class="anc-body">
+        <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.5rem">
+          <span class="anc-badge ${v.published == 1 ? 'anc-badge--pub' : 'anc-badge--draft'}">
+            ${v.published == 1 ? 'Опубликована' : 'Черновик'}
+          </span>
+          ${v.department ? `<span style="font-size:0.72rem;color:#6b7a8d">${esc(v.department)}</span>` : ''}
+        </div>
+        <h3 class="anc-title" style="margin:0 0 0.4rem;font-size:1rem">${esc(v.title)}</h3>
+        <div style="display:flex;flex-wrap:wrap;gap:0.4rem;margin-bottom:0.6rem">
+          ${v.location        ? `<span style="font-size:0.73rem;color:#2e7d32;background:#e8f5e9;padding:2px 8px;border-radius:100px">${esc(v.location)}</span>` : ''}
+          ${v.employment_type ? `<span style="font-size:0.73rem;color:#1976d2;background:#e3f0ff;padding:2px 8px;border-radius:100px">${esc(v.employment_type)}</span>` : ''}
+          ${v.salary          ? `<span style="font-size:0.73rem;color:#f57c00;background:#fff8e1;padding:2px 8px;border-radius:100px">${esc(v.salary)}</span>` : ''}
+        </div>
+        ${v.description ? `<p class="anc-excerpt">${esc(v.description)}</p>` : ''}
+      </div>
+      <div class="anc-actions">
+        ${v.published != 1 ? `<button class="anc-btn anc-btn--pub" onclick="publishVac(${v.id})">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+          Опубликовать
+        </button>` : ''}
+        <button class="anc-btn anc-btn--edit" onclick="openEditVac(${v.id})">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          Редактировать
+        </button>
+        <button class="anc-btn anc-btn--del" onclick="confirmDeleteVac(${v.id}, '${esc(v.title)}')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+          Удалить
+        </button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function openAddVac() {
+  document.getElementById('vac-modal-title').textContent = 'Добавить вакансию';
+  document.getElementById('vac-form').reset();
+  document.getElementById('vm-id').value = '';
+  document.getElementById('vm-location').value = 'Тюмень';
+  document.getElementById('vac-modal-error').hidden = true;
+  openModal('vac-modal');
+}
+
+function openEditVac(id) {
+  const v = allVacancies.find(x => x.id === id);
+  if (!v) return;
+  document.getElementById('vac-modal-title').textContent = 'Редактировать вакансию';
+  document.getElementById('vm-id').value          = v.id;
+  document.getElementById('vm-title').value       = v.title       || '';
+  document.getElementById('vm-department').value  = v.department  || '';
+  document.getElementById('vm-location').value    = v.location    || 'Тюмень';
+  document.getElementById('vm-type').value        = v.employment_type || 'Полная занятость';
+  document.getElementById('vm-salary').value      = v.salary      || '';
+  document.getElementById('vm-description').value = v.description || '';
+  document.getElementById('vm-requirements').value= v.requirements|| '';
+  document.getElementById('vm-published').checked = v.published == 1;
+  document.getElementById('vac-modal-error').hidden = true;
+  openModal('vac-modal');
+}
+
+function closeVacModal() { closeModal('vac-modal'); }
+
+async function handleSaveVac(e) {
+  e.preventDefault();
+  const errEl = document.getElementById('vac-modal-error');
+  const btn   = document.getElementById('vac-modal-submit');
+  errEl.hidden = true;
+
+  const id   = document.getElementById('vm-id').value;
+  const body = {
+    title:          document.getElementById('vm-title').value.trim(),
+    department:     document.getElementById('vm-department').value.trim(),
+    location:       document.getElementById('vm-location').value.trim(),
+    employment_type:document.getElementById('vm-type').value,
+    salary:         document.getElementById('vm-salary').value.trim(),
+    description:    document.getElementById('vm-description').value.trim(),
+    requirements:   document.getElementById('vm-requirements').value.trim(),
+    published:      document.getElementById('vm-published').checked ? 1 : 0,
+  };
+
+  btn.disabled = true; btn.textContent = 'СОХРАНЕНИЕ...';
+
+  try {
+    const res  = await fetch(API + '/api/vacancies' + (id ? '/' + id : ''), {
+      method:  id ? 'PUT' : 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token() },
+      body:    JSON.stringify(body),
+    });
+    const data = await res.json();
+    if (!data.success) { errEl.textContent = data.message; errEl.hidden = false; return; }
+    closeVacModal();
+    await loadVacancies();
+  } catch {
+    errEl.textContent = 'Ошибка соединения.'; errEl.hidden = false;
+  } finally {
+    btn.disabled = false; btn.textContent = 'СОХРАНИТЬ';
+  }
+}
+
+async function publishVac(id) {
+  const v = allVacancies.find(x => x.id === id);
+  if (!v) return;
+  try {
+    const res  = await fetch(API + '/api/vacancies/' + id, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token() },
+      body: JSON.stringify({ ...v, published: 1 }),
+    });
+    const data = await res.json();
+    if (!data.success) { alert(data.message); return; }
+    await loadVacancies();
+  } catch { alert('Ошибка соединения.'); }
+}
+
+function confirmDeleteVac(id, title) {
+  deleteTarget = { id, type: 'vacancy' };
+  document.getElementById('confirm-text').textContent = `Удалить вакансию «${title}»? Это действие нельзя отменить.`;
+  document.getElementById('confirm-ok').onclick = doDeleteVac;
+  openModal('confirm-modal');
+}
+
+async function doDeleteVac() {
+  if (!deleteTarget) return;
+  const { id } = deleteTarget;
+  const btn = document.getElementById('confirm-ok');
+  btn.disabled = true; btn.textContent = 'Удаление...';
+  try {
+    await fetch(API + '/api/vacancies/' + id, {
+      method: 'DELETE',
+      headers: { Authorization: 'Bearer ' + token() }
+    });
+    closeModal('confirm-modal');
+    deleteTarget = null;
+    await loadVacancies();
+  } catch { alert('Ошибка соединения.'); }
+  finally { btn.disabled = false; btn.textContent = 'Удалить'; }
 }
 
 // ===== UTILS =====

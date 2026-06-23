@@ -149,6 +149,14 @@ if (preg_match('#^/api/knowledge/tests/(\d+)/assign$#', $uri, $m)) {
     require_once __DIR__ . '/handlers/KnowledgeTestsHandler.php';
     exit;
 }
+// Tests: remove single assignment /api/knowledge/tests/{id}/assign/{assignmentId}
+if (preg_match('#^/api/knowledge/tests/(\d+)/assign/(\d+)$#', $uri, $m)) {
+    $GLOBALS['knowledge_test_id']    = (int)$m[1];
+    $GLOBALS['knowledge_action']     = 'assign';
+    $GLOBALS['knowledge_assign_id']  = (int)$m[2];
+    require_once __DIR__ . '/handlers/KnowledgeTestsHandler.php';
+    exit;
+}
 // Tests: single / update / delete
 if (preg_match('#^/api/knowledge/tests/(\d+)$#', $uri, $m)) {
     $GLOBALS['knowledge_test_id'] = (int)$m[1];

@@ -167,7 +167,6 @@ function getSession() {
 function setSession(token, user) {
   localStorage.setItem('cms_token', token);
   localStorage.setItem('cms_user', JSON.stringify(user));
-  if (user && user.role) localStorage.setItem('cms_last_role', user.role);
 }
 function clearSession() {
   localStorage.removeItem('cms_token');
@@ -181,9 +180,12 @@ function applySession(user) {
   if (label) label.textContent = (user.full_name || user.username).toUpperCase();
   const adminLink = document.getElementById('cd-admin-link');
   if (adminLink) adminLink.style.display = user.role === 'admin' ? '' : 'none';
-  // База знаний — только для сотрудников и администраторов
-  const kbItem = document.getElementById('nav-knowledge-item');
-  if (kbItem) kbItem.style.display = ['admin','employee'].includes(user.role) ? '' : 'none';
+  const kbLink = document.getElementById('cd-knowledge-link');
+  if (kbLink) kbLink.style.display = ['admin','employee'].includes(user.role) ? '' : 'none';
+  const kbNav = document.getElementById('nav-knowledge-item');
+  if (kbNav) kbNav.style.display = ['admin','employee'].includes(user.role) ? '' : 'none';
+  const kbMob = document.getElementById('mob-knowledge-item');
+  if (kbMob) kbMob.style.display = ['admin','employee'].includes(user.role) ? '' : 'none';
 }
 
 function resetNavbar() {
@@ -193,8 +195,12 @@ function resetNavbar() {
   if (dd) dd.classList.remove('open');
   const adminLink = document.getElementById('cd-admin-link');
   if (adminLink) adminLink.style.display = 'none';
-  const kbItem = document.getElementById('nav-knowledge-item');
-  if (kbItem) kbItem.style.display = 'none';
+  const kbLink = document.getElementById('cd-knowledge-link');
+  if (kbLink) kbLink.style.display = 'none';
+  const kbNav = document.getElementById('nav-knowledge-item');
+  if (kbNav) kbNav.style.display = 'none';
+  const kbMob = document.getElementById('mob-knowledge-item');
+  if (kbMob) kbMob.style.display = 'none';
 }
 
 // При загрузке — восстановить сессию
@@ -213,14 +219,6 @@ document.addEventListener('click', e => {
 });
 
 // --- Кнопка ВОЙТИ / дропдаун ---
-function setForgotVisible(visible) {
-  const btn  = document.getElementById('btn-forgot');
-  const info = document.getElementById('forgot-info');
-  if (!btn) return;
-  btn.hidden = !visible;
-  if (!visible && info) info.hidden = true;
-}
-
 window.toggleForgotPassword = function() {
   const info = document.getElementById('forgot-info');
   if (!info) return;
@@ -237,10 +235,9 @@ window.loginBtnClick = function() {
     // Не залогинен — открыть модал
     document.getElementById('login-error').hidden = true;
     document.getElementById('login-form').reset();
-    // Кнопку «Забыли пароль?» показываем всем неавторизованным
-    // Сохранённая роль с прошлой сессии используется для скрытия у admin/employee
-    const lastRole = localStorage.getItem('cms_last_role');
-    setForgotVisible(lastRole !== 'admin' && lastRole !== 'employee');
+    // Сбрасываем блок с телефоном при каждом открытии модала
+    const forgotInfo = document.getElementById('forgot-info');
+    if (forgotInfo) forgotInfo.hidden = true;
     openModal('login-modal');
     setTimeout(() => document.getElementById('login-username').focus(), 150);
   }
@@ -444,3 +441,89 @@ window.submitContactForm = async function(e) {
     btn.textContent  = 'ОТПРАВИТЬ';
   }
 };
+
+// ===== MOBILE NAV =====
+window.toggleMobNav = function() {
+  const nav    = document.getElementById('mob-nav');
+  const burger = document.getElementById('nav-burger');
+  if (!nav) return;
+  const opening = !nav.classList.contains('open');
+  nav.classList.toggle('open', opening);
+  if (burger) burger.classList.toggle('open', opening);
+  document.body.style.overflow = opening ? 'hidden' : '';
+};
+
+window.toggleMobDrop = function(btn) {
+  const sub = btn.nextElementSibling;
+  if (!sub) return;
+  btn.classList.toggle('open');
+  sub.classList.toggle('open');
+};
+
+window.toggleMobUser = function(btn) {
+  const menu = document.getElementById('mob-user-menu');
+  if (!menu) return;
+  btn.classList.toggle('open');
+  menu.classList.toggle('open');
+};
+
+function updateMobNav(user) {
+  const avatar = document.getElementById('mob-u-avatar');
+  const name   = document.getElementById('mob-u-name');
+  const label  = document.getElementById('mob-u-label');
+  const menu   = document.getElementById('mob-user-menu');
+  const loginLink = document.getElementById('mob-login-link');
+
+  if (!menu) return;
+
+  if (user) {
+    if (avatar) avatar.textContent = (user.full_name || user.username || '?')[0].toUpperCase();
+    if (name)   name.textContent   = user.full_name || user.username;
+    if (label)  label.textContent  = (user.role === 'admin' ? 'Администратор' : user.role === 'employee' ? 'Сотрудник' : 'Клиент');
+    if (loginLink) loginLink.style.display = 'none';
+
+    menu.innerHTML = `
+      ${user.role === 'admin' ? `<a href="admin.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        Панель администратора</a>` : ''}
+      <a href="profile.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+        Профиль</a>
+      <a href="dashboard.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Дашборд</a>
+      ${['admin','employee'].includes(user.role) ? `<a href="knowledge.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        База знаний</a>` : ''}
+      <button onclick="clientLogout()" class="mob-logout-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Выйти</button>
+    `;
+  } else {
+    if (avatar) avatar.textContent = '?';
+    if (name)   name.textContent   = 'Войти';
+    if (label)  label.textContent  = 'Личный кабинет';
+    if (loginLink) loginLink.style.display = '';
+    menu.innerHTML = '';
+  }
+}
+
+// Патчим applySession и resetNavbar чтобы обновляли и мобильное меню
+const _origApply = typeof applySession === 'function' ? applySession : null;
+const _origReset = typeof resetNavbar  === 'function' ? resetNavbar  : null;
+(function patchSession() {
+  const origApply = window._origApplySession || applySession;
+  const origReset = window._origResetNavbar  || resetNavbar;
+  window._origApplySession = origApply;
+  window._origResetNavbar  = origReset;
+  applySession = function(u) { origApply(u); updateMobNav(u); };
+  resetNavbar  = function()  { origReset();  updateMobNav(null); };
+  // Sync current session
+  const u = getSession();
+  updateMobNav(u || null);
+})();
+
+// Закрыть мобильный нав кликом по бэкдропу
+document.addEventListener('click', e => {
+  if (e.target.classList.contains('mob-nav-backdrop')) toggleMobNav();
+});

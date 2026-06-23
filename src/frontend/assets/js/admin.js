@@ -46,6 +46,19 @@ function toggleUserMenu(e) {
   document.getElementById('user-menu').classList.toggle('open');
 }
 
+function closeUserMenu() {
+  document.getElementById('user-menu').classList.remove('open');
+}
+
+function toggleAdminSidebar() {
+  const sidebar  = document.querySelector('.sidebar');
+  const backdrop = document.getElementById('sidebar-backdrop');
+  const burger   = document.getElementById('admin-burger');
+  const isOpen   = sidebar.classList.toggle('open');
+  backdrop.classList.toggle('open', isOpen);
+  burger.classList.toggle('open', isOpen);
+}
+
 function logout() {
   localStorage.removeItem('cms_token');
   localStorage.removeItem('cms_user');
@@ -71,6 +84,13 @@ function switchSection(name, el) {
   if (name === 'news')      loadNews();
   if (name === 'vacancies') loadVacancies();
   if (name === 'knowledge') loadKnowledgeSection();
+  // Закрыть сайдбар на мобильном
+  const sidebar  = document.querySelector('.sidebar');
+  const backdrop = document.getElementById('sidebar-backdrop');
+  const burger   = document.getElementById('admin-burger');
+  if (sidebar) sidebar.classList.remove('open');
+  if (backdrop) backdrop.classList.remove('open');
+  if (burger) burger.classList.remove('open');
 }
 
 // ===== LOAD USERS =====
@@ -1108,15 +1128,24 @@ function renderAdminTests() {
 // ─── Создать / редактировать тест ────────────────────────────────────────────
 let kbQCount = 0;
 
+function toggleAttemptsInput(radio) {
+  const numInput = document.getElementById('kbt-max-attempts');
+  numInput.disabled = radio.value !== 'limited';
+}
+
 function openKbAddTest() {
   document.getElementById('kbt-id').value    = '';
   document.getElementById('kbt-title').value = '';
   document.getElementById('kbt-desc').value  = '';
+  document.getElementById('kbt-passing-score').value = '60';
   document.getElementById('kbt-error').hidden = true;
   document.getElementById('kbt-modal-title').textContent = 'Создать тест';
   document.getElementById('kbt-questions-list').innerHTML = '';
+  document.querySelector('input[name="kbt-attempts-type"][value="unlimited"]').checked = true;
+  document.getElementById('kbt-max-attempts').disabled = true;
+  document.getElementById('kbt-max-attempts').value = '3';
   kbQCount = 0;
-  addQuestion();  // один вопрос сразу
+  addQuestion();
   openModal('kbt-modal');
 }
 
@@ -1127,8 +1156,20 @@ async function openKbEditTest(id) {
   document.getElementById('kbt-id').value    = t.id;
   document.getElementById('kbt-title').value = t.title;
   document.getElementById('kbt-desc').value  = t.description || '';
+  document.getElementById('kbt-passing-score').value = t.passing_score ?? 60;
   document.getElementById('kbt-error').hidden = true;
   document.getElementById('kbt-modal-title').textContent = 'Редактировать тест';
+
+  // Попытки
+  if (t.max_attempts) {
+    document.querySelector('input[name="kbt-attempts-type"][value="limited"]').checked = true;
+    document.getElementById('kbt-max-attempts').disabled = false;
+    document.getElementById('kbt-max-attempts').value = t.max_attempts;
+  } else {
+    document.querySelector('input[name="kbt-attempts-type"][value="unlimited"]').checked = true;
+    document.getElementById('kbt-max-attempts').disabled = true;
+    document.getElementById('kbt-max-attempts').value = '3';
+  }
 
   const container = document.getElementById('kbt-questions-list');
   container.innerHTML = '';
@@ -1142,17 +1183,22 @@ async function openKbEditTest(id) {
 }
 
 function addQuestion(prefill) {
-  const idx = kbQCount++;
-  const div = document.createElement('div');
+  const idx  = kbQCount++;
+  const div  = document.createElement('div');
   div.className   = 'kbt-q-block';
   div.dataset.idx = idx;
 
-  const opts = prefill?.opts || ['', '', '', ''];
-  const ans  = prefill?.ans  ?? 0;
+  const opts  = prefill?.opts || ['', '', '', ''];
+  const ans   = prefill?.ans  ?? 0;
+  const multi = Array.isArray(ans);  // true = множественный выбор
 
   div.innerHTML = `
     <div class="kbt-q-header">
       <span class="kbt-q-num">Вопрос ${idx + 1}</span>
+      <button type="button" class="kbt-q-mode-toggle ${multi ? 'multi' : ''}"
+              onclick="toggleQuestionMode(this)" title="Переключить тип ответа">
+        ${multi ? '☑ Несколько ответов' : '◉ Один ответ'}
+      </button>
       <button type="button" class="kbt-q-del" onclick="removeQuestion(this)" title="Удалить">×</button>
     </div>
     <div class="modal-field">
@@ -1160,23 +1206,60 @@ function addQuestion(prefill) {
       <input type="text" class="kbt-q-text-input" placeholder="Вопрос..." value="${esc(prefill?.q || '')}" required>
     </div>
     <div class="kbt-opts-grid">
-      ${opts.map((o, i) => `
-        <label class="kbt-opt-row">
-          <input type="radio" name="kbt-ans-${idx}" value="${i}" ${ans === i ? 'checked' : ''}>
+      ${opts.map((o, i) => {
+        const checked = multi ? (Array.isArray(ans) && ans.includes(i)) : (ans === i);
+        const type    = multi ? 'checkbox' : 'radio';
+        const name    = multi ? `kbt-ans-multi-${idx}` : `kbt-ans-${idx}`;
+        return `<label class="kbt-opt-row">
+          <input type="${type}" name="${name}" value="${i}" ${checked ? 'checked' : ''}>
           <input type="text" class="kbt-opt-input" placeholder="Вариант ${i+1}" value="${esc(o)}">
-        </label>
-      `).join('')}
+        </label>`;
+      }).join('')}
     </div>
-    <div class="kbt-opt-hint">Отметьте правильный вариант радиокнопкой слева</div>
+    <div class="kbt-opt-hint">${multi
+      ? 'Отметьте все правильные варианты (чекбоксы)'
+      : 'Отметьте один правильный вариант (радиокнопка)'}</div>
   `;
 
   document.getElementById('kbt-questions-list').appendChild(div);
 }
 
+function toggleQuestionMode(btn) {
+  const block = btn.closest('.kbt-q-block');
+  const idx   = block.dataset.idx;
+  const isMulti = btn.classList.contains('multi');
+
+  // Запоминаем текущие значения
+  const opts  = [...block.querySelectorAll('.kbt-opt-input')].map(i => i.value);
+  const checked = new Set(
+    [...block.querySelectorAll('input[type="radio"]:checked, input[type="checkbox"]:checked')]
+      .map(i => parseInt(i.value))
+  );
+
+  const newMulti = !isMulti;
+  const grid = block.querySelector('.kbt-opts-grid');
+  const hint = block.querySelector('.kbt-opt-hint');
+
+  grid.innerHTML = opts.map((o, i) => {
+    const type = newMulti ? 'checkbox' : 'radio';
+    const name = newMulti ? `kbt-ans-multi-${idx}` : `kbt-ans-${idx}`;
+    const ch   = newMulti ? checked.has(i) : (checked.has(i) || (i === 0 && !checked.size));
+    return `<label class="kbt-opt-row">
+      <input type="${type}" name="${name}" value="${i}" ${ch ? 'checked' : ''}>
+      <input type="text" class="kbt-opt-input" placeholder="Вариант ${i+1}" value="${esc(o)}">
+    </label>`;
+  }).join('');
+
+  btn.classList.toggle('multi', newMulti);
+  btn.textContent = newMulti ? '☑ Несколько ответов' : '◉ Один ответ';
+  hint.textContent = newMulti
+    ? 'Отметьте все правильные варианты (чекбоксы)'
+    : 'Отметьте один правильный вариант (радиокнопка)';
+}
+
 function removeQuestion(btn) {
   const block = btn.closest('.kbt-q-block');
   if (block) block.remove();
-  // Перенумеровываем
   document.querySelectorAll('.kbt-q-block').forEach((b, i) => {
     const num = b.querySelector('.kbt-q-num');
     if (num) num.textContent = `Вопрос ${i + 1}`;
@@ -1189,9 +1272,16 @@ function collectQuestions() {
   for (const b of blocks) {
     const q    = b.querySelector('.kbt-q-text-input')?.value.trim() || '';
     const opts = [...b.querySelectorAll('.kbt-opt-input')].map(i => i.value.trim());
-    const ansEl = b.querySelector('input[type="radio"]:checked');
-    const ans  = ansEl ? parseInt(ansEl.value) : 0;
-    if (!q) return null; // Validation fail
+    const multi = b.querySelector('.kbt-q-mode-toggle')?.classList.contains('multi');
+    let ans;
+    if (multi) {
+      ans = [...b.querySelectorAll('input[type="checkbox"]:checked')].map(i => parseInt(i.value));
+      if (!ans.length) { return null; }
+    } else {
+      const checked = b.querySelector('input[type="radio"]:checked');
+      ans = checked ? parseInt(checked.value) : 0;
+    }
+    if (!q) return null;
     qs.push({ q, opts, ans });
   }
   return qs;
@@ -1207,14 +1297,19 @@ async function handleSaveTest(e) {
   const title = document.getElementById('kbt-title').value.trim();
   const desc  = document.getElementById('kbt-desc').value.trim();
   const qs    = collectQuestions();
+  const passingScore = parseInt(document.getElementById('kbt-passing-score').value) || 60;
+  const attemptsType = document.querySelector('input[name="kbt-attempts-type"]:checked')?.value;
+  const maxAttempts  = attemptsType === 'limited'
+    ? (parseInt(document.getElementById('kbt-max-attempts').value) || 3)
+    : null;
 
   if (!title) { errEl.textContent = 'Введите название теста'; errEl.hidden = false; return; }
-  if (!qs)    { errEl.textContent = 'Заполните все вопросы'; errEl.hidden = false; return; }
+  if (!qs)    { errEl.textContent = 'Отметьте правильные ответы во всех вопросах'; errEl.hidden = false; return; }
   if (!qs.length) { errEl.textContent = 'Добавьте хотя бы один вопрос'; errEl.hidden = false; return; }
 
   btn.disabled = true; btn.textContent = 'СОХРАНЕНИЕ...';
 
-  const body = { title, description: desc, questions: qs };
+  const body = { title, description: desc, questions: qs, passing_score: passingScore, max_attempts: maxAttempts };
   const url  = id ? `${API}/api/knowledge/tests/${id}` : `${API}/api/knowledge/tests`;
 
   try {

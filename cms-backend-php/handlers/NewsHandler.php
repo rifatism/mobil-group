@@ -6,6 +6,9 @@ $db     = (new Database())->getConnection();
 $method = $_SERVER['REQUEST_METHOD'];
 $id     = (int)($GLOBALS['news_id'] ?? 0);
 
+// Миграция
+try { $db->exec("ALTER TABLE news ADD COLUMN archived TINYINT(1) NOT NULL DEFAULT 0"); } catch (\Exception $e) {}
+
 // GET — публичный доступ
 if ($method === 'GET') {
     if ($id) {
@@ -20,14 +23,17 @@ if ($method === 'GET') {
         $db->prepare("UPDATE news SET views = views + 1 WHERE id = ?")->execute([$id]);
         echo json_encode(['success' => true, 'news' => $item], JSON_UNESCAPED_UNICODE);
     } else {
-        // Для GET /api/news?all=1 от админа вернуть все (включая черновики)
-        $showAll = isset($_GET['all']) && $_GET['all'] === '1';
+        // Для GET /api/news?all=1 от админа вернуть все (включая черновики и архив)
+        $showAll  = isset($_GET['all'])     && $_GET['all']     === '1';
+        $showArch = isset($_GET['archive']) && $_GET['archive'] === '1';
         if ($showAll) {
             $token = Auth::require();
             Auth::requireRole($token, 'admin');
             $stmt = $db->query("SELECT * FROM news ORDER BY created_at DESC");
+        } elseif ($showArch) {
+            $stmt = $db->query("SELECT id, title, slug, excerpt, content, image, author, views, created_at, archived FROM news WHERE published = 1 AND archived = 1 ORDER BY created_at DESC");
         } else {
-            $stmt = $db->query("SELECT id, title, slug, excerpt, content, image, author, views, created_at FROM news WHERE published = 1 ORDER BY created_at DESC");
+            $stmt = $db->query("SELECT id, title, slug, excerpt, content, image, author, views, created_at, archived FROM news WHERE published = 1 AND archived = 0 ORDER BY created_at DESC");
         }
         echo json_encode(['success' => true, 'news' => $stmt->fetchAll()], JSON_UNESCAPED_UNICODE);
     }
@@ -56,7 +62,7 @@ if ($method === 'POST') {
     }
 
     $stmt = $db->prepare(
-        "INSERT INTO news (title, slug, content, excerpt, image, author, published) VALUES (?,?,?,?,?,?,?)"
+        "INSERT INTO news (title, slug, content, excerpt, image, author, published, archived) VALUES (?,?,?,?,?,?,?,?)"
     );
     $stmt->execute([
         $title,
@@ -66,6 +72,7 @@ if ($method === 'POST') {
         $data['image']     ?? '',
         $data['author']    ?? 'Администратор',
         (int)($data['published'] ?? 0),
+        (int)($data['archived']  ?? 0),
     ]);
 
     $newId = (int)$db->lastInsertId();
@@ -92,7 +99,7 @@ if ($method === 'PUT') {
     }
 
     $stmt = $db->prepare(
-        "UPDATE news SET title=?, content=?, excerpt=?, image=?, published=?, updated_at=NOW() WHERE id=?"
+        "UPDATE news SET title=?, content=?, excerpt=?, image=?, published=?, archived=?, updated_at=NOW() WHERE id=?"
     );
     $stmt->execute([
         $title,
@@ -100,6 +107,7 @@ if ($method === 'PUT') {
         $data['excerpt']   ?? '',
         $data['image']     ?? '',
         (int)($data['published'] ?? 0),
+        (int)($data['archived']  ?? 0),
         $id,
     ]);
 

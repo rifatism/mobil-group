@@ -29,7 +29,7 @@
         <li><a href="#">ПРОЕКТЫ</a></li>
         <li><a href="news.html">НОВОСТИ</a></li>
         <li><a href="career.html">КАРЬЕРА</a></li>
-        
+        <li id="nav-knowledge-item" style="display:none"><a href="knowledge.html">БАЗА ЗНАНИЙ</a></li>
     </ul>
     <div class="nav-right">
         <div class="lang-selector">RU <span class="arrow">▾</span></div>
@@ -55,6 +55,10 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
                     Дашборд
                 </a>
+                <a id="cd-knowledge-link" class="cd-item" href="knowledge.html" style="display:none">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                    База знаний
+                </a>
                 <a class="cd-item cd-item--soon" href="#">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                     Поддержка
@@ -68,7 +72,52 @@
             </div>
         </div>
     </div>
+    <button class="nav-burger" id="nav-burger" onclick="toggleMobNav()" aria-label="Меню">
+        <span></span><span></span><span></span>
+    </button>
 </nav>
+
+<!-- MOBILE NAV -->
+<div class="mob-nav" id="mob-nav">
+    <div class="mob-nav-backdrop" onclick="toggleMobNav()"></div>
+    <div class="mob-nav-panel">
+        <div class="mob-nav-head">
+            <img src="assets/images/logo.png" alt="МобилСервис">
+            <button class="mob-nav-close" onclick="toggleMobNav()">×</button>
+        </div>
+        <ul class="mob-nav-links">
+            <li><a href="index.html" class="mob-active">ГЛАВНАЯ</a></li>
+            <li><a href="about.html">О КОМПАНИИ</a></li>
+            <li>
+                <button class="mob-drop-trigger" onclick="toggleMobDrop(this)">
+                    УСЛУГИ <span class="mob-drop-chevron">▾</span>
+                </button>
+                <ul class="mob-sub">
+                    <li><a href="#service-monitoring">Мониторинг транспорта</a></li>
+                    <li><a href="#service-tachograph">Тахография</a></li>
+                    <li><a href="#service-satellite">Спутниковая связь</a></li>
+                </ul>
+            </li>
+            <li><a href="#">ПРОЕКТЫ</a></li>
+            <li><a href="news.html">НОВОСТИ</a></li>
+            <li><a href="career.html">КАРЬЕРА</a></li>
+            <li id="mob-knowledge-item" style="display:none"><a href="knowledge.html" class="mob-kb-link">БАЗА ЗНАНИЙ</a></li>
+            <li><a href="index.html#contact">КОНТАКТЫ</a></li>
+        </ul>
+        <div class="mob-user-section">
+            <button class="mob-user-trigger" onclick="toggleMobUser(this)">
+                <div class="mob-u-avatar" id="mob-u-avatar">?</div>
+                <div class="mob-u-info">
+                    <div class="mob-u-name" id="mob-u-name">Войти</div>
+                    <div class="mob-u-label" id="mob-u-label">Личный кабинет</div>
+                </div>
+                <span class="mob-u-chevron">▾</span>
+            </button>
+            <div class="mob-user-menu" id="mob-user-menu"></div>
+            <a href="#" onclick="loginBtnClick();toggleMobNav();return false;" class="mob-login-link" id="mob-login-link">ВОЙТИ</a>
+        </div>
+    </div>
+</div>
 
 <!-- HERO -->
 <section class="hero">
@@ -494,9 +543,6 @@
         </div>
     </div>
     <div class="footer-bottom">
-        <a href="#" class="logo footer-logo">
-            <img src="assets/images/logo.png" alt="МобилСервис" class="logo-img logo-img-footer">
-        </a>
         <p class="f-copy">© МобилСервис 2026. Все права защищены.</p>
         <p class="f-dev">Тюмень, с 1998 года</p>
     </div>

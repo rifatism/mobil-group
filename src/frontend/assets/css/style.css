@@ -66,6 +66,9 @@ body {
 .nav-links a:hover, .nav-links a.active { color: #fff; opacity: 0.75; }
 .navbar.scrolled .nav-links a { color: #2c3e50; }
 .navbar.scrolled .nav-links a:hover { color: var(--green); opacity: 1; }
+#nav-knowledge-item a { color: var(--green) !important; opacity: 1 !important; text-decoration: underline; }
+.navbar.scrolled #nav-knowledge-item a { color: var(--green) !important; }
+.mob-kb-link { color: var(--green) !important; font-weight: 700; text-decoration: underline; }
 .arrow { font-size: 0.65rem; }
 
 /* ── NAV DROPDOWN (Услуги) ── */
@@ -177,6 +180,121 @@ body {
 .btn-login:hover { background: rgba(255,255,255,0.12); border-color: #fff; color: #fff; }
 .navbar.scrolled .btn-login { border-color: #c8d0d8; color: #2c3e50; }
 .navbar.scrolled .btn-login:hover { background: var(--green); border-color: var(--green); color: #fff; }
+
+/* ===== BURGER BUTTON ===== */
+.nav-burger {
+  display: none; flex-direction: column; justify-content: center; align-items: center;
+  gap: 5px; width: 40px; height: 40px;
+  background: none; border: none; cursor: pointer; padding: 4px; z-index: 1100;
+}
+.nav-burger span {
+  display: block; width: 22px; height: 2px;
+  background: rgba(255,255,255,0.9); border-radius: 2px;
+  transition: transform 0.3s, opacity 0.3s, background 0.3s;
+}
+.navbar.scrolled .nav-burger span { background: #2c3e50; }
+.nav-burger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.nav-burger.open span:nth-child(2) { opacity: 0; }
+.nav-burger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+/* ===== MOBILE NAV OVERLAY ===== */
+.mob-nav { position: fixed; inset: 0; z-index: 1050; pointer-events: none; visibility: hidden; }
+.mob-nav.open { pointer-events: all; visibility: visible; }
+.mob-nav-backdrop {
+  position: absolute; inset: 0; background: rgba(8,15,28,0.55);
+  opacity: 0; transition: opacity 0.3s;
+}
+.mob-nav.open .mob-nav-backdrop { opacity: 1; }
+.mob-nav-panel {
+  position: absolute; top: 0; right: 0; bottom: 0;
+  width: min(340px, 88vw); background: #fff;
+  transform: translateX(100%);
+  transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+  display: flex; flex-direction: column; overflow-y: auto;
+}
+.mob-nav.open .mob-nav-panel { transform: translateX(0); }
+.mob-nav-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1.2rem 1.4rem; border-bottom: 1px solid #f0f0f0; flex-shrink: 0;
+}
+.mob-nav-head img { height: 56px; width: auto; }
+.mob-nav-close {
+  background: none; border: none; cursor: pointer;
+  font-size: 1.6rem; color: #6b7a8d; line-height: 1; padding: 4px 8px;
+}
+.mob-nav-links { list-style: none; padding: 0.5rem 0; flex: 1; }
+.mob-nav-links > li { border-bottom: 1px solid #f4f4f4; }
+.mob-nav-links > li > a,
+.mob-nav-links > li > button.mob-drop-trigger {
+  display: flex; align-items: center; justify-content: space-between;
+  width: 100%; padding: 0.9rem 1.4rem;
+  font-family: var(--font-nav); font-size: 0.78rem; font-weight: 700;
+  letter-spacing: 0.08em; color: #2c3e50; text-decoration: none;
+  background: none; border: none; cursor: pointer;
+  transition: color 0.2s, background 0.2s;
+}
+.mob-nav-links > li > a:hover,
+.mob-nav-links > li > button.mob-drop-trigger:hover { color: var(--green); background: #f8fafc; }
+.mob-nav-links > li > a.mob-active { color: var(--green); }
+.mob-sub { list-style: none; background: #f8fafc; display: none; }
+.mob-sub.open { display: block; }
+.mob-sub li a {
+  display: block; padding: 0.7rem 1.4rem 0.7rem 2.2rem;
+  font-size: 0.8rem; color: #4a5568; text-decoration: none; transition: color 0.2s;
+}
+.mob-sub li a:hover { color: var(--green); }
+.mob-drop-chevron { font-size: 0.65rem; transition: transform 0.25s; }
+.mob-drop-trigger.open .mob-drop-chevron { transform: rotate(180deg); }
+
+/* User section (bottom of panel) */
+.mob-user-section { border-top: 1px solid #f0f0f0; flex-shrink: 0; }
+.mob-user-trigger {
+  display: flex; align-items: center; gap: 0.8rem;
+  width: 100%; padding: 1rem 1.4rem;
+  background: none; border: none; cursor: pointer;
+  transition: background 0.2s;
+}
+.mob-user-trigger:hover { background: #f8fafc; }
+.mob-u-avatar {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--green); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.85rem; font-weight: 700; flex-shrink: 0;
+}
+.mob-u-info { flex: 1; text-align: left; }
+.mob-u-name { font-weight: 600; font-size: 0.88rem; color: #1a2b2e; }
+.mob-u-label { font-size: 0.72rem; color: #6b7a8d; margin-top: 1px; }
+.mob-u-chevron { font-size: 0.65rem; color: #6b7a8d; transition: transform 0.25s; flex-shrink: 0; }
+.mob-user-trigger.open .mob-u-chevron { transform: rotate(180deg); }
+.mob-user-menu { display: none; background: #f8fafc; padding: 0.4rem 0; }
+.mob-user-menu.open { display: block; }
+.mob-user-menu a, .mob-user-menu button {
+  display: flex; align-items: center; gap: 0.7rem;
+  width: 100%; padding: 0.75rem 1.4rem;
+  font-size: 0.84rem; color: #2c3e50; text-decoration: none;
+  background: none; border: none; cursor: pointer; font-family: var(--font-body);
+  transition: color 0.2s, background 0.2s;
+}
+.mob-user-menu a:hover, .mob-user-menu button:hover { color: var(--green); background: #edf2f7; }
+.mob-user-menu svg { width: 16px; height: 16px; flex-shrink: 0; color: #6b7a8d; }
+.mob-logout-btn { color: #e53e3e !important; }
+.mob-login-link {
+  display: block; margin: 1rem 1.4rem 1.2rem;
+  background: var(--green); color: #fff; text-align: center;
+  padding: 0.75rem; border-radius: 8px;
+  font-weight: 700; font-size: 0.82rem; text-decoration: none;
+  font-family: var(--font-nav); letter-spacing: 0.06em;
+  transition: background 0.2s;
+}
+.mob-login-link:hover { background: #1565c0; }
+
+@media (max-width: 1024px) {
+  .nav-links { display: none; }
+  .nav-right .lang-selector,
+  .nav-right .btn-contacts,
+  .nav-right #client-dropdown-wrap { display: none; }
+  .nav-burger { display: flex; }
+}
 
 /* ===== HERO — 100vh, текст по центру (п.4) ===== */
 .hero {
@@ -772,6 +890,7 @@ button.btn-login:hover { background: rgba(255,255,255,0.12); border-color: #fff;
   padding: 12px 14px; font-size: 0.82rem; color: #1d4ed8;
   line-height: 1.5;
 }
+.modal-forgot-info[hidden] { display: none; }
 .modal-forgot-info svg { width: 18px; height: 18px; flex-shrink: 0; margin-top: 2px; color: #1976d2; }
 .forgot-phone { font-weight: 700; color: #1976d2; text-decoration: none; font-size: 0.95rem; }
 .forgot-phone:hover { text-decoration: underline; }

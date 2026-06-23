@@ -45,21 +45,19 @@ function renderRows(list) {
 
     grid.innerHTML = list.map((n, i) => {
         const imgBlock = n.image
-            ? `<img src="${escHtml(n.image)}" alt="${escHtml(n.title)}" loading="lazy"
-               onerror="this.parentElement.innerHTML='${PLACEHOLDER.replace(/'/g,"\\'")}'>">`
+            ? `<img src="${escHtml(n.image)}" alt="${escHtml(n.title)}" loading="lazy">`
             : PLACEHOLDER;
 
-        const cat = escHtml(n.category || 'Новости компании');
         const dateStr = fmtNewsDate(n.created_at);
 
         return `<article class="np-row" onclick="openNewsView(${n.id})" style="transition-delay:${i * 0.06}s">
             <div class="np-row-left">
                 <div>
-                    <p class="np-row-category">${cat}</p>
                     <h3 class="np-row-title">${escHtml(n.title)}</h3>
+                    <p class="np-row-excerpt">${escHtml(n.excerpt || '')}</p>
                 </div>
                 <div class="np-row-bottom">
-                    <span class="np-row-readtime">1 мин</span>
+                    <span class="np-row-readtime">читать далее</span>
                     <div class="np-row-arrow">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
                             <line x1="5" y1="12" x2="19" y2="12"/>
@@ -73,10 +71,6 @@ function renderRows(list) {
                 <div class="np-row-meta-group">
                     <p class="np-row-meta-label">Опубликовано:</p>
                     <p class="np-row-meta-value">${dateStr}</p>
-                </div>
-                <div class="np-row-meta-group">
-                    <p class="np-row-meta-label">Раздел:</p>
-                    <p class="np-row-meta-value">${cat}</p>
                 </div>
             </div>
         </article>`;
@@ -117,13 +111,18 @@ async function loadPublicNews() {
 }
 
 // ===== ФИЛЬТРЫ =====
+const curYear = new Date().getFullYear();
+
 document.querySelectorAll('.np-filter-btn').forEach(btn => {
     btn.addEventListener('click', () => {
         document.querySelectorAll('.np-filter-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
-        const cat = btn.dataset.cat;
-        const filtered = cat ? allNews.filter(n => (n.category || '') === cat) : allNews;
-        renderRows(filtered);
+        const filter = btn.dataset.filter;
+        if (filter === 'archive') {
+            renderRows(allNews.filter(n => new Date(n.created_at).getFullYear() < curYear));
+        } else {
+            renderRows(allNews.filter(n => new Date(n.created_at).getFullYear() >= curYear));
+        }
     });
 });
 
@@ -135,9 +134,9 @@ async function openNewsView(id) {
         if (!data.success) return;
         const n = data.news;
 
-        document.getElementById('np-modal-date').textContent    = fmtNewsDate(n.created_at);
-        document.getElementById('np-modal-title').textContent   = n.title;
-        document.getElementById('np-modal-content').textContent = n.content;
+        document.getElementById('np-modal-date').textContent  = fmtNewsDate(n.created_at);
+        document.getElementById('np-modal-title').textContent = n.title;
+        document.getElementById('np-modal-content').innerHTML = n.content;
 
         const imgWrap = document.getElementById('np-modal-img-wrap');
         imgWrap.innerHTML = n.image ? `<img src="${escHtml(n.image)}" alt="${escHtml(n.title)}">` : '';

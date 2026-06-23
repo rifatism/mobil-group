@@ -18,6 +18,12 @@ $method = $_SERVER['REQUEST_METHOD'];
 $testId = (int)($GLOBALS['knowledge_test_id'] ?? 0);
 $action = $GLOBALS['knowledge_action'] ?? '';
 
+// Миграция: добавляем новые колонки если их нет
+try { $db->exec("ALTER TABLE knowledge_tests ADD COLUMN max_attempts INT NULL DEFAULT NULL"); } catch (\Exception $e) {}
+try { $db->exec("ALTER TABLE knowledge_tests ADD COLUMN passing_score INT NOT NULL DEFAULT 60"); } catch (\Exception $e) {}
+try { $db->exec("ALTER TABLE knowledge_results ADD COLUMN passed TINYINT(1) NULL DEFAULT NULL"); } catch (\Exception $e) {}
+try { $db->exec("ALTER TABLE knowledge_results ADD COLUMN attempt_count INT NOT NULL DEFAULT 1"); } catch (\Exception $e) {}
+
 // ─── GET /api/knowledge/tests — список тестов ──────────────────────────────
 if ($method === 'GET' && !$testId && $action !== 'my') {
     if ($role === 'admin') {
@@ -51,7 +57,7 @@ if ($method === 'GET' && !$testId && $action !== 'my') {
 }
 
 // ─── GET /api/knowledge/tests/{id} — один тест для прохождения ────────────
-if ($method === 'GET' && $testId) {
+if ($method === 'GET' && $testId && $action !== 'assign') {
     // Проверить что назначен (employee) или admin
     if ($role === 'employee') {
         $chk = $db->prepare("SELECT id FROM knowledge_assignments WHERE test_id=? AND (user_id=? OR user_id=0)");
@@ -85,8 +91,11 @@ if ($method === 'POST' && !$testId && $action !== 'submit' && $action !== 'assig
     if (!$title) { http_response_code(400); echo json_encode(['success'=>false,'message'=>'Название обязательно'],JSON_UNESCAPED_UNICODE); exit; }
     if (empty($qs)) { http_response_code(400); echo json_encode(['success'=>false,'message'=>'Добавьте хотя бы один вопрос'],JSON_UNESCAPED_UNICODE); exit; }
 
-    $ins = $db->prepare("INSERT INTO knowledge_tests (title, description, questions, created_by) VALUES (?,?,?,?)");
-    $ins->execute([$title, $desc, json_encode($qs, JSON_UNESCAPED_UNICODE), $uid]);
+    $maxAttempts  = isset($data['max_attempts'])  ? (int)$data['max_attempts']  : null;
+    $passingScore = isset($data['passing_score']) ? (int)$data['passing_score'] : 60;
+
+    $ins = $db->prepare("INSERT INTO knowledge_tests (title, description, questions, created_by, max_attempts, passing_score) VALUES (?,?,?,?,?,?)");
+    $ins->execute([$title, $desc, json_encode($qs, JSON_UNESCAPED_UNICODE), $uid, $maxAttempts, $passingScore]);
     $newId = (int)$db->lastInsertId();
 
     $get = $db->prepare("SELECT * FROM knowledge_tests WHERE id = ?");
@@ -103,11 +112,13 @@ if ($method === 'PUT' && $testId && $action !== 'assign') {
     $title = trim($data['title'] ?? '');
     $desc  = trim($data['description'] ?? '');
     $qs    = $data['questions'] ?? [];
+    $maxAttempts  = array_key_exists('max_attempts', $data)  ? (strlen((string)$data['max_attempts']) ? (int)$data['max_attempts'] : null) : null;
+    $passingScore = isset($data['passing_score']) ? (int)$data['passing_score'] : 60;
 
     if (!$title) { http_response_code(400); echo json_encode(['success'=>false,'message'=>'Название обязательно'],JSON_UNESCAPED_UNICODE); exit; }
 
-    $stmt = $db->prepare("UPDATE knowledge_tests SET title=?, description=?, questions=? WHERE id=?");
-    $stmt->execute([$title, $desc, json_encode($qs, JSON_UNESCAPED_UNICODE), $testId]);
+    $stmt = $db->prepare("UPDATE knowledge_tests SET title=?, description=?, questions=?, max_attempts=?, passing_score=? WHERE id=?");
+    $stmt->execute([$title, $desc, json_encode($qs, JSON_UNESCAPED_UNICODE), $maxAttempts, $passingScore, $testId]);
     echo json_encode(['success' => true], JSON_UNESCAPED_UNICODE);
     exit;
 }
@@ -120,7 +131,7 @@ if ($method === 'GET' && $testId && $action === 'assign') {
     $stmt = $db->prepare("
         SELECT ka.id, ka.user_id, ka.due_date, ka.assigned_at,
                u.full_name, u.username,
-               kr.score, kr.passed, kr.submitted_at
+               kr.score, kr.passed, kr.completed_at AS submitted_at, kr.attempt_count
         FROM knowledge_assignments ka
         LEFT JOIN users u ON u.id = ka.user_id
         LEFT JOIN knowledge_results kr ON kr.test_id = ka.test_id AND kr.user_id = ka.user_id
@@ -176,6 +187,16 @@ if ($method === 'POST' && $testId && $action === 'assign') {
     exit;
 }
 
+// ─── DELETE /api/knowledge/tests/{id}/assign/{assignmentId} — снять назначение ──
+$assignId = (int)($GLOBALS['knowledge_assign_id'] ?? 0);
+if ($method === 'DELETE' && $testId && $action === 'assign' && $assignId) {
+    if ($role !== 'admin') { http_response_code(403); echo json_encode(['success'=>false,'message'=>'Только администратор'],JSON_UNESCAPED_UNICODE); exit; }
+    $stmt = $db->prepare("DELETE FROM knowledge_assignments WHERE id = ? AND test_id = ?");
+    $stmt->execute([$assignId, $testId]);
+    echo json_encode(['success' => true], JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
 // ─── DELETE /api/knowledge/tests/{id} — удалить тест ─────────────────────
 if ($method === 'DELETE' && $testId) {
     if ($role !== 'admin') { http_response_code(403); echo json_encode(['success'=>false,'message'=>'Только администратор'],JSON_UNESCAPED_UNICODE); exit; }
@@ -202,23 +223,67 @@ if ($method === 'POST' && $action === 'submit') {
     $chk->execute([$testId, $uid]);
     if (!$chk->fetch()) { http_response_code(403); echo json_encode(['success'=>false,'message'=>'Тест не назначен'],JSON_UNESCAPED_UNICODE); exit; }
 
-    // Загрузить правильные ответы
-    $stmt = $db->prepare("SELECT questions FROM knowledge_tests WHERE id=?");
+    // Загрузить тест с настройками
+    $stmt = $db->prepare("SELECT questions, max_attempts, passing_score FROM knowledge_tests WHERE id=?");
     $stmt->execute([$testId]);
     $t = $stmt->fetch();
     if (!$t) { http_response_code(404); echo json_encode(['success'=>false,'message'=>'Тест не найден'],JSON_UNESCAPED_UNICODE); exit; }
 
-    $qs    = json_decode($t['questions'], true) ?? [];
-    $total = count($qs);
-    $score = 0;
-    foreach ($qs as $i => $q) {
-        if (isset($ans[$i]) && (int)$ans[$i] === (int)$q['ans']) $score++;
+    // Проверить количество попыток
+    $maxAttempts = $t['max_attempts'] !== null ? (int)$t['max_attempts'] : null;
+    if ($maxAttempts !== null) {
+        $cntStmt = $db->prepare("SELECT attempt_count FROM knowledge_results WHERE test_id=? AND user_id=?");
+        $cntStmt->execute([$testId, $uid]);
+        $existing = $cntStmt->fetch();
+        $used = $existing ? (int)$existing['attempt_count'] : 0;
+        if ($used >= $maxAttempts) {
+            http_response_code(403);
+            echo json_encode(['success'=>false,'message'=>'Превышено количество попыток ('.$maxAttempts.')'],JSON_UNESCAPED_UNICODE);
+            exit;
+        }
     }
 
-    $ins = $db->prepare("INSERT INTO knowledge_results (test_id, user_id, score, total, answers) VALUES (?,?,?,?,?) ON DUPLICATE KEY UPDATE score=VALUES(score), total=VALUES(total), answers=VALUES(answers), completed_at=NOW()");
-    $ins->execute([$testId, $uid, $score, $total, json_encode($ans, JSON_UNESCAPED_UNICODE)]);
+    // Подсчёт очков (поддержка одиночных и множественных ответов)
+    $qs           = json_decode($t['questions'], true) ?? [];
+    $passingScore = (int)($t['passing_score'] ?? 60);
+    $total        = count($qs);
+    $score        = 0;
 
-    echo json_encode(['success' => true, 'score' => $score, 'total' => $total, 'percent' => $total ? round($score/$total*100) : 0], JSON_UNESCAPED_UNICODE);
+    foreach ($qs as $i => $q) {
+        $correct = $q['ans'] ?? null;
+        $given   = $ans[$i] ?? null;
+        if (is_array($correct)) {
+            // Множественный выбор: сравниваем отсортированные массивы
+            $givenArr   = is_array($given) ? $given : (isset($given) ? [$given] : []);
+            $correctArr = $correct;
+            sort($givenArr); sort($correctArr);
+            if ($givenArr === $correctArr) $score++;
+        } else {
+            if (isset($given) && (int)$given === (int)$correct) $score++;
+        }
+    }
+
+    $percent = $total ? round($score / $total * 100) : 0;
+    $passed  = $percent >= $passingScore ? 1 : 0;
+
+    // Сохранить результат (обновить если уже есть, увеличить счётчик попыток)
+    $ins = $db->prepare("
+        INSERT INTO knowledge_results (test_id, user_id, score, total, answers, passed, attempt_count, completed_at)
+        VALUES (?,?,?,?,?,?,1,NOW())
+        ON DUPLICATE KEY UPDATE
+            score=VALUES(score), total=VALUES(total), answers=VALUES(answers),
+            passed=VALUES(passed), attempt_count=attempt_count+1, completed_at=NOW()
+    ");
+    $ins->execute([$testId, $uid, $score, $total, json_encode($ans, JSON_UNESCAPED_UNICODE), $passed]);
+
+    echo json_encode([
+        'success'       => true,
+        'score'         => $score,
+        'total'         => $total,
+        'percent'       => $percent,
+        'passed'        => (bool)$passed,
+        'passing_score' => $passingScore,
+    ], JSON_UNESCAPED_UNICODE);
     exit;
 }
 

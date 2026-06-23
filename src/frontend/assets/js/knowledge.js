@@ -103,43 +103,147 @@ async function loadTests() {
 
 function renderTests() {
   const grid = document.getElementById('kb-tests-grid');
-  if (!allTests.length) {
-    grid.innerHTML = `<div class="kb-tests-empty">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-      <p>Назначенных тестов пока нет</p>
-    </div>`;
-    return;
-  }
+  const title = document.getElementById('kb-tests-title');
 
-  grid.innerHTML = allTests.map(t => {
-    const done   = !!t.completed_at;
-    const qCount = t.question_count || 0;
-    const score  = done ? `${t.my_score ?? 0}/${t.my_total ?? 0}` : '';
-    const pct    = done && t.my_total ? Math.round((t.my_score / t.my_total) * 100) : null;
-    const due    = t.due_date ? `до ${fmtDate(t.due_date)}` : '';
-
-    const icon = done
-      ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`
-      : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>`;
-
-    const actionBtn = done
-      ? `<button class="kb-btn-retake" onclick="openTest(${t.id})">Пройти ещё раз</button>`
-      : `<button class="kb-btn-take"   onclick="openTest(${t.id})">Пройти тест</button>`;
-
-    return `<div class="kb-test-card ${done ? 'kb-test-card--done' : ''}">
-      <div class="kb-test-icon">${icon}</div>
-      <div class="kb-test-info">
-        <div class="kb-test-title">${escH(t.title)}</div>
-        <div class="kb-test-meta">
-          ${qCount ? `<span class="kb-test-tag">${qCount} вопр.</span>` : ''}
-          ${done   ? `<span class="kb-test-tag kb-test-tag--done">Пройден</span>` : ''}
-          ${pct !== null ? `<span class="kb-test-tag kb-test-tag--score">${score} (${pct}%)</span>` : ''}
-          ${due   ? `<span class="kb-test-due">${escH(due)}</span>` : ''}
+  if (currentRole === 'admin') {
+    // ── Вид администратора: все тесты с кнопкой назначить ──
+    if (title) title.innerHTML = `
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      Тесты`;
+    if (!allTests.length) {
+      grid.innerHTML = `<div class="kb-tests-empty">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        <p>Тесты ещё не созданы. Создайте тест в панели администратора.</p>
+        <a href="admin.html" class="kb-btn-take" style="margin-top:.75rem;display:inline-block">Открыть панель</a>
+      </div>`;
+      return;
+    }
+    grid.innerHTML = allTests.map(t => {
+      const qCount  = t.question_count || 0;
+      const assigns = t.assign_count != null ? t.assign_count : '?';
+      return `<div class="kb-test-card kb-test-card--admin">
+        <div class="kb-test-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
         </div>
-      </div>
-      <div class="kb-test-action">${actionBtn}</div>
-    </div>`;
-  }).join('');
+        <div class="kb-test-info">
+          <div class="kb-test-title">${escH(t.title)}</div>
+          <div class="kb-test-meta">
+            ${qCount ? `<span class="kb-test-tag">${qCount} вопр.</span>` : ''}
+            <span class="kb-test-tag kb-test-tag--assign">Назначен: ${assigns}×</span>
+          </div>
+          ${t.description ? `<div class="kb-test-desc">${escH(t.description)}</div>` : ''}
+        </div>
+        <div class="kb-test-action">
+          <button class="kb-btn-take" onclick="openKbAssignModal(${t.id},'${escH(t.title).replace(/'/g,"\\'")}')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="width:15px;height:15px"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+            Назначить
+          </button>
+        </div>
+      </div>`;
+    }).join('');
+  } else {
+    // ── Вид сотрудника: назначенные тесты ──
+    if (title) title.innerHTML = `
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      Назначенные тесты`;
+    if (!allTests.length) {
+      grid.innerHTML = `<div class="kb-tests-empty">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        <p>Назначенных тестов пока нет</p>
+      </div>`;
+      return;
+    }
+    grid.innerHTML = allTests.map(t => {
+      const done   = !!t.completed_at;
+      const qCount = t.question_count || 0;
+      const score  = done ? `${t.my_score ?? 0}/${t.my_total ?? 0}` : '';
+      const pct    = done && t.my_total ? Math.round((t.my_score / t.my_total) * 100) : null;
+      const due    = t.due_date ? `до ${fmtDate(t.due_date)}` : '';
+      const icon   = done
+        ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`
+        : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>`;
+      const actionBtn = done
+        ? `<button class="kb-btn-retake" onclick="openTest(${t.id})">Пройти ещё раз</button>`
+        : `<button class="kb-btn-take"   onclick="openTest(${t.id})">Пройти тест</button>`;
+      return `<div class="kb-test-card ${done ? 'kb-test-card--done' : ''}">
+        <div class="kb-test-icon">${icon}</div>
+        <div class="kb-test-info">
+          <div class="kb-test-title">${escH(t.title)}</div>
+          <div class="kb-test-meta">
+            ${qCount ? `<span class="kb-test-tag">${qCount} вопр.</span>` : ''}
+            ${done   ? `<span class="kb-test-tag kb-test-tag--done">Пройден</span>` : ''}
+            ${pct !== null ? `<span class="kb-test-tag kb-test-tag--score">${score} (${pct}%)</span>` : ''}
+            ${due   ? `<span class="kb-test-due">${escH(due)}</span>` : ''}
+          </div>
+        </div>
+        <div class="kb-test-action">${actionBtn}</div>
+      </div>`;
+    }).join('');
+  }
+}
+
+// ─── ASSIGN MODAL (admin on knowledge.html) ────────────────────────────────
+let kbAssignTestId = 0;
+let kbEmployees    = [];
+
+async function openKbAssignModal(id, title) {
+  kbAssignTestId = id;
+  document.getElementById('kb-assign-test-name').textContent = title;
+  document.getElementById('kb-assign-error').style.display = 'none';
+  document.getElementById('kb-assign-submit').textContent  = 'НАЗНАЧИТЬ';
+  document.getElementById('kb-assign-submit').disabled     = false;
+
+  // Загружаем список сотрудников если ещё не загружали
+  const select = document.getElementById('kb-assign-target');
+  select.innerHTML = '<option value="all">Всем сотрудникам</option>';
+  try {
+    const res  = await fetch(`${KB_API}/api/users`, {
+      headers: { Authorization: 'Bearer ' + kbToken() }
+    });
+    const data = await res.json();
+    kbEmployees = (data.users || []).filter(u => u.role === 'employee');
+    kbEmployees.forEach(u => {
+      const opt = document.createElement('option');
+      opt.value       = u.id;
+      opt.textContent = u.full_name || u.username;
+      select.appendChild(opt);
+    });
+  } catch {}
+
+  document.getElementById('kb-assign-modal').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeKbAssignModal(e) {
+  if (e && e.target !== document.getElementById('kb-assign-modal')) return;
+  document.getElementById('kb-assign-modal').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+async function handleKbAssign() {
+  const btn    = document.getElementById('kb-assign-submit');
+  const errEl  = document.getElementById('kb-assign-error');
+  const target = document.getElementById('kb-assign-target').value;
+  errEl.style.display = 'none';
+  btn.disabled = true; btn.textContent = 'НАЗНАЧАЮ...';
+
+  try {
+    const res  = await fetch(`${KB_API}/api/knowledge/tests/${kbAssignTestId}/assign`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + kbToken() },
+      body: JSON.stringify({ target }),
+    });
+    const data = await res.json();
+    if (!data.success) { errEl.textContent = data.message; errEl.style.display = ''; return; }
+    document.getElementById('kb-assign-modal').style.display = 'none';
+    document.body.style.overflow = '';
+    // Обновить счётчик на карточке
+    loadTests();
+  } catch {
+    errEl.textContent = 'Ошибка соединения.'; errEl.style.display = '';
+  } finally {
+    btn.disabled = false; btn.textContent = 'НАЗНАЧИТЬ';
+  }
 }
 
 function fmtDate(s) {

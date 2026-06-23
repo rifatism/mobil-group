@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../middleware/Auth.php';
+require_once __DIR__ . '/../helpers/NotificationHelper.php';
 
 $token  = Auth::require();
 $role   = $token->role ?? '';
@@ -222,8 +223,14 @@ if ($method === 'POST' && !$action) {
     $ins = $db->prepare("INSERT INTO knowledge_files (folder_path, title, description, filename, original_name, file_size, file_type, uploaded_by) VALUES (?,?,?,?,?,?,?,?)");
     $ins->execute([$curPath, $title, $desc, $fname, $orig, $_FILES['file']['size'], $mime, $uid]);
 
+    $newId = $db->lastInsertId();
     $get = $db->prepare("SELECT kf.*, u.full_name AS uploader FROM knowledge_files kf LEFT JOIN users u ON u.id = kf.uploaded_by WHERE kf.id = ?");
-    $get->execute([$db->lastInsertId()]);
+    $get->execute([$newId]);
+
+    // Уведомить всех сотрудников о новом файле
+    $folderNote = $curPath ? " (папка: $curPath)" : '';
+    notifyRole($db, 'employee', 'file_uploaded', 'Новый файл в базе знаний', "Добавлен файл: «$title»$folderNote", 'knowledge.html', $uid);
+
     echo json_encode(['success' => true, 'file' => $get->fetch()], JSON_UNESCAPED_UNICODE);
     exit;
 }

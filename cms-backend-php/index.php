@@ -79,6 +79,27 @@ if (preg_match('#^/api/vacancies/(\d+)$#', $uri, $m)) {
     exit;
 }
 
+// ─── Notifications ────────────────────────────────────────────────────────
+if ($uri === '/api/notifications') {
+    require_once __DIR__ . '/handlers/NotificationsHandler.php';
+    exit;
+}
+if ($uri === '/api/notifications/read') {
+    $GLOBALS['notif_action'] = 'read_all';
+    require_once __DIR__ . '/handlers/NotificationsHandler.php';
+    exit;
+}
+if (preg_match('#^/api/notifications/(\d+)/read$#', $uri, $m)) {
+    $GLOBALS['notif_id']     = (int)$m[1];
+    require_once __DIR__ . '/handlers/NotificationsHandler.php';
+    exit;
+}
+if (preg_match('#^/api/notifications/(\d+)$#', $uri, $m)) {
+    $GLOBALS['notif_id'] = (int)$m[1];
+    require_once __DIR__ . '/handlers/NotificationsHandler.php';
+    exit;
+}
+
 // ─── Knowledge Base ───────────────────────────────────────────────────────
 // Folders: create / delete
 if ($uri === '/api/knowledge/folders') {

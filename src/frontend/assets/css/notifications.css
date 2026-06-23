@@ -1,0 +1,148 @@
+/* ===== NOTIFICATION BELL WIDGET ===== */
+
+.notif-bell-wrap,
+#notif-bell-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.notif-btn {
+  position: relative;
+  display: flex; align-items: center; justify-content: center;
+  width: 40px; height: 40px;
+  background: none; border: none; cursor: pointer;
+  border-radius: 50%;
+  transition: background 0.18s;
+  color: inherit;
+  padding: 0;
+}
+.notif-btn:hover { background: rgba(0,0,0,0.07); }
+.notif-btn svg { width: 22px; height: 22px; }
+
+.notif-badge {
+  position: absolute;
+  top: 4px; right: 4px;
+  min-width: 17px; height: 17px;
+  background: #e53935; color: #fff;
+  font-size: 10px; font-weight: 700;
+  border-radius: 50px;
+  display: flex; align-items: center; justify-content: center;
+  padding: 0 4px;
+  pointer-events: none;
+  line-height: 1;
+}
+
+/* ── Панель ──────────────────────────────────────────────────────────────── */
+.notif-panel {
+  display: none;
+  position: absolute;
+  top: calc(100% + 8px); right: 0;
+  width: 360px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.15);
+  border: 1.5px solid #e8edf4;
+  z-index: 9999;
+  overflow: hidden;
+  animation: notifSlide 0.18s ease;
+}
+.notif-panel--open { display: flex; flex-direction: column; }
+
+@keyframes notifSlide {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.notif-panel-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1rem 1.2rem 0.7rem;
+  border-bottom: 1.5px solid #f0f4f8;
+}
+.notif-panel-title {
+  font-family: 'Montserrat', Arial, sans-serif;
+  font-size: 0.9rem; font-weight: 800;
+  color: #1a2332;
+}
+.notif-read-all-btn {
+  background: none; border: none; cursor: pointer;
+  font-size: 0.75rem; color: #1976d2; font-weight: 600;
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+.notif-read-all-btn:hover { background: #e3f0fb; }
+
+/* ── Список ──────────────────────────────────────────────────────────────── */
+.notif-list-body {
+  max-height: 420px;
+  overflow-y: auto;
+  padding: 0.4rem 0;
+}
+.notif-list-body::-webkit-scrollbar { width: 5px; }
+.notif-list-body::-webkit-scrollbar-thumb { background: #d0d8e4; border-radius: 4px; }
+
+.notif-empty {
+  padding: 2rem 1.5rem;
+  text-align: center;
+  color: #8a9ab5;
+  font-size: 0.85rem;
+}
+
+/* ── Одно уведомление ────────────────────────────────────────────────────── */
+.notif-item {
+  display: flex; align-items: flex-start; gap: 0.75rem;
+  padding: 0.75rem 1.2rem 0.75rem 1rem;
+  cursor: pointer;
+  transition: background 0.14s;
+  border-left: 3px solid transparent;
+  position: relative;
+}
+.notif-item:hover { background: #f7fafd; }
+.notif-item--unread {
+  background: #edf5fd;
+  border-left-color: #1976d2;
+}
+
+.notif-item-icon {
+  width: 36px; height: 36px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  background: #e3f0fb;
+  color: #1976d2;
+}
+.notif-item-icon svg { width: 18px; height: 18px; }
+.notif-icon--test_assigned .notif-item-icon,
+.notif-item-icon.notif-icon--test_assigned { background: #e8f5e9; color: #388e3c; }
+.notif-icon--file_uploaded .notif-item-icon,
+.notif-item-icon.notif-icon--file_uploaded { background: #fff8e1; color: #f57c00; }
+
+/* make icon inside wrapper use its own class */
+.notif-item-icon.notif-icon--test_assigned { background: #e8f5e9; color: #388e3c; }
+.notif-item-icon.notif-icon--file_uploaded { background: #fff8e1; color: #f57c00; }
+
+.notif-item-body { flex: 1; min-width: 0; }
+.notif-item-title {
+  font-size: 0.82rem; font-weight: 700; color: #1a2332;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.notif-item-text {
+  font-size: 0.78rem; color: #4a5568; margin-top: 2px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.notif-item-time { font-size: 0.72rem; color: #8a9ab5; margin-top: 3px; }
+
+.notif-item-del {
+  background: none; border: none; cursor: pointer;
+  color: #b0bad0; font-size: 1.1rem; line-height: 1;
+  padding: 0 0.2rem;
+  opacity: 0; transition: opacity 0.14s, color 0.14s;
+  flex-shrink: 0;
+}
+.notif-item:hover .notif-item-del { opacity: 1; }
+.notif-item-del:hover { color: #e53935; }
+
+/* ── Адаптивы ────────────────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .notif-panel { width: calc(100vw - 2rem); right: -1rem; }
+}

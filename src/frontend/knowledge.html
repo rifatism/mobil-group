@@ -8,6 +8,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/profile.css">
   <link rel="stylesheet" href="assets/css/knowledge.css">
+  <link rel="stylesheet" href="assets/css/notifications.css">
 </head>
 <body>
 
@@ -17,6 +18,7 @@
     <img src="assets/images/logo.png" alt="МобилСервис">
   </a>
   <div class="p-header-right">
+    <div id="notif-bell-wrap"></div>
     <div class="p-user-menu" id="p-user-menu">
       <button class="p-user-trigger" onclick="toggleKbMenu(event)">
         <span class="p-avatar" id="p-avatar">?</span>
@@ -75,11 +77,11 @@
   </div>
 
   <!-- ===== ТЕСТЫ ===== -->
-  <section class="kb-section">
+  <section class="kb-section" id="kb-tests-section">
     <div class="kb-section-header">
-      <h2 class="kb-section-title">
+      <h2 class="kb-section-title" id="kb-tests-title">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-        Назначенные тесты
+        Тесты
       </h2>
     </div>
     <div id="kb-tests-grid" class="kb-tests-grid">
@@ -89,6 +91,23 @@
       </div>
     </div>
   </section>
+
+  <!-- Модал назначения теста (для admin на этой странице) -->
+  <div id="kb-assign-modal" class="kb-modal-backdrop" onclick="closeKbAssignModal(event)" style="display:none">
+    <div class="kb-modal-card" style="max-width:460px" onclick="event.stopPropagation()">
+      <button class="kb-modal-close" onclick="closeKbAssignModal()">&times;</button>
+      <h2 class="kb-modal-title" id="kb-assign-title">Назначить тест</h2>
+      <p class="kb-assign-test-name" id="kb-assign-test-name"></p>
+      <div class="kb-form-field">
+        <label>Кому назначить</label>
+        <select id="kb-assign-target" class="kb-form-select">
+          <option value="all">Всем сотрудникам</option>
+        </select>
+      </div>
+      <p id="kb-assign-error" class="kb-form-error" style="display:none"></p>
+      <button class="kb-btn-primary" id="kb-assign-submit" onclick="handleKbAssign()">НАЗНАЧИТЬ</button>
+    </div>
+  </div>
 
   <!-- ===== ФАЙЛЫ ===== -->
   <section class="kb-section">
@@ -177,6 +196,7 @@
   </div>
 </div>
 
+<script src="assets/js/notifications.js"></script>
 <script src="assets/js/knowledge.js"></script>
 </body>
 </html>

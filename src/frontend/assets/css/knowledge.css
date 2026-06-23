@@ -135,9 +135,29 @@
   font-size: 0.72rem; font-weight: 600; padding: 2px 8px;
   border-radius: 100px; background: var(--kb-blue-lt); color: var(--kb-blue);
 }
-.kb-test-tag--done  { background: var(--kb-green-lt); color: var(--kb-green); }
-.kb-test-tag--score { background: var(--kb-orange-lt); color: var(--kb-orange); }
-.kb-test-due { font-size: 0.75rem; color: var(--kb-muted); }
+.kb-test-tag--done   { background: var(--kb-green-lt); color: var(--kb-green); }
+.kb-test-tag--score  { background: var(--kb-orange-lt); color: var(--kb-orange); }
+.kb-test-tag--assign { background: #f3e8ff; color: #7c3aed; }
+.kb-test-due  { font-size: 0.75rem; color: var(--kb-muted); }
+.kb-test-desc { font-size: 0.78rem; color: var(--kb-muted); margin-top: 4px; }
+
+.kb-test-card--admin { border-color: #d8e2ee; }
+.kb-test-card--admin .kb-test-icon { background: #eef2ff; color: #4f46e5; }
+
+.kb-assign-test-name {
+  font-size: 0.88rem; color: var(--kb-text); font-weight: 600;
+  margin: -0.5rem 0 1.2rem; padding: 0.6rem 0.8rem;
+  background: var(--kb-blue-lt); border-radius: 8px;
+}
+.kb-form-select {
+  width: 100%; padding: 0.65rem 0.9rem;
+  border: 1.5px solid var(--kb-border); border-radius: 10px;
+  font-size: 0.88rem; color: var(--kb-text);
+  background: #fff; outline: none;
+  font-family: 'Inter', Arial, sans-serif;
+  transition: border-color 0.18s;
+}
+.kb-form-select:focus { border-color: var(--kb-blue); }
 
 .kb-test-action { flex-shrink: 0; }
 .kb-btn-take {

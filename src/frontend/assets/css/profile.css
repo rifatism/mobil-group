@@ -28,7 +28,10 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); min-
   position: sticky; top: 0; z-index: 100;
 }
 .p-logo img { height: 40px; width: auto; filter: brightness(0) invert(1); display: block; }
-.p-header-right { display: flex; align-items: center; gap: 1rem; }
+.p-header-right { display: flex; align-items: center; gap: 0.75rem; }
+/* Уведомления в тёмной шапке */
+.p-header #notif-bell-wrap .notif-btn { color: rgba(255,255,255,0.85); }
+.p-header #notif-bell-wrap .notif-btn:hover { background: rgba(255,255,255,0.12); }
 
 /* ===== USER MENU ===== */
 .p-user-menu { position: relative; }

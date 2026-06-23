@@ -150,6 +150,8 @@ const ROLE_LABELS = { admin: 'Администратор', employee: 'Сотру
 function applySession(user) {
   const label = document.getElementById('btn-login-label');
   if (label) label.textContent = (user.full_name || user.username).toUpperCase();
+  const adminLink = document.getElementById('cd-admin-link');
+  if (adminLink) adminLink.style.display = user.role === 'admin' ? '' : 'none';
 }
 
 function resetNavbar() {
@@ -157,6 +159,8 @@ function resetNavbar() {
   if (label) label.textContent = 'ВОЙТИ';
   const dd = document.getElementById('client-dropdown');
   if (dd) dd.classList.remove('open');
+  const adminLink = document.getElementById('cd-admin-link');
+  if (adminLink) adminLink.style.display = 'none';
 }
 
 // При загрузке — восстановить сессию
@@ -299,6 +303,47 @@ window.handleAddUser = async function(e) {
     btn.textContent = 'СОЗДАТЬ';
   }
 };
+
+// ===== HOME NEWS =====
+(async function loadHomeNews() {
+  const grid = document.getElementById('home-news-grid');
+  if (!grid) return;
+
+  const PH_SVG = '<div class="news-card-img-ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>';
+
+  function fmtHomeDate(str) {
+    const d = new Date(str);
+    return isNaN(d) ? '' : d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
+  }
+  function escN(s) { return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  try {
+    const res  = await fetch(API_BASE + '/api/news');
+    const data = await res.json();
+    const items = (data.news || []).slice(0, 2);
+
+    if (!items.length) { grid.innerHTML = ''; return; }
+
+    grid.innerHTML = items.map(n => {
+      const imgInner = n.image
+        ? `<img src="${escN(n.image)}" alt="${escN(n.title)}" loading="lazy">`
+        : PH_SVG;
+
+      return `<article class="news-card" onclick="window.location.href='news.html'">
+        <div class="news-card-img">${imgInner}</div>
+        <div class="news-card-body">
+          <span class="news-card-date">${fmtHomeDate(n.created_at)}</span>
+          <h3 class="news-card-title">${escN(n.title)}</h3>
+          ${n.excerpt ? `<p class="news-card-excerpt">${escN(n.excerpt)}</p>` : ''}
+          <span class="news-card-link">Читать далее →</span>
+        </div>
+      </article>`;
+    }).join('');
+
+  } catch {
+    grid.innerHTML = '';
+  }
+})();
 
 // ===== CONTACT FORM =====
 window.submitContactForm = async function(e) {

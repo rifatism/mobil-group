@@ -35,6 +35,25 @@ if (preg_match('#^/api/users/(\d+)$#', $uri, $m)) {
     exit;
 }
 
+// News — list / create
+if ($uri === '/api/news') {
+    require_once __DIR__ . '/handlers/NewsHandler.php';
+    exit;
+}
+
+// News — single / update / delete
+if (preg_match('#^/api/news/(\d+)$#', $uri, $m)) {
+    $GLOBALS['news_id'] = (int)$m[1];
+    require_once __DIR__ . '/handlers/NewsHandler.php';
+    exit;
+}
+
+// Upload image
+if ($uri === '/api/upload' && $method === 'POST') {
+    require_once __DIR__ . '/handlers/UploadHandler.php';
+    exit;
+}
+
 // Contact form
 if ($uri === '/api/contact' && $method === 'POST') {
     require_once __DIR__ . '/handlers/ContactHandler.php';

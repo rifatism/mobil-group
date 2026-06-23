@@ -20,7 +20,7 @@
         <li><a href="about.html">О КОМПАНИИ</a></li>
         <li><a href="#">УСЛУГИ <span class="arrow">▾</span></a></li>
         <li><a href="#">ПРОЕКТЫ</a></li>
-        <li><a href="#">НОВОСТИ</a></li>
+        <li><a href="news.html">НОВОСТИ</a></li>
         <li><a href="#">КАРЬЕРА</a></li>
     </ul>
     <div class="nav-right">
@@ -35,6 +35,10 @@
                 <span id="btn-login-label">ВОЙТИ</span>
             </button>
             <div id="client-dropdown" class="client-dropdown">
+                <a id="cd-admin-link" class="cd-item cd-item--admin" href="admin.html" style="display:none">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    Панель администратора
+                </a>
                 <a class="cd-item" href="profile.html">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
                     Профиль
@@ -376,10 +380,9 @@
             <div class="g-line"></div>
         </div>
     </div>
-    <div class="news-grid">
-        <div class="news-card"><img src="https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=700&q=80" alt=""></div>
-        <div class="news-card"><img src="https://images.unsplash.com/photo-1476134397686-16d0f6fe4b36?w=700&q=80" alt=""></div>
-        <div class="news-card"><img src="https://images.unsplash.com/photo-1518770660439-4636190af475?w=700&q=80" alt=""></div>
+    <div id="home-news-grid" class="news-grid"></div>
+    <div class="news-footer">
+        <a href="news.html" class="btn-all-news">ВСЕ НОВОСТИ <span class="btn-arr-inline">→</span></a>
     </div>
 </section>
 

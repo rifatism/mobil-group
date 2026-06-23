@@ -1249,12 +1249,11 @@ async function deleteKbTest(id) {
 
 // ─── Назначить тест ──────────────────────────────────────────────────────────
 function openAssignTest(id, title) {
-  document.getElementById('kba-test-id').value   = id;
+  document.getElementById('kba-test-id').value        = id;
   document.getElementById('kba-test-name').textContent = title;
   document.getElementById('kba-error').hidden = true;
-  document.getElementById('kba-due').value = '';
+  document.getElementById('kba-due').value    = '';
 
-  // Заполнить список сотрудников
   const sel = document.getElementById('kba-target');
   sel.innerHTML = '<option value="all">Всем сотрудникам</option>';
   kbUsers.forEach(u => {
@@ -1265,6 +1264,39 @@ function openAssignTest(id, title) {
   });
 
   openModal('kba-modal');
+  loadAssignedList(id);
+}
+
+async function loadAssignedList(testId) {
+  const el = document.getElementById('kba-assigned-list');
+  el.innerHTML = '<span class="kba-assigned-loading">Загрузка...</span>';
+  try {
+    const res  = await fetch(`${API}/api/knowledge/tests/${testId}/assign`, {
+      headers: { Authorization: 'Bearer ' + token() }
+    });
+    const data = await res.json();
+    if (!data.success || !data.assignments.length) {
+      el.innerHTML = '<span class="kba-assigned-empty">Никому не назначен</span>';
+      return;
+    }
+    el.innerHTML = data.assignments.map(a => {
+      let status = '';
+      if (a.submitted_at) {
+        status = a.passed
+          ? `<span class="kba-badge kba-badge--pass">Сдан ${a.score}%</span>`
+          : `<span class="kba-badge kba-badge--fail">Не сдан ${a.score}%</span>`;
+      } else {
+        status = `<span class="kba-badge kba-badge--wait">Ожидает</span>`;
+      }
+      const due = a.due_date ? `<span class="kba-due">до ${a.due_date}</span>` : '';
+      return `<div class="kba-assigned-row">
+        <span class="kba-assigned-name">${esc(a.name)}</span>
+        <span class="kba-assigned-meta">${due}${status}</span>
+      </div>`;
+    }).join('');
+  } catch {
+    el.innerHTML = '<span class="kba-assigned-empty">Ошибка загрузки</span>';
+  }
 }
 
 async function handleAssignTest() {
@@ -1282,9 +1314,8 @@ async function handleAssignTest() {
     });
     const data = await res.json();
     if (!data.success) { errEl.textContent = data.message; errEl.hidden = false; return; }
-    closeModal('kba-modal');
     await loadKbTests();
-    alert('Тест назначен!');
+    loadAssignedList(testId);
   } catch {
     errEl.textContent = 'Ошибка соединения.'; errEl.hidden = false;
   }

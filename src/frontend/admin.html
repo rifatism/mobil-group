@@ -51,7 +51,7 @@
       <div class="header-right">
         <button class="btn-header-add" onclick="openAddUser()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Добавить
+          <span class="add-btn-label">Добавить</span>
         </button>
 
         <!-- Notifications bell -->
@@ -537,7 +537,7 @@
 
 <!-- ===== KB: ASSIGN TEST MODAL ===== -->
 <div id="kba-modal" class="modal-backdrop" onclick="backdropClick(event,'kba-modal')">
-  <div class="modal-card" style="max-width:480px">
+  <div class="modal-card" style="max-width:540px">
     <button class="modal-close" onclick="closeModal('kba-modal')">&times;</button>
     <div class="modal-header">
       <div class="modal-icon">
@@ -560,6 +560,14 @@
       </div>
       <p id="kba-error" class="modal-msg modal-msg--error" hidden></p>
       <button class="modal-btn" onclick="handleAssignTest()">НАЗНАЧИТЬ</button>
+    </div>
+
+    <!-- Кто уже назначен -->
+    <div class="kba-assigned-section">
+      <p class="kba-assigned-title">Назначен для:</p>
+      <div id="kba-assigned-list" class="kba-assigned-list">
+        <span class="kba-assigned-loading">Загрузка...</span>
+      </div>
     </div>
   </div>
 </div>

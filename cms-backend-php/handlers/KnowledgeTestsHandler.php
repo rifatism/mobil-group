@@ -112,6 +112,41 @@ if ($method === 'PUT' && $testId && $action !== 'assign') {
     exit;
 }
 
+// ─── GET /api/knowledge/tests/{id}/assign — список назначенных ──────────────
+if ($method === 'GET' && $testId && $action === 'assign') {
+    if ($role !== 'admin') { http_response_code(403); echo json_encode(['success'=>false,'message'=>'Только администратор'],JSON_UNESCAPED_UNICODE); exit; }
+
+    // user_id = 0 означает «все сотрудники»
+    $stmt = $db->prepare("
+        SELECT ka.id, ka.user_id, ka.due_date, ka.assigned_at,
+               u.full_name, u.username,
+               kr.score, kr.passed, kr.submitted_at
+        FROM knowledge_assignments ka
+        LEFT JOIN users u ON u.id = ka.user_id
+        LEFT JOIN knowledge_results kr ON kr.test_id = ka.test_id AND kr.user_id = ka.user_id
+        WHERE ka.test_id = ?
+        ORDER BY ka.assigned_at DESC
+    ");
+    $stmt->execute([$testId]);
+    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    $result = array_map(function($r) {
+        return [
+            'id'           => (int)$r['id'],
+            'user_id'      => (int)$r['user_id'],
+            'name'         => $r['user_id'] == 0 ? 'Все сотрудники' : ($r['full_name'] ?: $r['username'] ?: '—'),
+            'due_date'     => $r['due_date'],
+            'assigned_at'  => $r['assigned_at'],
+            'score'        => $r['score'] !== null ? (int)$r['score'] : null,
+            'passed'       => $r['passed'] !== null ? (bool)$r['passed'] : null,
+            'submitted_at' => $r['submitted_at'],
+        ];
+    }, $rows);
+
+    echo json_encode(['success' => true, 'assignments' => $result], JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
 // ─── POST /api/knowledge/tests/{id}/assign — назначить тест ───────────────
 if ($method === 'POST' && $testId && $action === 'assign') {
     if ($role !== 'admin') { http_response_code(403); echo json_encode(['success'=>false,'message'=>'Только администратор'],JSON_UNESCAPED_UNICODE); exit; }

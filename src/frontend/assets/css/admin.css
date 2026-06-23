@@ -606,6 +606,18 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); min-
 .modal-actions .modal-btn { margin-top: 0; }
 
 /* ===== БАЗА ЗНАНИЙ ===== */
+
+/* Хлебные крошки */
+.kb-crumb-nav {
+  display: flex; align-items: center; flex-wrap: wrap;
+  gap: 0.2rem; padding: 0.5rem 0 0.75rem;
+  font-size: 0.8rem;
+}
+.kb-crumb { color: var(--text-muted); }
+.kb-crumb--link { color: var(--blue); cursor: pointer; transition: opacity 0.15s; }
+.kb-crumb--link:hover { opacity: 0.7; }
+.kb-crumb--active { color: var(--text); font-weight: 600; }
+.kb-crumb-sep { color: #c0cad8; margin: 0 0.1rem; font-size: 0.9rem; }
 .kb-admin-files-list { display: flex; flex-direction: column; gap: 0.6rem; }
 
 .kbf-row {
@@ -613,6 +625,18 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); min-
   padding: 0.9rem 1.1rem;
   background: var(--bg); border-radius: 10px;
   border: 1.5px solid var(--border);
+}
+.kbf-row--folder {
+  cursor: pointer;
+  background: #fafcff;
+  transition: border-color 0.15s, background 0.15s;
+}
+.kbf-row--folder:hover { border-color: var(--blue); background: var(--blue-light); }
+.kbf-folder-icon {
+  width: 42px; height: 42px; border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  background: #fff3c4; color: #f59e0b;
+  flex-shrink: 0;
 }
 .kbf-ext {
   display: inline-flex; align-items: center; justify-content: center;

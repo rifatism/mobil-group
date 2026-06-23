@@ -21,9 +21,9 @@ $base   = '/var/www/html/uploads/knowledge/';
 // ─── Helper: sanitize & resolve path ──────────────────────────────────────────
 function kb_resolve(string $raw, string $base): ?string {
     $raw = trim($raw, '/');
-    // Remove traversal and dangerous chars
+    // Remove only traversal and null bytes
     $raw = preg_replace('#\.\.+#', '', $raw);
-    $raw = preg_replace('#[^a-zA-Z0-9/_\-\. \x80-\xFF]#u', '', $raw);
+    $raw = preg_replace('#[\x00-\x1F\\\\]#', '', $raw);
     $raw = preg_replace('#/+#', '/', trim($raw, '/'));
 
     if ($raw === '') return '';
@@ -67,8 +67,11 @@ if ($method === 'POST' && $action === 'folder_create') {
 
     $data   = json_decode(file_get_contents('php://input'), true) ?? [];
     $parent = kb_resolve(trim($data['path'] ?? ''), $base) ?? '';
-    $name   = preg_replace('#[^a-zA-Z0-9_\-\. \x80-\xFF]#u', '', trim($data['name'] ?? ''));
-    $name   = trim($name);
+    $name = trim($data['name'] ?? '');
+    // Запрещаем только опасные символы: слэши, нулевые байты, точки в начале
+    $name = preg_replace('#[/\\\\\x00-\x1F]#', '', $name);
+    $name = preg_replace('#^\.+#', '', $name);
+    $name = trim($name);
 
     if (!$name) { http_response_code(400); echo json_encode(['success'=>false,'message'=>'Укажите название папки'],JSON_UNESCAPED_UNICODE); exit; }
 

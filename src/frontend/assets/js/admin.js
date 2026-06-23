@@ -808,10 +808,12 @@ function fmtDate(str) {
 // ===== БАЗА ЗНАНИЙ ===========================================================
 // =============================================================================
 
-let kbFiles = [];
-let kbTests = [];
-let kbUsers = [];   // список сотрудников для назначения тестов
-let kbTab   = 'files';
+let kbFiles    = [];
+let kbFolders  = [];
+let kbTests    = [];
+let kbUsers    = [];
+let kbTab      = 'files';
+let kbAdminPath = '';
 
 function switchKbTab(tab, el) {
   kbTab = tab;
@@ -822,20 +824,50 @@ function switchKbTab(tab, el) {
 }
 
 async function loadKnowledgeSection() {
+  kbAdminPath = '';
   await Promise.all([loadKbFiles(), loadKbTests()]);
-  // Загружаем сотрудников для назначения тестов
   kbUsers = allUsers.filter(u => u.role === 'employee');
+}
+
+// ─── NAVIGATE ────────────────────────────────────────────────────────────────
+function kbAdminNavigateTo(path) {
+  kbAdminPath = path;
+  document.getElementById('kbf-search').value = '';
+  loadKbFiles();
+}
+
+function renderAdminBreadcrumb() {
+  const el = document.getElementById('kb-admin-breadcrumb');
+  if (!el) return;
+  const parts = kbAdminPath ? kbAdminPath.split('/') : [];
+  let html = `<span class="kb-crumb kb-crumb--link" onclick="kbAdminNavigateTo('')">База знаний</span>`;
+  let built = '';
+  parts.forEach((part, i) => {
+    built += (built ? '/' : '') + part;
+    const p = built;
+    html += `<span class="kb-crumb-sep">›</span>`;
+    if (i === parts.length - 1) {
+      html += `<span class="kb-crumb kb-crumb--active">${esc(part)}</span>`;
+    } else {
+      html += `<span class="kb-crumb kb-crumb--link" onclick="kbAdminNavigateTo('${esc(p)}')">${esc(part)}</span>`;
+    }
+  });
+  el.innerHTML = html;
 }
 
 // ─── ФАЙЛЫ ───────────────────────────────────────────────────────────────────
 async function loadKbFiles() {
   const el = document.getElementById('kb-admin-files-grid');
+  el.innerHTML = '<div class="empty-state">Загрузка...</div>';
+  renderAdminBreadcrumb();
   try {
-    const res  = await fetch(API + '/api/knowledge/files', {
+    const qs   = kbAdminPath ? `?path=${encodeURIComponent(kbAdminPath)}` : '';
+    const res  = await fetch(`${API}/api/knowledge/files${qs}`, {
       headers: { Authorization: 'Bearer ' + token() }
     });
     const data = await res.json();
-    kbFiles = data.files || [];
+    kbFolders  = data.folders || [];
+    kbFiles    = data.files   || [];
     renderAdminFiles();
   } catch { el.innerHTML = '<div class="empty-state">Ошибка загрузки файлов</div>'; }
 }
@@ -843,14 +875,37 @@ async function loadKbFiles() {
 function renderAdminFiles() {
   const el = document.getElementById('kb-admin-files-grid');
   const q  = (document.getElementById('kbf-search')?.value || '').toLowerCase().trim();
-  const list = q ? kbFiles.filter(f => (f.title + (f.description||'')).toLowerCase().includes(q)) : kbFiles;
 
-  if (!list.length) {
-    el.innerHTML = '<div class="empty-state">Файлов нет. Загрузите первый файл.</div>';
+  const filtFolders = q ? kbFolders.filter(f => f.name.toLowerCase().includes(q)) : kbFolders;
+  const filtFiles   = q ? kbFiles.filter(f => (f.title + (f.description||'')).toLowerCase().includes(q)) : kbFiles;
+
+  if (!filtFolders.length && !filtFiles.length) {
+    el.innerHTML = '<div class="empty-state">Нет файлов. Загрузите первый или создайте папку.</div>';
     return;
   }
 
-  el.innerHTML = list.map(f => {
+  const folderRows = filtFolders.map(f => {
+    const meta = [
+      f.file_count ? `${f.file_count} файл.` : '',
+      f.dir_count  ? `${f.dir_count} папк.`  : '',
+    ].filter(Boolean).join(' · ') || 'Пусто';
+
+    return `<div class="kbf-row kbf-row--folder" onclick="kbAdminNavigateTo('${esc(f.path)}')">
+      <span class="kbf-folder-icon">
+        <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22"><path d="M10 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-8l-2-2z"/></svg>
+      </span>
+      <div class="kbf-info">
+        <div class="kbf-title">${esc(f.name)}</div>
+        <div class="kbf-meta">${meta}</div>
+      </div>
+      <button class="btn-delete" onclick="event.stopPropagation(); deleteKbFolder('${esc(f.path)}')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+        Удалить
+      </button>
+    </div>`;
+  }).join('');
+
+  const fileRows = filtFiles.map(f => {
     const size = fmtFileSize(f.file_size);
     const date = f.created_at ? fmtDate(f.created_at) : '';
     const ext  = (f.original_name || '').split('.').pop().toUpperCase();
@@ -865,13 +920,15 @@ function renderAdminFiles() {
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
           Скачать
         </a>
-        ${f.id ? `<button class="btn-delete" onclick="deleteKbFile(${f.id})">
+        <button class="btn-delete" onclick="deleteKbFile(${f.id ? f.id : 'null'}, '${esc(f.filename)}', '${esc(f.folder_path || kbAdminPath)}')">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
           Удалить
-        </button>` : ''}
+        </button>
       </div>
     </div>`;
   }).join('');
+
+  el.innerHTML = folderRows + fileRows;
 }
 
 function fmtFileSize(bytes) {
@@ -880,6 +937,41 @@ function fmtFileSize(bytes) {
   if (b < 1024)         return b + ' Б';
   if (b < 1024 * 1024)  return (b/1024).toFixed(1) + ' КБ';
   return (b/1024/1024).toFixed(1) + ' МБ';
+}
+
+// Создать папку (из admin-панели)
+function openKbAdminMkdir() {
+  document.getElementById('kbmkdir-name').value = '';
+  document.getElementById('kbmkdir-error').hidden = true;
+  const label = document.getElementById('kbmkdir-path-label');
+  if (label) label.textContent = kbAdminPath ? `В папке: ${kbAdminPath}` : 'В корневом разделе';
+  openModal('kbmkdir-modal');
+  setTimeout(() => document.getElementById('kbmkdir-name').focus(), 100);
+}
+
+async function handleKbAdminMkdir() {
+  const errEl = document.getElementById('kbmkdir-error');
+  const btn   = document.getElementById('kbmkdir-submit');
+  const name  = document.getElementById('kbmkdir-name').value.trim();
+  errEl.hidden = true;
+  if (!name) { errEl.textContent = 'Введите название папки'; errEl.hidden = false; return; }
+
+  btn.disabled = true; btn.textContent = 'СОЗДАНИЕ...';
+  try {
+    const res  = await fetch(`${API}/api/knowledge/folders`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token() },
+      body: JSON.stringify({ path: kbAdminPath, name }),
+    });
+    const data = await res.json();
+    if (!data.success) { errEl.textContent = data.message; errEl.hidden = false; return; }
+    closeModal('kbmkdir-modal');
+    await loadKbFiles();
+  } catch {
+    errEl.textContent = 'Ошибка соединения.'; errEl.hidden = false;
+  } finally {
+    btn.disabled = false; btn.textContent = 'СОЗДАТЬ';
+  }
 }
 
 // Загрузить файл (из admin-панели)
@@ -902,6 +994,7 @@ async function handleKbAdminUpload(e) {
   fd.append('file',        file);
   fd.append('title',       document.getElementById('kbf-title').value.trim());
   fd.append('description', document.getElementById('kbf-desc').value.trim());
+  fd.append('path',        kbAdminPath);
 
   btn.disabled = true; btn.textContent = 'ЗАГРУЗКА...';
   try {
@@ -921,12 +1014,35 @@ async function handleKbAdminUpload(e) {
   }
 }
 
-async function deleteKbFile(id) {
+async function deleteKbFile(id, filename, folderPath) {
   if (!confirm('Удалить файл? Это действие нельзя отменить.')) return;
   try {
-    const res  = await fetch(`${API}/api/knowledge/files/${id}`, {
+    let res;
+    if (id) {
+      res = await fetch(`${API}/api/knowledge/files/${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: 'Bearer ' + token() },
+      });
+    } else {
+      res = await fetch(`${API}/api/knowledge/files`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token() },
+        body: JSON.stringify({ filename, folder_path: folderPath }),
+      });
+    }
+    const data = await res.json();
+    if (!data.success) { alert(data.message); return; }
+    await loadKbFiles();
+  } catch { alert('Ошибка соединения.'); }
+}
+
+async function deleteKbFolder(path) {
+  if (!confirm(`Удалить папку «${path.split('/').pop()}» и все файлы внутри?`)) return;
+  try {
+    const res  = await fetch(`${API}/api/knowledge/folders`, {
       method: 'DELETE',
-      headers: { Authorization: 'Bearer ' + token() },
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token() },
+      body: JSON.stringify({ path }),
     });
     const data = await res.json();
     if (!data.success) { alert(data.message); return; }

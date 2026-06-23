@@ -165,6 +165,67 @@
 }
 .kb-tests-empty svg { width: 44px; height: 44px; stroke: #c0cad8; display: block; margin: 0 auto 1rem; }
 
+/* ───── СЕКЦИЯ-КНОПКИ ───── */
+.kb-section-actions { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+
+.kb-btn-mkdir {
+  display: flex; align-items: center; gap: 0.4rem;
+  padding: 0.55rem 1.1rem;
+  background: #f0f4f8; color: var(--kb-text);
+  border: 1.5px solid var(--kb-border); border-radius: 10px;
+  font-size: 0.82rem; font-weight: 700;
+  font-family: 'Montserrat', Arial, sans-serif;
+  cursor: pointer; transition: background 0.18s, border-color 0.18s;
+}
+.kb-btn-mkdir:hover { background: var(--kb-blue-lt); border-color: var(--kb-blue); color: var(--kb-blue); }
+.kb-btn-mkdir svg { width: 16px; height: 16px; }
+
+/* ───── ХЛЕБНЫЕ КРОШКИ ───── */
+.kb-breadcrumb {
+  display: flex; align-items: center; flex-wrap: wrap;
+  gap: 0.2rem; margin-bottom: 1rem; margin-top: -0.25rem;
+  font-size: 0.82rem;
+}
+.kb-crumb { color: var(--kb-muted); }
+.kb-crumb--link {
+  color: var(--kb-blue); cursor: pointer;
+  text-decoration: none; transition: opacity 0.15s;
+}
+.kb-crumb--link:hover { opacity: 0.7; }
+.kb-crumb--active { color: var(--kb-text); font-weight: 600; }
+.kb-crumb-sep { color: #c0cad8; margin: 0 0.1rem; font-size: 0.9rem; }
+
+/* ───── ПАПКИ ───── */
+.kb-folder-card {
+  display: flex; align-items: center; gap: 1rem;
+  padding: 1rem 1.3rem;
+  border: 1.5px solid #d8e2ee;
+  border-radius: var(--kb-radius);
+  cursor: pointer;
+  transition: border-color 0.18s, background 0.18s, box-shadow 0.18s;
+  position: relative;
+  background: #fafcff;
+}
+.kb-folder-card:hover {
+  border-color: var(--kb-blue);
+  background: var(--kb-blue-lt);
+  box-shadow: 0 4px 16px rgba(25,118,210,0.1);
+}
+.kb-folder-icon {
+  width: 44px; height: 44px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  background: #fff3c4; color: #f59e0b;
+  flex-shrink: 0;
+}
+.kb-folder-icon svg { width: 26px; height: 26px; }
+.kb-folder-info { flex: 1; min-width: 0; }
+.kb-folder-name {
+  font-family: 'Montserrat', Arial, sans-serif;
+  font-size: 0.92rem; font-weight: 700; color: var(--kb-text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.kb-folder-meta { font-size: 0.75rem; color: var(--kb-muted); margin-top: 2px; }
+
 /* ───── ПОИСК ФАЙЛОВ ───── */
 .kb-search-row { margin-bottom: 1.2rem; }
 .kb-search-wrap {

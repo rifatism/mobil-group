@@ -97,23 +97,33 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
         Файлы компании
       </h2>
-      <!-- Кнопка загрузки только для admin -->
-      <button id="kb-upload-btn" class="kb-btn-upload" onclick="openKbUpload()" style="display:none">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        Загрузить файл
-      </button>
+      <div class="kb-section-actions">
+        <button id="kb-mkdir-btn" class="kb-btn-mkdir" onclick="openKbMkdir()" style="display:none">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg>
+          Создать папку
+        </button>
+        <button id="kb-upload-btn" class="kb-btn-upload" onclick="openKbUpload()" style="display:none">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Загрузить файл
+        </button>
+      </div>
     </div>
+
+    <!-- Хлебные крошки -->
+    <nav id="kb-breadcrumb" class="kb-breadcrumb"></nav>
+
     <!-- Поиск файлов -->
     <div class="kb-search-row">
       <div class="kb-search-wrap">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input id="kb-file-search" type="search" placeholder="Поиск файлов..." oninput="renderFiles()">
+        <input id="kb-file-search" type="search" placeholder="Поиск файлов и папок..." oninput="renderFilesAndFolders()">
       </div>
     </div>
+
     <div id="kb-files-grid" class="kb-files-grid">
       <div class="kb-loading">
         <div class="kb-spinner"></div>
-        Загрузка файлов...
+        Загрузка...
       </div>
     </div>
   </section>
@@ -124,6 +134,22 @@
   <div class="kb-modal-card">
     <button class="kb-modal-close" onclick="closeTestModal()">×</button>
     <div id="kb-test-content"><!-- filled by JS --></div>
+  </div>
+</div>
+
+<!-- ===== МОДАЛ СОЗДАНИЯ ПАПКИ ===== -->
+<div id="kb-mkdir-modal" class="kb-modal-backdrop" onclick="if(event.target===this)closeKbMkdir()">
+  <div class="kb-modal-card kb-modal-card--sm">
+    <button class="kb-modal-close" onclick="closeKbMkdir()">×</button>
+    <h3 class="kb-modal-title">Создать папку</h3>
+    <form id="kb-mkdir-form" onsubmit="handleKbMkdir(event)">
+      <div class="kb-form-field">
+        <label>Название папки <span style="color:#e53935">*</span></label>
+        <input id="kb-mkdir-name" type="text" placeholder="Название папки..." autocomplete="off">
+      </div>
+      <p id="kb-mkdir-error" class="kb-form-error" hidden></p>
+      <button type="submit" id="kb-mkdir-submit" class="kb-btn-primary">СОЗДАТЬ</button>
+    </form>
   </div>
 </div>
 

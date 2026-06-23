@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Мониторинг транспорта — МобилСервис</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/dashboard.css">
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ════ LEFT PANEL ════ -->
+  <aside class="sidebar" id="sidebar">
+
+    <!-- Sidebar header -->
+    <div class="sb-head">
+      <a href="index.html" class="sb-logo">
+        <svg viewBox="0 0 40 40" fill="none">
+          <rect width="40" height="40" rx="10" fill="#1976d2"/>
+          <path d="M8 28l6-10 5 7 4-5 9 8" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="28" cy="14" r="4" fill="#fff" opacity=".9"/>
+        </svg>
+        <span>МобилСервис</span>
+      </a>
+      <button class="sb-collapse" id="sb-collapse" title="Свернуть">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+    </div>
+
+    <!-- Schema selector -->
+    <div class="sb-schema-wrap">
+      <label class="sb-section-label">Схема</label>
+      <div class="sb-schema-select-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21l9-18 9 18M5 17h14"/></svg>
+        <select id="db-schema-select" class="sb-schema-select">
+          <option value="">Загрузка...</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Period selector -->
+    <div class="sb-period-wrap">
+      <label class="sb-section-label">Период</label>
+      <div class="sb-shift-tabs" id="sb-shift-tabs">
+        <button class="sb-shift active" data-idx="0">Сутки</button>
+        <button class="sb-shift" data-idx="1">День</button>
+        <button class="sb-shift" data-idx="2">Ночь</button>
+      </div>
+      <div class="sb-date-row">
+        <input type="date" id="sb-date-from" class="sb-date-input">
+        <span class="sb-date-sep">—</span>
+        <input type="date" id="sb-date-to"   class="sb-date-input">
+      </div>
+    </div>
+
+    <!-- Search -->
+    <div class="sb-search-wrap">
+      <svg class="sb-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="search" id="sb-search" class="sb-search" placeholder="Поиск ТС...">
+    </div>
+
+    <!-- Vehicle tree -->
+    <div class="sb-tree" id="sb-tree">
+      <div class="sb-loading">
+        <div class="sb-spinner"></div>
+        <span>Загрузка...</span>
+      </div>
+    </div>
+
+    <!-- Sidebar footer: stats -->
+    <div class="sb-stats">
+      <div class="sb-stat sb-stat--moving" title="В движении">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        <span id="stat-moving">—</span>
+      </div>
+      <div class="sb-stat sb-stat--parked" title="На стоянке">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9 8h4a2 2 0 0 1 0 4H9V8zm0 4h4"/></svg>
+        <span id="stat-parked">—</span>
+      </div>
+      <div class="sb-stat sb-stat--offline" title="Нет связи">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="1" y1="1" x2="23" y2="23"/><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55M5 12.55a10.94 10.94 0 0 1 5.17-2.39M10.71 5.05A16 16 0 0 1 22.56 9M1.42 9a15.91 15.91 0 0 1 4.7-2.88M8.53 16.11a6 6 0 0 1 6.95 0M12 20h.01"/></svg>
+        <span id="stat-offline">—</span>
+      </div>
+      <div class="sb-stat sb-stat--total" title="Всего ТС">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13" rx="1"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+        <span id="stat-total">—</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ════ MAIN WORKSPACE ════ -->
+  <main class="workspace" id="workspace">
+
+    <!-- Top bar -->
+    <div class="topbar">
+      <button class="sb-expand-btn" id="sb-expand" title="Развернуть панель">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <div class="topbar-breadcrumb">
+        <span id="tb-schema-name">Выберите схему</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;flex-shrink:0"><polyline points="9 18 15 12 9 6"/></svg>
+        <span id="tb-vehicle-name" class="tb-vehicle-crumb">Все ТС</span>
+      </div>
+      <div class="topbar-right">
+        <button class="topbar-btn" id="refresh-btn" title="Обновить">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+        </button>
+        <div class="user-menu-wrap" id="user-menu-wrap">
+          <button class="user-trigger" onclick="toggleUserMenu()">
+            <span class="user-avatar" id="topbar-avatar">?</span>
+            <span class="user-name" id="topbar-username">Профиль</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="user-dropdown" id="user-dropdown">
+            <a class="user-dd-item" href="profile.html">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+              Профиль
+            </a>
+            <button class="user-dd-item user-dd-logout" onclick="logout()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+              Выйти
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Split: Trips (top) + Map (bottom) -->
+    <div class="split-container" id="split-container">
+
+      <!-- ── TRIPS PANEL ── -->
+      <div class="trips-pane" id="trips-pane">
+        <div class="trips-toolbar">
+          <div class="trips-toolbar-left">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><path d="M9 17H7A5 5 0 0 1 7 7h2"/><path d="M15 7h2a5 5 0 1 1 0 10h-2"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+            <span id="trips-title">Рейсы</span>
+          </div>
+          <div class="trips-toolbar-right">
+            <button class="tb-export-btn" id="btn-export-csv"   title="CSV">CSV</button>
+            <button class="tb-export-btn" id="btn-export-excel" title="Excel">XLS</button>
+            <button class="tb-export-btn" id="btn-export-pdf"   title="PDF">PDF</button>
+          </div>
+        </div>
+
+        <!-- Trips table wrapper -->
+        <div class="trips-table-wrap" id="trips-table-wrap">
+          <div class="trips-empty" id="trips-empty">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:48px;height:48px;opacity:.25"><rect x="1" y="3" width="15" height="13" rx="1"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+            <p>Выберите транспортное средство<br>для просмотра рейсов</p>
+          </div>
+          <table class="trips-table" id="trips-table" hidden>
+            <thead>
+              <tr>
+                <th class="col-num">№</th>
+                <th class="col-date">Начало</th>
+                <th class="col-date">Конец</th>
+                <th class="col-num">Пробег, км</th>
+                <th class="col-num">V макс, км/ч</th>
+                <th class="col-num">V ср, км/ч</th>
+                <th class="col-addr">Откуда</th>
+                <th class="col-addr">Куда</th>
+                <th class="col-fuel">Топл. нач.</th>
+                <th class="col-fuel">Топл. кон.</th>
+                <th class="col-fuel">Расход</th>
+              </tr>
+            </thead>
+            <tbody id="trips-tbody"></tbody>
+            <tfoot id="trips-tfoot"></tfoot>
+          </table>
+        </div>
+      </div>
+
+      <!-- ── DRAG HANDLE ── -->
+      <div class="drag-handle" id="drag-handle">
+        <div class="drag-dots"></div>
+      </div>
+
+      <!-- ── MAP PANEL ── -->
+      <div class="map-pane" id="map-pane">
+        <div id="db-map"></div>
+        <div class="map-info-bar" id="map-info-bar" hidden>
+          <div class="map-info-inner">
+            <span class="map-info-label">Маршрут:</span>
+            <span id="map-info-trip"></span>
+          </div>
+          <button class="map-clear-btn" id="map-clear-btn" title="Очистить маршрут">✕</button>
+        </div>
+        <div class="map-loading" id="map-loading" hidden>
+          <div class="map-spinner"></div>
+        </div>
+      </div>
+
+    </div><!-- .split-container -->
+
+  </main><!-- .workspace -->
+
+</div><!-- .app -->
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="assets/js/dashboard.js"></script>
+</body>
+</html>

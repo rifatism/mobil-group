@@ -35,6 +35,12 @@ if (preg_match('#^/api/users/(\d+)$#', $uri, $m)) {
     exit;
 }
 
+// AutoGRAF proxy — /api/autograf/*
+if (str_starts_with($uri, '/api/autograf/')) {
+    require_once __DIR__ . '/handlers/AutografHandler.php';
+    exit;
+}
+
 // 404
 http_response_code(404);
 echo json_encode(['success' => false, 'message' => 'Эндпоинт не найден'], JSON_UNESCAPED_UNICODE);

@@ -14,18 +14,44 @@ function ag_base(): string  { return $_ENV['AG_BASE_URL'] ?? 'https://ag.r72.ru/
 function ag_user(): string  { return $_ENV['AG_USERNAME']  ?? 'testapi'; }
 function ag_pass(): string  { return $_ENV['AG_PASSWORD']  ?? '1234'; }
 
+function ag_session_cache_file(): string {
+    return sys_get_temp_dir() . '/ag_sid_' . md5(ag_user() . ag_pass()) . '.json';
+}
+
+function ag_session_new(): string {
+    $url = ag_base() . '/Login?UserName=' . rawurlencode(ag_user()) . '&Password=' . rawurlencode(ag_pass());
+    $sid = trim(ag_get($url), " \t\n\r\0\x0B\"");
+    file_put_contents(ag_session_cache_file(), json_encode(['sid' => $sid, 'exp' => time() + 1500]));
+    return $sid;
+}
+
 function ag_session(): string {
-    $cache = sys_get_temp_dir() . '/ag_sid_' . md5(ag_user() . ag_pass()) . '.json';
+    $cache = ag_session_cache_file();
     if (file_exists($cache)) {
         $d = json_decode(file_get_contents($cache), true);
         if ($d && !empty($d['sid']) && ($d['exp'] ?? 0) > time()) {
             return $d['sid'];
         }
     }
-    $url = ag_base() . '/Login?UserName=' . rawurlencode(ag_user()) . '&Password=' . rawurlencode(ag_pass());
-    $sid = trim(ag_get($url), " \t\n\r\0\x0B\"");
-    file_put_contents($cache, json_encode(['sid' => $sid, 'exp' => time() + 1500]));
-    return $sid;
+    return ag_session_new();
+}
+
+function ag_session_refresh(): string {
+    @unlink(ag_session_cache_file());
+    return ag_session_new();
+}
+
+// Run AutoGRAF request; on empty/error response retry once with a fresh session.
+function ag_req_retry(string $url, ?array $post_body = null): array {
+    $raw  = $post_body !== null ? ag_post($url, $post_body) : ag_get($url);
+    $data = json_decode($raw, true);
+    if (!empty($data) && is_array($data)) return $data;
+    // Session may have expired — refresh and retry
+    $newSid = ag_session_refresh();
+    $url2 = preg_replace('/session=[^&]+/', 'session=' . rawurlencode($newSid), $url);
+    $raw2 = $post_body !== null ? ag_post($url2, $post_body) : ag_get($url2);
+    $data2 = json_decode($raw2, true);
+    return is_array($data2) ? $data2 : [];
 }
 
 function ag_get(string $url): string {
@@ -74,13 +100,7 @@ function json_out(array $data): void {
 if ($sub === '/schemas' && $method === 'GET') {
     $sid  = ag_session();
     $url  = ag_base() . '/EnumSchemas?session=' . rawurlencode($sid);
-    $data = ag_req($url);
-    if (empty($data)) {
-        // refresh session and retry
-        @unlink(sys_get_temp_dir() . '/ag_sid_' . md5(ag_user() . ag_pass()) . '.json');
-        $sid  = ag_session();
-        $data = ag_req(ag_base() . '/EnumSchemas?session=' . rawurlencode($sid));
-    }
+    $data = ag_req_retry($url);
     json_out(['success' => true, 'schemas' => $data]);
     exit;
 }
@@ -93,10 +113,11 @@ if ($sub === '/vehicles' && $method === 'GET') {
     $sid = ag_session();
     ag_get(ag_base() . '/SelectSchema?session=' . rawurlencode($sid) . '&schemaID=' . rawurlencode($schemaId));
     $url  = ag_base() . '/EnumDevices?session=' . rawurlencode($sid) . '&schemaID=' . rawurlencode($schemaId);
-    $data = ag_req($url);
+    $data = ag_req_retry($url);
 
-    // Extract reg numbers from Properties
+    // Extract reg numbers; strip heavy fields to reduce response size
     $items = $data['Items'] ?? [];
+    $splitters = [];
     foreach ($items as &$item) {
         $item['_regNum'] = '';
         foreach ($item['Properties'] ?? [] as $p) {
@@ -105,15 +126,15 @@ if ($sub === '/vehicles' && $method === 'GET') {
                 break;
             }
         }
-        unset($item['Properties']); // slim down response
+        // TripSplitters extracted once to top-level; remove from each item to slim response
+        if (!empty($item['TripSplitters']) && empty($splitters)) {
+            $splitters = $item['TripSplitters'];
+        }
+        unset($item['Properties'], $item['TripSplitters'], $item['splitters'],
+              $item['Image'], $item['ImageColored'], $item['ImageHue'],
+              $item['IsAreaEnabled'], $item['FixedLocation']);
     }
     unset($item);
-
-    // TripSplitters are per-item; take them from the first item that has them
-    $splitters = [];
-    foreach ($items as $it) {
-        if (!empty($it['TripSplitters'])) { $splitters = $it['TripSplitters']; break; }
-    }
 
     json_out([
         'success'   => true,
@@ -130,10 +151,9 @@ if ($sub === '/positions' && $method === 'GET') {
     $schemaId = $_GET['schemaId'] ?? '';
     if (!$schemaId) { http_response_code(400); json_out(['success' => false, 'message' => 'schemaId required']); exit; }
     $sid  = ag_session();
-    // SelectSchema ensures session context is correct for this schema
     ag_get(ag_base() . '/SelectSchema?session=' . rawurlencode($sid) . '&schemaID=' . rawurlencode($schemaId));
     $url  = ag_base() . '/GetOnlineInfoAll?session=' . rawurlencode($sid) . '&schemaID=' . rawurlencode($schemaId);
-    $data = ag_req($url);
+    $data = ag_req_retry($url);
     // Normalize: response is array or dict
     if (isset($data[0])) {
         // already array

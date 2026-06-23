@@ -392,7 +392,6 @@ async function loadSchemas() {
 
 // ─── Vehicles + tree ─────────────────────────────────────────────────────────
 async function loadVehicles() {
-  // Clear previous schema's markers from map
   clearAllMarkers();
   clearTrack();
   state.positions = {};
@@ -403,25 +402,57 @@ async function loadVehicles() {
   const tree = document.getElementById('sb-tree');
   tree.innerHTML = '<div class="sb-loading"><div class="sb-spinner"></div><span>Загрузка...</span></div>';
 
-  const data = await apiFetch(`${AG}/vehicles?schemaId=${encodeURIComponent(state.schemaId)}`);
-  if (!data?.success) { tree.innerHTML = '<div class="sb-loading"><span>Ошибка загрузки</span></div>'; return; }
+  let data;
+  try {
+    data = await apiFetch(`${AG}/vehicles?schemaId=${encodeURIComponent(state.schemaId)}`);
+  } catch (e) {
+    console.error('[vehicles] fetch error:', e);
+    tree.innerHTML = `<div class="sb-loading"><span>Ошибка сети: ${e.message}</span></div>`;
+    return;
+  }
 
-  state.groups   = data.groups   || [];
-  state.vehicles = data.vehicles || [];
+  if (!data?.success) {
+    console.warn('[vehicles] bad response:', data);
+    tree.innerHTML = `<div class="sb-loading"><span>Ошибка: ${data?.message || 'нет данных'}</span></div>`;
+    return;
+  }
+
+  state.groups    = data.groups    || [];
+  state.vehicles  = data.vehicles  || [];
   state.splitters = data.splitters || [];
+  console.log(`[vehicles] schema=${state.schemaId} groups=${state.groups.length} vehicles=${state.vehicles.length}`);
 
-  buildTree();
+  try {
+    buildTree();
+  } catch (e) {
+    console.error('[buildTree] error:', e);
+    tree.innerHTML = `<div class="sb-loading"><span>Ошибка дерева: ${e.message}</span></div>`;
+    return;
+  }
+
   await loadPositions();
 }
 
 
 // ─── Positions ────────────────────────────────────────────────────────────────
 async function loadPositions() {
-  const data = await apiFetch(`${AG}/positions?schemaId=${encodeURIComponent(state.schemaId)}`);
-  if (!data?.success) return;
+  let data;
+  try {
+    data = await apiFetch(`${AG}/positions?schemaId=${encodeURIComponent(state.schemaId)}`);
+  } catch (e) {
+    console.error('[positions] fetch error:', e);
+    return;
+  }
+  if (!data?.success) { console.warn('[positions] bad response:', data); return; }
 
   state.positions = parsePositions(data.positions || []);
-  placeMarkers();
+  console.log(`[positions] parsed=${Object.keys(state.positions).length}`);
+
+  try {
+    placeMarkers();
+  } catch (e) {
+    console.error('[placeMarkers] error:', e);
+  }
   updateTreeStatuses();
 }
 

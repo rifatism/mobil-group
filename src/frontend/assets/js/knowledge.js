@@ -9,9 +9,11 @@ function kbLogout() {
   window.location.replace('index.html');
 }
 
-let currentRole = '';
-let allFiles    = [];
-let allTests    = [];
+let currentRole     = '';
+let currentKbPath   = '';
+let allFiles        = [];
+let allFolders      = [];
+let allTests        = [];
 
 // ─── INIT ────────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
@@ -22,7 +24,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   currentRole = user.role;
 
-  // Header
   const ini = initials2(user.full_name || user.username);
   document.getElementById('p-avatar').textContent    = ini;
   document.getElementById('p-dd-avatar').textContent = ini;
@@ -31,13 +32,14 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('p-dd-email').textContent  = user.email || '';
 
   if (user.role === 'admin') {
-    const uploadBtn  = document.getElementById('kb-upload-btn');
+    const uploadBtn = document.getElementById('kb-upload-btn');
     if (uploadBtn) uploadBtn.style.display = '';
+    const mkdirBtn = document.getElementById('kb-mkdir-btn');
+    if (mkdirBtn) mkdirBtn.style.display = '';
     const adminRow = document.getElementById('dd-admin-row');
     if (adminRow) adminRow.style.display = '';
   }
 
-  // Close dropdown on outside click
   document.addEventListener('click', e => {
     const menu = document.getElementById('p-user-menu');
     if (menu && !menu.contains(e.target)) menu.classList.remove('open');
@@ -56,6 +58,32 @@ function initials2(str) {
   if (!str) return '?';
   const p = String(str).trim().split(/\s+/);
   return p.length >= 2 ? (p[0][0] + p[1][0]).toUpperCase() : String(str).slice(0, 2).toUpperCase();
+}
+
+// ─── NAVIGATE ────────────────────────────────────────────────────────────────
+function kbNavigateTo(path) {
+  currentKbPath = path;
+  document.getElementById('kb-file-search').value = '';
+  loadFiles();
+}
+
+function renderBreadcrumb() {
+  const el = document.getElementById('kb-breadcrumb');
+  if (!el) return;
+  const parts = currentKbPath ? currentKbPath.split('/') : [];
+  let html = `<span class="kb-crumb kb-crumb--link" onclick="kbNavigateTo('')">База знаний</span>`;
+  let built = '';
+  parts.forEach((part, i) => {
+    built += (built ? '/' : '') + part;
+    const p = built;
+    html += `<span class="kb-crumb-sep">›</span>`;
+    if (i === parts.length - 1) {
+      html += `<span class="kb-crumb kb-crumb--active">${escH(part)}</span>`;
+    } else {
+      html += `<span class="kb-crumb kb-crumb--link" onclick="kbNavigateTo('${escH(p)}')">${escH(part)}</span>`;
+    }
+  });
+  el.innerHTML = html;
 }
 
 // ─── TESTS ───────────────────────────────────────────────────────────────────
@@ -147,7 +175,7 @@ function renderTestModal() {
   const qs    = test.questions || [];
   const total = qs.length;
   const q     = qs[current];
-  const pct   = total ? Math.round(((current) / total) * 100) : 0;
+  const pct   = total ? Math.round((current / total) * 100) : 0;
 
   document.getElementById('kb-test-content').innerHTML = `
     <div class="kbt-head">
@@ -181,11 +209,9 @@ function renderTestModal() {
 
 function selectAnswer(qIdx, optIdx) {
   testState.answers[qIdx] = optIdx;
-  // Update option highlight
   document.querySelectorAll('.kbt-option').forEach((el, i) => {
     el.classList.toggle('selected', i === optIdx);
   });
-  // Enable next/finish button
   const btn = document.getElementById('kbt-finish-btn') || document.querySelector('.kbt-btn--next');
   if (btn) btn.disabled = false;
 }
@@ -204,11 +230,7 @@ async function submitTest() {
   if (testState.submitting) return;
   const { test, answers } = testState;
   const qs = test.questions || [];
-  // Check all answered
-  if (Object.keys(answers).length < qs.length) {
-    alert('Пожалуйста, ответьте на все вопросы');
-    return;
-  }
+  if (Object.keys(answers).length < qs.length) { alert('Пожалуйста, ответьте на все вопросы'); return; }
 
   testState.submitting = true;
   const finBtn = document.getElementById('kbt-finish-btn');
@@ -222,8 +244,6 @@ async function submitTest() {
     });
     const data = await res.json();
     if (!data.success) { alert(data.message); return; }
-
-    // Show result
     const ok = data.percent >= 60;
     document.getElementById('kb-test-content').innerHTML = `
       <div class="kbt-result">
@@ -238,44 +258,80 @@ async function submitTest() {
   finally { testState.submitting = false; }
 }
 
-// ─── FILES ───────────────────────────────────────────────────────────────────
+// ─── FILES + FOLDERS ─────────────────────────────────────────────────────────
 async function loadFiles() {
   const grid = document.getElementById('kb-files-grid');
+  grid.innerHTML = `<div class="kb-loading"><div class="kb-spinner"></div>Загрузка...</div>`;
+  renderBreadcrumb();
+
   try {
-    const res  = await fetch(KB_API + '/api/knowledge/files', {
+    const qs   = currentKbPath ? `?path=${encodeURIComponent(currentKbPath)}` : '';
+    const res  = await fetch(`${KB_API}/api/knowledge/files${qs}`, {
       headers: { Authorization: 'Bearer ' + kbToken() }
     });
     const data = await res.json();
-    allFiles = data.files || [];
-    renderFiles();
+    allFolders  = data.folders || [];
+    allFiles    = data.files   || [];
+    renderFilesAndFolders();
   } catch {
     grid.innerHTML = '<div class="kb-files-empty"><p>Не удалось загрузить файлы.</p></div>';
   }
 }
 
-function renderFiles() {
+function renderFiles() { renderFilesAndFolders(); } // alias for search input
+
+function renderFilesAndFolders() {
   const grid = document.getElementById('kb-files-grid');
   const q    = (document.getElementById('kb-file-search')?.value || '').toLowerCase().trim();
-  const list = q ? allFiles.filter(f => (f.title + (f.description||'')).toLowerCase().includes(q)) : allFiles;
 
-  if (!list.length) {
+  const filteredFolders = q
+    ? allFolders.filter(f => f.name.toLowerCase().includes(q))
+    : allFolders;
+
+  const filteredFiles = q
+    ? allFiles.filter(f => (f.title + (f.description||'')).toLowerCase().includes(q))
+    : allFiles;
+
+  if (!filteredFolders.length && !filteredFiles.length) {
     grid.innerHTML = `<div class="kb-files-empty">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
-      <p>${q ? 'Файлы не найдены' : 'Файлов пока нет'}</p>
+      <p>${q ? 'Ничего не найдено' : 'Папка пуста'}</p>
     </div>`;
     return;
   }
 
-  grid.innerHTML = list.map(f => {
+  const folderCards = filteredFolders.map(f => {
+    const delBtn = currentRole === 'admin'
+      ? `<button class="kb-btn-del-file" title="Удалить папку" onclick="event.stopPropagation(); deleteKbFolder('${escH(f.path)}')">
+           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+         </button>` : '';
+    const meta = [
+      f.file_count ? `${f.file_count} файл${pluralRu(f.file_count,'','а','ов')}` : '',
+      f.dir_count  ? `${f.dir_count} папк${pluralRu(f.dir_count,'а','и','')}`  : '',
+    ].filter(Boolean).join(' · ') || 'Пусто';
+
+    return `<div class="kb-folder-card" onclick="kbNavigateTo('${escH(f.path)}')">
+      <div class="kb-folder-icon">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-8l-2-2z"/></svg>
+      </div>
+      <div class="kb-folder-info">
+        <div class="kb-folder-name">${escH(f.name)}</div>
+        <div class="kb-folder-meta">${meta}</div>
+      </div>
+      ${delBtn}
+    </div>`;
+  }).join('');
+
+  const fileCards = filteredFiles.map(f => {
     const icon    = fileIcon(f.file_type, f.original_name);
     const size    = fmtSize(f.file_size);
     const date    = f.created_at ? fmtDate(f.created_at) : '';
     const dlHref  = f.id
       ? `${KB_API}/api/knowledge/files/${f.id}/download`
-      : `${KB_API}/uploads/knowledge/${encodeURIComponent(f.filename)}`;
+      : `${KB_API}/uploads/knowledge/${currentKbPath ? encodeURIComponent(currentKbPath) + '/' : ''}${encodeURIComponent(f.filename)}`;
 
     const delBtn = currentRole === 'admin'
-      ? `<button class="kb-btn-del-file" title="Удалить" onclick="deleteFile(${f.id ? f.id : `null,'${escH(f.filename)}'`})">
+      ? `<button class="kb-btn-del-file" title="Удалить" onclick="deleteKbFile(${f.id ? f.id : 'null'}, '${escH(f.filename)}', '${escH(f.folder_path || currentKbPath)}')">
            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
          </button>` : '';
 
@@ -297,6 +353,15 @@ function renderFiles() {
       </div>
     </div>`;
   }).join('');
+
+  grid.innerHTML = folderCards + fileCards;
+}
+
+function pluralRu(n, one, few, many) {
+  const mod10 = n % 10, mod100 = n % 100;
+  if (mod10 === 1 && mod100 !== 11) return one;
+  if ([2,3,4].includes(mod10) && ![12,13,14].includes(mod100)) return few;
+  return many;
 }
 
 function fileIcon(mime, name) {
@@ -324,9 +389,9 @@ function fmtSize(bytes) {
   return (b/1024/1024).toFixed(1) + ' МБ';
 }
 
-async function deleteFile(id, filename) {
+// ─── DELETE FILE ──────────────────────────────────────────────────────────────
+async function deleteKbFile(id, filename, folderPath) {
   if (!confirm('Удалить файл?')) return;
-
   try {
     let res;
     if (id) {
@@ -338,7 +403,7 @@ async function deleteFile(id, filename) {
       res = await fetch(`${KB_API}/api/knowledge/files`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + kbToken() },
-        body: JSON.stringify({ filename }),
+        body: JSON.stringify({ filename, folder_path: folderPath }),
       });
     }
     const data = await res.json();
@@ -347,7 +412,61 @@ async function deleteFile(id, filename) {
   } catch { alert('Ошибка соединения.'); }
 }
 
-// ─── UPLOAD MODAL ─────────────────────────────────────────────────────────────
+// ─── DELETE FOLDER ────────────────────────────────────────────────────────────
+async function deleteKbFolder(path) {
+  if (!confirm(`Удалить папку «${path.split('/').pop()}» и все файлы внутри?`)) return;
+  try {
+    const res  = await fetch(`${KB_API}/api/knowledge/folders`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + kbToken() },
+      body: JSON.stringify({ path }),
+    });
+    const data = await res.json();
+    if (!data.success) { alert(data.message); return; }
+    await loadFiles();
+  } catch { alert('Ошибка соединения.'); }
+}
+
+// ─── CREATE FOLDER ────────────────────────────────────────────────────────────
+function openKbMkdir() {
+  document.getElementById('kb-mkdir-name').value = '';
+  document.getElementById('kb-mkdir-error').hidden = true;
+  document.getElementById('kb-mkdir-modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  setTimeout(() => document.getElementById('kb-mkdir-name').focus(), 100);
+}
+function closeKbMkdir() {
+  document.getElementById('kb-mkdir-modal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+async function handleKbMkdir(e) {
+  e.preventDefault();
+  const errEl = document.getElementById('kb-mkdir-error');
+  const btn   = document.getElementById('kb-mkdir-submit');
+  const name  = document.getElementById('kb-mkdir-name').value.trim();
+  errEl.hidden = true;
+  if (!name) { errEl.textContent = 'Введите название папки'; errEl.hidden = false; return; }
+
+  btn.disabled = true; btn.textContent = 'СОЗДАНИЕ...';
+  try {
+    const res  = await fetch(`${KB_API}/api/knowledge/folders`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + kbToken() },
+      body: JSON.stringify({ path: currentKbPath, name }),
+    });
+    const data = await res.json();
+    if (!data.success) { errEl.textContent = data.message; errEl.hidden = false; return; }
+    closeKbMkdir();
+    await loadFiles();
+  } catch {
+    errEl.textContent = 'Ошибка соединения.'; errEl.hidden = false;
+  } finally {
+    btn.disabled = false; btn.textContent = 'СОЗДАТЬ';
+  }
+}
+
+// ─── UPLOAD FILE ──────────────────────────────────────────────────────────────
 function openKbUpload() {
   document.getElementById('kb-upload-form').reset();
   document.getElementById('kbu-error').hidden = true;
@@ -365,17 +484,17 @@ async function handleKbUpload(e) {
   const btn   = document.getElementById('kbu-submit');
   const file  = document.getElementById('kbu-file').files[0];
   errEl.hidden = true;
-
   if (!file) { errEl.textContent = 'Выберите файл'; errEl.hidden = false; return; }
 
   const fd = new FormData();
   fd.append('file',        file);
   fd.append('title',       document.getElementById('kbu-title').value.trim());
   fd.append('description', document.getElementById('kbu-desc').value.trim());
+  fd.append('path',        currentKbPath);
 
   btn.disabled = true; btn.textContent = 'ЗАГРУЗКА...';
   try {
-    const res  = await fetch(KB_API + '/api/knowledge/files', {
+    const res  = await fetch(`${KB_API}/api/knowledge/files`, {
       method: 'POST',
       headers: { Authorization: 'Bearer ' + kbToken() },
       body: fd,

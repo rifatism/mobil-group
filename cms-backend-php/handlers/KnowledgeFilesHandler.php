@@ -6,7 +6,6 @@ $token  = Auth::require();
 $role   = $token->role ?? '';
 $uid    = (int)($token->uid ?? 0);
 
-// Только admin и employee
 if (!in_array($role, ['admin', 'employee'], true)) {
     http_response_code(403);
     echo json_encode(['success' => false, 'message' => 'Нет доступа'], JSON_UNESCAPED_UNICODE);
@@ -17,42 +16,147 @@ $db     = (new Database())->getConnection();
 $method = $_SERVER['REQUEST_METHOD'];
 $subId  = (int)($GLOBALS['knowledge_file_id'] ?? 0);
 $action = $GLOBALS['knowledge_action'] ?? '';
-$dir    = '/var/www/html/uploads/knowledge/';
+$base   = '/var/www/html/uploads/knowledge/';
 
-// ─── GET /api/knowledge/files/{id}/download ────────────────────────────────
+// ─── Helper: sanitize & resolve path ──────────────────────────────────────────
+function kb_resolve(string $raw, string $base): ?string {
+    $raw = trim($raw, '/');
+    // Remove traversal and dangerous chars
+    $raw = preg_replace('#\.\.+#', '', $raw);
+    $raw = preg_replace('#[^a-zA-Z0-9/_\-\. \x80-\xFF]#u', '', $raw);
+    $raw = preg_replace('#/+#', '/', trim($raw, '/'));
+
+    if ($raw === '') return '';
+
+    $full     = $base . $raw;
+    $realBase = realpath(rtrim($base, '/'));
+    $real     = realpath($full);
+
+    if (!$realBase) return null;
+    if ($raw !== '' && !$real) return null; // doesn't exist
+    if ($real && strpos($real . '/', $realBase . '/') !== 0) return null;
+
+    return $raw;
+}
+
+function kb_dir(string $base, string $path): string {
+    return $base . ($path !== '' ? $path . '/' : '');
+}
+
+// ─── GET /api/knowledge/files/{id}/download ────────────────────────────────────
 if ($method === 'GET' && $subId && $action === 'download') {
-    $stmt = $db->prepare("SELECT filename, original_name, file_type FROM knowledge_files WHERE id = ?");
+    $stmt = $db->prepare("SELECT filename, original_name, file_type, folder_path FROM knowledge_files WHERE id = ?");
     $stmt->execute([$subId]);
     $f = $stmt->fetch();
     if (!$f) { http_response_code(404); echo json_encode(['success'=>false,'message'=>'Файл не найден'],JSON_UNESCAPED_UNICODE); exit; }
 
-    $path = $dir . $f['filename'];
-    if (!file_exists($path)) { http_response_code(404); echo json_encode(['success'=>false,'message'=>'Файл отсутствует на диске'],JSON_UNESCAPED_UNICODE); exit; }
+    $fpath = kb_dir($base, $f['folder_path']) . $f['filename'];
+    if (!file_exists($fpath)) { http_response_code(404); echo json_encode(['success'=>false,'message'=>'Файл отсутствует на диске'],JSON_UNESCAPED_UNICODE); exit; }
 
     header('Content-Type: ' . ($f['file_type'] ?: 'application/octet-stream'));
     header('Content-Disposition: attachment; filename="' . rawurlencode($f['original_name']) . '"');
-    header('Content-Length: ' . filesize($path));
+    header('Content-Length: ' . filesize($fpath));
     header('Cache-Control: private');
-    readfile($path);
+    readfile($fpath);
     exit;
 }
 
-// ─── GET /api/knowledge/files ──────────────────────────────────────────────
-if ($method === 'GET') {
-    // Файлы из БД
-    $stmt = $db->query("SELECT kf.*, u.full_name AS uploader FROM knowledge_files kf LEFT JOIN users u ON u.id = kf.uploaded_by ORDER BY kf.created_at DESC");
-    $dbFiles = $stmt->fetchAll();
-    $dbNames = array_column($dbFiles, 'filename');
+// ─── FOLDER: create ───────────────────────────────────────────────────────────
+if ($method === 'POST' && $action === 'folder_create') {
+    if ($role !== 'admin') { http_response_code(403); echo json_encode(['success'=>false,'message'=>'Только администратор'],JSON_UNESCAPED_UNICODE); exit; }
 
-    // Файлы напрямую в папке, которых нет в БД
+    $data   = json_decode(file_get_contents('php://input'), true) ?? [];
+    $parent = kb_resolve(trim($data['path'] ?? ''), $base) ?? '';
+    $name   = preg_replace('#[^a-zA-Z0-9_\-\. \x80-\xFF]#u', '', trim($data['name'] ?? ''));
+    $name   = trim($name);
+
+    if (!$name) { http_response_code(400); echo json_encode(['success'=>false,'message'=>'Укажите название папки'],JSON_UNESCAPED_UNICODE); exit; }
+
+    $newPath = kb_dir($base, $parent) . $name;
+    if (is_dir($newPath)) { http_response_code(409); echo json_encode(['success'=>false,'message'=>'Папка уже существует'],JSON_UNESCAPED_UNICODE); exit; }
+    if (!mkdir($newPath, 0775, true)) { http_response_code(500); echo json_encode(['success'=>false,'message'=>'Ошибка создания папки'],JSON_UNESCAPED_UNICODE); exit; }
+
+    echo json_encode(['success' => true, 'name' => $name], JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
+// ─── FOLDER: delete ───────────────────────────────────────────────────────────
+if ($method === 'DELETE' && $action === 'folder_delete') {
+    if ($role !== 'admin') { http_response_code(403); echo json_encode(['success'=>false,'message'=>'Только администратор'],JSON_UNESCAPED_UNICODE); exit; }
+
+    $data      = json_decode(file_get_contents('php://input'), true) ?? [];
+    $folderPath = kb_resolve(trim($data['path'] ?? ''), $base);
+
+    if ($folderPath === null || $folderPath === '') {
+        http_response_code(400);
+        echo json_encode(['success'=>false,'message'=>'Неверный путь к папке'],JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
+    // Delete all DB records under this folder path (exact or nested)
+    $like = $db->quote($folderPath . '%');
+    $db->exec("DELETE FROM knowledge_files WHERE folder_path = " . $db->quote($folderPath) . " OR folder_path LIKE " . $db->quote($folderPath . '/%'));
+
+    // Recursively delete the directory
+    function kb_rmdir(string $dir): void {
+        if (!is_dir($dir)) return;
+        foreach (scandir($dir) as $item) {
+            if ($item === '.' || $item === '..') continue;
+            $path = $dir . '/' . $item;
+            is_dir($path) ? kb_rmdir($path) : unlink($path);
+        }
+        rmdir($dir);
+    }
+    kb_rmdir(kb_dir($base, $folderPath));
+
+    echo json_encode(['success' => true], JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
+// ─── GET /api/knowledge/files — list directory ─────────────────────────────────
+if ($method === 'GET' && !$subId) {
+    $rawPath = trim($_GET['path'] ?? '');
+    $curPath = kb_resolve($rawPath, $base) ?? '';
+    $targetDir = kb_dir($base, $curPath);
+
+    // Subfolders
+    $folders = [];
+    if (is_dir($targetDir)) {
+        foreach (scandir($targetDir) as $item) {
+            if ($item[0] === '.') continue;
+            if (!is_dir($targetDir . $item)) continue;
+            $itemDir   = $targetDir . $item . '/';
+            $fileCount = 0; $dirCount = 0;
+            foreach (scandir($itemDir) as $sub) {
+                if ($sub[0] === '.') continue;
+                is_dir($itemDir . $sub) ? $dirCount++ : $fileCount++;
+            }
+            $folders[] = [
+                'name'       => $item,
+                'path'       => $curPath !== '' ? "$curPath/$item" : $item,
+                'file_count' => $fileCount,
+                'dir_count'  => $dirCount,
+            ];
+        }
+    }
+
+    // DB files for this folder
+    $stmt = $db->prepare("SELECT kf.*, u.full_name AS uploader FROM knowledge_files kf LEFT JOIN users u ON u.id = kf.uploaded_by WHERE kf.folder_path = ? ORDER BY kf.created_at DESC");
+    $stmt->execute([$curPath]);
+    $dbFiles  = $stmt->fetchAll();
+    $dbNames  = array_column($dbFiles, 'filename');
+
+    // Filesystem files not in DB
     $extra = [];
-    if (is_dir($dir)) {
-        foreach (scandir($dir) as $fname) {
-            if ($fname === '.' || $fname === '..') continue;
+    if (is_dir($targetDir)) {
+        foreach (scandir($targetDir) as $fname) {
+            if ($fname[0] === '.') continue;
+            if (is_dir($targetDir . $fname)) continue;
             if (in_array($fname, $dbNames, true)) continue;
-            $fpath = $dir . $fname;
+            $fpath = $targetDir . $fname;
             $extra[] = [
                 'id'            => null,
+                'folder_path'   => $curPath,
                 'title'         => $fname,
                 'description'   => null,
                 'filename'      => $fname,
@@ -67,13 +171,17 @@ if ($method === 'GET') {
         }
     }
 
-    $all = array_merge($dbFiles, $extra);
-    echo json_encode(['success' => true, 'files' => $all], JSON_UNESCAPED_UNICODE);
+    echo json_encode([
+        'success' => true,
+        'path'    => $curPath,
+        'folders' => $folders,
+        'files'   => array_merge($dbFiles, $extra),
+    ], JSON_UNESCAPED_UNICODE);
     exit;
 }
 
-// ─── POST /api/knowledge/files ─────────────────────────────────────────────
-if ($method === 'POST') {
+// ─── POST /api/knowledge/files — upload ───────────────────────────────────────
+if ($method === 'POST' && !$action) {
     if ($role !== 'admin') { http_response_code(403); echo json_encode(['success'=>false,'message'=>'Только администратор'],JSON_UNESCAPED_UNICODE); exit; }
 
     if (empty($_FILES['file']) || $_FILES['file']['error'] !== UPLOAD_ERR_OK) {
@@ -81,34 +189,35 @@ if ($method === 'POST') {
         echo json_encode(['success' => false, 'message' => 'Файл не передан'], JSON_UNESCAPED_UNICODE);
         exit;
     }
-
-    $maxSize = 50 * 1024 * 1024; // 50 МБ
-    if ($_FILES['file']['size'] > $maxSize) {
+    if ($_FILES['file']['size'] > 50 * 1024 * 1024) {
         http_response_code(400);
         echo json_encode(['success' => false, 'message' => 'Файл слишком большой (максимум 50 МБ)'], JSON_UNESCAPED_UNICODE);
         exit;
     }
 
-    if (!is_dir($dir)) mkdir($dir, 0775, true);
+    $rawPath   = trim($_POST['path'] ?? '');
+    $curPath   = kb_resolve($rawPath, $base) ?? '';
+    $targetDir = kb_dir($base, $curPath);
+    if (!is_dir($targetDir)) mkdir($targetDir, 0775, true);
 
     $orig  = $_FILES['file']['name'];
     $ext   = strtolower(pathinfo($orig, PATHINFO_EXTENSION));
-    $safe  = preg_replace('/[^a-z0-9_\-\.]/i', '_', pathinfo($orig, PATHINFO_FILENAME));
+    $safe  = preg_replace('/[^a-z0-9_\-]/i', '_', pathinfo($orig, PATHINFO_FILENAME));
     $fname = $safe . '_' . uniqid('', true) . ($ext ? ".$ext" : '');
 
-    if (!move_uploaded_file($_FILES['file']['tmp_name'], $dir . $fname)) {
+    if (!move_uploaded_file($_FILES['file']['tmp_name'], $targetDir . $fname)) {
         http_response_code(500);
         echo json_encode(['success' => false, 'message' => 'Ошибка сохранения файла'], JSON_UNESCAPED_UNICODE);
         exit;
     }
 
-    $finfo    = new finfo(FILEINFO_MIME_TYPE);
-    $mime     = $finfo->file($dir . $fname);
-    $title    = trim($_POST['title'] ?? '') ?: $orig;
-    $desc     = trim($_POST['description'] ?? '');
+    $finfo = new finfo(FILEINFO_MIME_TYPE);
+    $mime  = $finfo->file($targetDir . $fname);
+    $title = trim($_POST['title'] ?? '') ?: $orig;
+    $desc  = trim($_POST['description'] ?? '');
 
-    $ins = $db->prepare("INSERT INTO knowledge_files (title, description, filename, original_name, file_size, file_type, uploaded_by) VALUES (?,?,?,?,?,?,?)");
-    $ins->execute([$title, $desc, $fname, $orig, $_FILES['file']['size'], $mime, $uid]);
+    $ins = $db->prepare("INSERT INTO knowledge_files (folder_path, title, description, filename, original_name, file_size, file_type, uploaded_by) VALUES (?,?,?,?,?,?,?,?)");
+    $ins->execute([$curPath, $title, $desc, $fname, $orig, $_FILES['file']['size'], $mime, $uid]);
 
     $get = $db->prepare("SELECT kf.*, u.full_name AS uploader FROM knowledge_files kf LEFT JOIN users u ON u.id = kf.uploaded_by WHERE kf.id = ?");
     $get->execute([$db->lastInsertId()]);
@@ -116,17 +225,16 @@ if ($method === 'POST') {
     exit;
 }
 
-// ─── DELETE /api/knowledge/files/{id} ─────────────────────────────────────
-if ($method === 'DELETE') {
+// ─── DELETE /api/knowledge/files/{id} — delete file ───────────────────────────
+if ($method === 'DELETE' && $subId) {
     if ($role !== 'admin') { http_response_code(403); echo json_encode(['success'=>false,'message'=>'Только администратор'],JSON_UNESCAPED_UNICODE); exit; }
-    if (!$subId) { http_response_code(400); echo json_encode(['success'=>false,'message'=>'ID не указан'],JSON_UNESCAPED_UNICODE); exit; }
 
-    $stmt = $db->prepare("SELECT filename FROM knowledge_files WHERE id = ?");
+    $stmt = $db->prepare("SELECT filename, folder_path FROM knowledge_files WHERE id = ?");
     $stmt->execute([$subId]);
     $f = $stmt->fetch();
     if (!$f) { http_response_code(404); echo json_encode(['success'=>false,'message'=>'Файл не найден'],JSON_UNESCAPED_UNICODE); exit; }
 
-    $fpath = $dir . $f['filename'];
+    $fpath = kb_dir($base, $f['folder_path']) . $f['filename'];
     if (file_exists($fpath)) @unlink($fpath);
 
     $db->prepare("DELETE FROM knowledge_files WHERE id = ?")->execute([$subId]);
@@ -134,13 +242,14 @@ if ($method === 'DELETE') {
     exit;
 }
 
-// ─── DELETE /api/knowledge/files?folder_file=filename ─────────────────────
-if ($method === 'DELETE' && !$subId) {
+// ─── DELETE without id — delete folder-only file ──────────────────────────────
+if ($method === 'DELETE' && !$subId && $action !== 'folder_delete') {
     if ($role !== 'admin') { http_response_code(403); echo json_encode(['success'=>false,'message'=>'Только администратор'],JSON_UNESCAPED_UNICODE); exit; }
     $data = json_decode(file_get_contents('php://input'), true) ?? [];
     $fn   = basename($data['filename'] ?? '');
+    $fp   = kb_resolve(trim($data['folder_path'] ?? ''), $base) ?? '';
     if (!$fn) { http_response_code(400); echo json_encode(['success'=>false,'message'=>'Имя файла не указано'],JSON_UNESCAPED_UNICODE); exit; }
-    $fpath = $dir . $fn;
+    $fpath = kb_dir($base, $fp) . $fn;
     if (file_exists($fpath)) @unlink($fpath);
     echo json_encode(['success' => true], JSON_UNESCAPED_UNICODE);
     exit;

@@ -80,6 +80,13 @@ if (preg_match('#^/api/vacancies/(\d+)$#', $uri, $m)) {
 }
 
 // ─── Knowledge Base ───────────────────────────────────────────────────────
+// Folders: create / delete
+if ($uri === '/api/knowledge/folders') {
+    $GLOBALS['knowledge_action'] = $method === 'POST' ? 'folder_create' : 'folder_delete';
+    require_once __DIR__ . '/handlers/KnowledgeFilesHandler.php';
+    exit;
+}
+
 // Files: /api/knowledge/files, /api/knowledge/files/{id}, /api/knowledge/files/{id}/download
 if ($uri === '/api/knowledge/files') {
     require_once __DIR__ . '/handlers/KnowledgeFilesHandler.php';

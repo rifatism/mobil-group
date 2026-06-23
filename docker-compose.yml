@@ -33,6 +33,7 @@ services:
     volumes:
       - ./cms-backend-php:/var/www/html
       - backend_uploads:/var/www/html/uploads
+      - ./cms-backend-php/uploads/knowledge:/var/www/html/uploads/knowledge
     depends_on:
       mysql:
         condition: service_healthy

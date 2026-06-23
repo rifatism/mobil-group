@@ -167,6 +167,7 @@ function getSession() {
 function setSession(token, user) {
   localStorage.setItem('cms_token', token);
   localStorage.setItem('cms_user', JSON.stringify(user));
+  if (user && user.role) localStorage.setItem('cms_last_role', user.role);
 }
 function clearSession() {
   localStorage.removeItem('cms_token');
@@ -212,15 +213,34 @@ document.addEventListener('click', e => {
 });
 
 // --- Кнопка ВОЙТИ / дропдаун ---
+function setForgotVisible(visible) {
+  const btn  = document.getElementById('btn-forgot');
+  const info = document.getElementById('forgot-info');
+  if (!btn) return;
+  btn.hidden = !visible;
+  if (!visible && info) info.hidden = true;
+}
+
+window.toggleForgotPassword = function() {
+  const info = document.getElementById('forgot-info');
+  if (!info) return;
+  info.hidden = !info.hidden;
+};
+
 window.loginBtnClick = function() {
   const user = getSession();
   if (user) {
-    // Показать дропдаун
+    // Залогинен — показать дропдаун
     const dd = document.getElementById('client-dropdown');
     if (dd) dd.classList.toggle('open');
   } else {
+    // Не залогинен — открыть модал
     document.getElementById('login-error').hidden = true;
     document.getElementById('login-form').reset();
+    // Кнопку «Забыли пароль?» показываем всем неавторизованным
+    // Сохранённая роль с прошлой сессии используется для скрытия у admin/employee
+    const lastRole = localStorage.getItem('cms_last_role');
+    setForgotVisible(lastRole !== 'admin' && lastRole !== 'employee');
     openModal('login-modal');
     setTimeout(() => document.getElementById('login-username').focus(), 150);
   }

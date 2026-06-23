@@ -53,8 +53,9 @@ function logout() {
 }
 
 // ===== SECTIONS =====
-const SECTION_TITLES = { users: 'Пользователи', news: 'Новости', vacancies: 'Вакансии', knowledge: 'База знаний' };
-const ADD_HANDLERS   = { users: 'openAddUser()', news: 'openAddNews()', vacancies: 'openAddVac()', knowledge: '' };
+const SECTION_TITLES  = { users: 'Пользователи', news: 'Новости', vacancies: 'Вакансии', knowledge: 'База знаний' };
+const ADD_HANDLERS    = { users: 'openAddUser()', news: 'openAddNews()', vacancies: 'openAddVac()', knowledge: '' };
+const ADD_BTN_LABELS  = { users: 'Добавить', news: 'Добавить новость', vacancies: 'Добавить вакансию', knowledge: '' };
 
 function switchSection(name, el) {
   document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
@@ -65,6 +66,8 @@ function switchSection(name, el) {
   const addBtn = document.querySelector('.btn-header-add');
   addBtn.setAttribute('onclick', ADD_HANDLERS[name] || '');
   addBtn.style.display = name === 'knowledge' ? 'none' : '';
+  const labelEl = addBtn.querySelector('.add-btn-label');
+  if (labelEl) labelEl.textContent = ADD_BTN_LABELS[name] || 'Добавить';
   if (name === 'news')      loadNews();
   if (name === 'vacancies') loadVacancies();
   if (name === 'knowledge') loadKnowledgeSection();

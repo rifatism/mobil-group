@@ -27,7 +27,15 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); min-
   padding: 0 2rem;
   position: sticky; top: 0; z-index: 100;
 }
-.p-logo img { height: 40px; width: auto; filter: brightness(0) invert(1); display: block; }
+.p-site-btn {
+  display: flex; align-items: center; gap: 8px;
+  margin: 0 0.8rem; padding: 0.65rem 1rem;
+  border-radius: 10px; color: rgba(255,255,255,0.4);
+  font-size: 0.8rem; text-decoration: none;
+  transition: color 0.2s, background 0.2s;
+}
+.p-site-btn svg { width: 16px; height: 16px; }
+.p-site-btn:hover { color: rgba(255,255,255,0.75); background: rgba(255,255,255,0.06); }
 .p-header-right { display: flex; align-items: center; gap: 0.75rem; }
 /* Уведомления в тёмной шапке */
 .p-header #notif-bell-wrap .notif-btn { color: rgba(255,255,255,0.85); }

@@ -123,15 +123,21 @@ function vehicleStatus(pos) {
 function parsePositions(raw) {
   const result = {};
   const parseOne = p => {
-    const lp = p.LastPosition ?? p.lastPosition ?? {};
+    const lp  = p.LastPosition ?? p.lastPosition ?? {};
+    const fin = p.Final ?? {};
+    const cons = fin.Consumption2;
+    const odo  = fin.CANTotalDistance;
     return {
-      lat:     lp.Lat  ?? lp.lat  ?? p.Lat  ?? null,
-      lon:     lp.Lng  ?? lp.lng  ?? lp.Lon ?? p.Lng ?? null,
-      speed:   p.Speed ?? p.speed ?? 0,
-      time:    p.DT ?? p.DTLocal ?? p.LastData ?? null,
-      address: p.Address ?? '',
-      state:   p.State ?? -1,
-      course:  p.Course ?? 0,
+      lat:         lp.Lat ?? lp.lat ?? p.Lat ?? null,
+      lon:         lp.Lng ?? lp.lng ?? lp.Lon ?? p.Lng ?? null,
+      speed:       p.Speed ?? p.speed ?? 0,
+      time:        p.DT ?? p.DTLocal ?? p.LastData ?? null,
+      address:     p.Address ?? '',
+      state:       p.State ?? -1,
+      course:      p.Course ?? 0,
+      currLocation: fin.CurrLocation || '',
+      consumption:  (cons != null && Number(cons) > 0) ? Number(cons) : null,
+      canOdometer:  (odo  != null && Number(odo)  > 0) ? Number(odo)  : null,
     };
   };
   if (Array.isArray(raw)) {
@@ -190,9 +196,11 @@ function buildPopup(v, pos, st) {
   const speed   = pos?.speed > 0 ? `<div class="lp-row"><b>Скорость:</b> ${fmtNum(pos.speed)} км/ч</div>` : '';
   const addr    = pos?.address    ? `<div class="lp-row">${pos.address}</div>` : '';
   const time    = pos?.time       ? `<div class="lp-row"><b>Данные:</b> ${fmtDateTime(pos.time)}</div>` : '';
+  const fuel    = pos?.consumption != null ? `<div class="lp-row"><b>Расход:</b> ${fmtNum(pos.consumption, 1)} л/ч</div>` : '';
+  const odo     = pos?.canOdometer != null ? `<div class="lp-row"><b>Одометр:</b> ${fmtNum(pos.canOdometer)} км</div>` : '';
   const reg     = v._regNum       ? ` · <span style="color:#888">${v._regNum}</span>` : '';
   return `<div class="lp-name">${v.Name}${reg}</div>
-          <div class="lp-row">${stLabel}</div>${speed}${addr}${time}`;
+          <div class="lp-row">${stLabel}</div>${speed}${addr}${time}${fuel}${odo}`;
 }
 
 // ─── Vehicle Tree ─────────────────────────────────────────────────────────────
@@ -457,6 +465,34 @@ async function loadPositions() {
   updateTreeStatuses();
 }
 
+// ─── Vehicle info strip (fuel / location / odometer) ─────────────────────────
+function renderVehicleInfo() {
+  const el = document.getElementById('trips-vehicle-info');
+  const pos = state.selectedId ? state.positions[state.selectedId] : null;
+
+  if (!pos) { el.hidden = true; return; }
+
+  const items = [];
+
+  const loc = pos.currLocation || pos.address;
+  if (loc) {
+    items.push(`<span class="trips-vinfo-item"><span class="trips-vinfo-label">📍</span> <span class="trips-vinfo-value" title="${loc}" style="max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${loc}</span></span>`);
+  }
+
+  if (pos.consumption != null) {
+    items.push(`<span class="trips-vinfo-item"><span class="trips-vinfo-label">⛽ Расход:</span> <span class="trips-vinfo-value">${fmtNum(pos.consumption, 1)} л/ч</span></span>`);
+  }
+
+  if (pos.canOdometer != null) {
+    items.push(`<span class="trips-vinfo-item"><span class="trips-vinfo-label">📏 Одометр:</span> <span class="trips-vinfo-value">${fmtNum(pos.canOdometer)} км</span></span>`);
+  }
+
+  if (!items.length) { el.hidden = true; return; }
+
+  el.innerHTML = items.join('<span class="trips-vinfo-sep"> · </span>');
+  el.hidden = false;
+}
+
 // ─── Trips ────────────────────────────────────────────────────────────────────
 async function loadTrips() {
   if (!state.selectedId || !state.schemaId) return;
@@ -480,6 +516,7 @@ async function loadTrips() {
   state.trips = data?.trips || [];
 
   document.getElementById('trips-title').textContent = `Рейсы — ${state.selectedName}`;
+  renderVehicleInfo();
   renderTripsTable();
 }
 
@@ -512,11 +549,11 @@ function renderTripsTable() {
     const addrS  = trip.SA ?? trip.StartAddress ?? trip.startAddress ?? trip.AddressFrom ?? '';
     const addrE  = trip.EA ?? trip.EndAddress   ?? trip.endAddress   ?? trip.AddressTo   ?? '';
 
-    // Fuel sensors (optional)
-    const sensors = trip.Sensors ?? trip.sensors ?? [];
-    const fuelStart = extractSensor(sensors, ['Уровень нач', 'FuelStart', 'ДУТ нач', 'Fuel', 'Level']);
-    const fuelEnd   = extractSensor(sensors, ['Уровень кон', 'FuelEnd',   'ДУТ кон']);
-    const fuelCons  = extractSensor(sensors, ['Расход', 'Consumption', 'Consume']);
+    // Fuel: check direct AutoGRAF fields first (F1/F2/Fc), then Sensors array
+    const sensors   = trip.Sensors ?? trip.sensors ?? [];
+    const fuelStart = trip.F1 != null ? fmtNum(trip.F1) : extractSensor(sensors, ['Уровень нач', 'FuelStart', 'ДУТ нач', 'Fuel', 'Level']);
+    const fuelEnd   = trip.F2 != null ? fmtNum(trip.F2) : extractSensor(sensors, ['Уровень кон', 'FuelEnd',   'ДУТ кон']);
+    const fuelCons  = trip.Fc != null ? fmtNum(trip.Fc) : extractSensor(sensors, ['Расход', 'Consumption', 'Consume']);
 
     if (dist != null) totDist   += Number(dist);
     if (maxSpd != null && Number(maxSpd) > totMaxSpd) totMaxSpd = Number(maxSpd);
@@ -737,6 +774,7 @@ function initMapClear() {
 
 // ─── Export ───────────────────────────────────────────────────────────────────
 function resetTripsUI() {
+  document.getElementById('trips-vehicle-info').hidden = true;
   document.getElementById('trips-title').textContent = 'Рейсы';
   document.getElementById('trips-empty').innerHTML = `
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:48px;height:48px;opacity:.25"><rect x="1" y="3" width="15" height="13" rx="1"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>

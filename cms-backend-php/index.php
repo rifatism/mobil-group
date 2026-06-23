@@ -35,6 +35,12 @@ if (preg_match('#^/api/users/(\d+)$#', $uri, $m)) {
     exit;
 }
 
+// Contact form
+if ($uri === '/api/contact' && $method === 'POST') {
+    require_once __DIR__ . '/handlers/ContactHandler.php';
+    exit;
+}
+
 // AutoGRAF proxy — /api/autograf/*
 if (str_starts_with($uri, '/api/autograf/')) {
     require_once __DIR__ . '/handlers/AutografHandler.php';

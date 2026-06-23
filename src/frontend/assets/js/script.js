@@ -300,3 +300,50 @@ window.handleAddUser = async function(e) {
     btn.textContent = 'СОЗДАТЬ';
   }
 };
+
+// ===== CONTACT FORM =====
+window.submitContactForm = async function(e) {
+  e.preventDefault();
+  const statusEl = document.getElementById('cf-status');
+  const btn      = document.getElementById('cf-submit');
+
+  statusEl.className = 'cf-status';
+  statusEl.hidden    = true;
+
+  const body = {
+    organization: document.getElementById('cf-organization').value.trim(),
+    contact:      document.getElementById('cf-contact').value.trim(),
+    email:        document.getElementById('cf-email').value.trim(),
+    phone:        document.getElementById('cf-phone').value.trim(),
+    message:      document.getElementById('cf-message').value.trim(),
+    consent:      document.getElementById('cf-consent').checked,
+  };
+
+  btn.disabled    = true;
+  btn.textContent = 'ОТПРАВКА...';
+
+  try {
+    const res  = await fetch(API_BASE + '/api/contact', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify(body),
+    });
+    const data = await res.json();
+
+    if (data.success) {
+      statusEl.textContent = 'Спасибо! Ваше сообщение отправлено. Мы свяжемся с вами в ближайшее время.';
+      statusEl.className   = 'cf-status success';
+      document.getElementById('contact-form').reset();
+    } else {
+      statusEl.textContent = data.message || 'Ошибка при отправке. Попробуйте позже.';
+      statusEl.className   = 'cf-status error';
+    }
+  } catch {
+    statusEl.textContent = 'Нет связи с сервером. Проверьте подключение.';
+    statusEl.className   = 'cf-status error';
+  } finally {
+    statusEl.hidden  = false;
+    btn.disabled     = false;
+    btn.textContent  = 'ОТПРАВИТЬ';
+  }
+};

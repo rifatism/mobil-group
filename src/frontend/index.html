@@ -398,21 +398,22 @@
     <div class="contact-body">
         <div class="contact-form-wrap">
             <h3 class="form-heading">Обратная связь</h3>
-            <form class="contact-form">
+            <form class="contact-form" id="contact-form" onsubmit="submitContactForm(event)">
                 <div class="form-row">
-                    <input type="text" placeholder="Название организации">
-                    <input type="text" placeholder="Контактное лицо">
+                    <input type="text" id="cf-organization" placeholder="Название организации">
+                    <input type="text" id="cf-contact" placeholder="Контактное лицо">
                 </div>
                 <div class="form-row">
-                    <input type="email" placeholder="Электронная почта">
-                    <input type="tel" placeholder="+7 (___) ___-__-__">
+                    <input type="email" id="cf-email" placeholder="Электронная почта" required>
+                    <input type="tel" id="cf-phone" placeholder="+7 (___) ___-__-__">
                 </div>
-                <textarea placeholder="Вопросы и предложения"></textarea>
+                <textarea id="cf-message" placeholder="Вопросы и предложения" required></textarea>
                 <label class="check-label">
-                    <input type="checkbox">
+                    <input type="checkbox" id="cf-consent">
                     Я соглашаюсь с политикой компании и разрешаю обработку персональных данных
                 </label>
-                <button type="submit" class="btn-submit">ОТПРАВИТЬ</button>
+                <div id="cf-status" class="cf-status" hidden></div>
+                <button type="submit" id="cf-submit" class="btn-submit">ОТПРАВИТЬ</button>
             </form>
         </div>
         <div class="contact-map">

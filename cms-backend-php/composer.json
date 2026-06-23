@@ -4,7 +4,8 @@
     "require": {
         "php": ">=8.0",
         "firebase/php-jwt": "^6.0",
-        "vlucas/phpdotenv": "^5.5"
+        "vlucas/phpdotenv": "^5.5",
+        "phpmailer/phpmailer": "^7.1"
     },
     "autoload": {
         "psr-4": {

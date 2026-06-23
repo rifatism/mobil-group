@@ -392,6 +392,73 @@
   </div>
 </div>
 
+<!-- ===== EDIT USER MODAL ===== -->
+<div id="edituser-modal" class="modal-backdrop" onclick="backdropClick(event, 'edituser-modal')">
+  <div class="modal-card">
+    <button class="modal-close" onclick="closeEditUser()">&times;</button>
+    <div class="modal-header">
+      <div class="modal-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      </div>
+      <h2 class="modal-title" id="eu-modal-title">Редактировать профиль</h2>
+      <p class="modal-sub">Изменения применяются немедленно</p>
+    </div>
+    <form id="edituser-form" class="modal-form" onsubmit="handleEditUser(event)">
+      <input type="hidden" id="eu-id">
+      <!-- Readonly info -->
+      <div class="modal-row-2">
+        <div class="modal-field">
+          <label>Логин</label>
+          <input id="eu-username" type="text" disabled style="opacity:.6">
+        </div>
+        <div class="modal-field">
+          <label>E-mail</label>
+          <input id="eu-email" type="email" disabled style="opacity:.6">
+        </div>
+      </div>
+      <!-- Name -->
+      <div class="modal-row-3" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.75rem">
+        <div class="modal-field">
+          <label>Фамилия</label>
+          <input id="eu-last" type="text" placeholder="Иванов">
+        </div>
+        <div class="modal-field">
+          <label>Имя</label>
+          <input id="eu-first" type="text" placeholder="Иван">
+        </div>
+        <div class="modal-field">
+          <label>Отчество</label>
+          <input id="eu-patr" type="text" placeholder="Иванович">
+        </div>
+      </div>
+      <div class="modal-field">
+        <label>Телефон</label>
+        <input id="eu-phone" type="tel" placeholder="+7 (___) ___-__-__">
+      </div>
+      <div class="modal-field">
+        <label>О себе / описание</label>
+        <textarea id="eu-desc" rows="2" placeholder="Краткое описание..."></textarea>
+      </div>
+      <!-- Client type — только для клиентов -->
+      <div id="eu-type-row" class="modal-field">
+        <label>Тип клиента</label>
+        <select id="eu-client-type" onchange="onEuTypeChange()">
+          <option value="individual">Физическое лицо</option>
+          <option value="ip">Индивидуальный предприниматель (ИП)</option>
+          <option value="selfemployed">Самозанятый</option>
+          <option value="company">Компания</option>
+        </select>
+      </div>
+      <div id="eu-company-row" class="modal-field" hidden>
+        <label>Название организации</label>
+        <input id="eu-company" type="text" placeholder="ООО «Название»">
+      </div>
+      <p id="edituser-error" class="modal-msg modal-msg--error" hidden></p>
+      <button type="submit" id="edituser-submit" class="modal-btn">СОХРАНИТЬ</button>
+    </form>
+  </div>
+</div>
+
 <script src="assets/js/admin.js"></script>
 </body>
 </html>

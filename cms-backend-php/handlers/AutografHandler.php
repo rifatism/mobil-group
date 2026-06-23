@@ -154,12 +154,11 @@ if ($sub === '/positions' && $method === 'GET') {
     ag_get(ag_base() . '/SelectSchema?session=' . rawurlencode($sid) . '&schemaID=' . rawurlencode($schemaId));
     $url  = ag_base() . '/GetOnlineInfoAll?session=' . rawurlencode($sid) . '&schemaID=' . rawurlencode($schemaId);
     $data = ag_req_retry($url);
-    // Normalize: response is array or dict
-    if (isset($data[0])) {
-        // already array
-    } elseif (is_array($data)) {
+    // Normalize: response is array or dict; filter out null entries
+    if (!isset($data[0]) && is_array($data)) {
         $data = array_values($data);
     }
+    $data = array_values(array_filter($data, fn($v) => $v !== null));
     json_out(['success' => true, 'positions' => $data]);
     exit;
 }

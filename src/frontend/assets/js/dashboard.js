@@ -136,6 +136,7 @@ function parsePositions(raw) {
   };
   if (Array.isArray(raw)) {
     raw.forEach(p => {
+      if (!p || typeof p !== 'object') return; // skip null / non-object entries
       const id = String(p.ID ?? p.Id ?? p.DeviceId ?? '');
       if (id) result[id] = parseOne(p);
     });

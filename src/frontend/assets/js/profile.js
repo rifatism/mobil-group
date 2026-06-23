@@ -1,5 +1,11 @@
 const API = 'http://localhost:8000';
 const ROLE_LABELS = { admin: 'Администратор', employee: 'Сотрудник', client: 'Клиент' };
+const CLIENT_TYPE_LABELS = {
+  individual:   'Физическое лицо',
+  ip:           'Индивидуальный предприниматель (ИП)',
+  selfemployed: 'Самозанятый',
+  company:      'Компания',
+};
 
 // ===== INIT =====
 document.addEventListener('DOMContentLoaded', () => {
@@ -76,24 +82,21 @@ function fillForm(u) {
   val('f-phone',   u.phone       || '');
   val('f-email',   u.email       || '');
   val('f-desc',    u.description || '');
-  val('f-company', u.company_name || '');
+  // Тип клиента — только чтение
+  const type    = u.client_type || 'individual';
+  const typeEl  = document.getElementById('p-type-readonly');
+  if (typeEl) typeEl.textContent = CLIENT_TYPE_LABELS[type] || type;
 
-  // Client type radio
-  const type = u.client_type || 'individual';
-  const radio = document.querySelector(`input[name="client_type"][value="${type}"]`);
-  if (radio) radio.checked = true;
-  updateCompanyField(type);
-}
+  const companyField = document.getElementById('company-field');
+  if (companyField) {
+    const showCompany = type === 'company' || type === 'ip';
+    companyField.hidden = !showCompany;
+    val('f-company', u.company_name || '');
+  }
 
-// ===== TYPE CHANGE =====
-function onTypeChange() {
-  const selected = document.querySelector('input[name="client_type"]:checked');
-  updateCompanyField(selected ? selected.value : 'individual');
-}
-
-function updateCompanyField(type) {
-  const field = document.getElementById('company-field');
-  if (field) field.hidden = (type !== 'company');
+  // Скрыть блок типа для сотрудников и админов
+  const typeSection = document.getElementById('client-type-section');
+  if (typeSection) typeSection.hidden = u.role !== 'client';
 }
 
 // ===== SAVE PROFILE =====
@@ -105,16 +108,12 @@ async function saveProfile(e) {
   btn.disabled = true;
   btn.textContent = 'Сохранение...';
 
-  const type = (document.querySelector('input[name="client_type"]:checked') || {}).value || 'individual';
-
   const body = {
-    first_name:   get('f-first'),
-    last_name:    get('f-last'),
-    patronymic:   get('f-patr'),
-    phone:        get('f-phone'),
-    description:  get('f-desc'),
-    client_type:  type,
-    company_name: type === 'company' ? get('f-company') : '',
+    first_name:  get('f-first'),
+    last_name:   get('f-last'),
+    patronymic:  get('f-patr'),
+    phone:       get('f-phone'),
+    description: get('f-desc'),
   };
 
   try {

@@ -101,6 +101,13 @@ function setFilter(role, el) {
   renderTable();
 }
 
+const CLIENT_TYPE_LABELS = {
+  individual:   'Физлицо',
+  ip:           'ИП',
+  selfemployed: 'Самозанятый',
+  company:      'Компания',
+};
+
 // ===== RENDER TABLE =====
 function renderTable() {
   const q = (document.getElementById('search-input').value || '').toLowerCase().trim();
@@ -123,25 +130,37 @@ function renderTable() {
     const name = u.full_name
       ? `<div class="user-cell-name">${esc(u.full_name)}</div><div class="user-cell-login">@${esc(u.username)}</div>`
       : `<div class="user-cell-name">@${esc(u.username)}</div>`;
+
     const phone = u.phone ? esc(u.phone) : '<span class="muted">—</span>';
     const date  = u.created_at ? fmtDate(u.created_at) : '—';
-    const del   = u.role !== 'admin'
-      ? `<button class="btn-delete" onclick="confirmDelete(${u.id}, '${esc(u.username)}')">
-           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
-           Удалить
-         </button>`
+
+    // Тип клиента — показываем только для клиентов
+    const typeTag = u.role === 'client' && u.client_type
+      ? `<span class="client-type-badge">${CLIENT_TYPE_LABELS[u.client_type] || u.client_type}</span>`
       : '';
+
+    const actions = u.role !== 'admin' ? `
+      <div style="display:flex;gap:0.4rem;justify-content:flex-end">
+        <button class="btn-edit-user" onclick="openEditUser(${u.id})">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          Изменить
+        </button>
+        <button class="btn-delete" onclick="confirmDelete(${u.id}, '${esc(u.username)}')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+          Удалить
+        </button>
+      </div>` : '';
 
     return `<tr>
       <td><div class="user-cell">
         <span class="user-initials role-${u.role}">${ini}</span>
-        <div>${name}</div>
+        <div>${name}${typeTag}</div>
       </div></td>
       <td>${esc(u.email)}</td>
       <td>${phone}</td>
       <td><span class="role-badge role-${u.role}">${ROLE_LABELS[u.role] || u.role}</span></td>
       <td class="muted">${date}</td>
-      <td>${del}</td>
+      <td>${actions}</td>
     </tr>`;
   }).join('');
 }
@@ -190,6 +209,82 @@ async function handleAddUser(e) {
     errEl.textContent = 'Нет связи с сервером.'; errEl.hidden = false;
   } finally {
     btn.disabled = false; btn.textContent = 'СОЗДАТЬ ПОЛЬЗОВАТЕЛЯ';
+  }
+}
+
+// ===== EDIT USER =====
+function openEditUser(id) {
+  const u = allUsers.find(x => x.id === id);
+  if (!u) return;
+
+  document.getElementById('eu-id').value         = u.id;
+  document.getElementById('eu-last').value        = u.last_name   || '';
+  document.getElementById('eu-first').value       = u.first_name  || '';
+  document.getElementById('eu-patr').value        = u.patronymic  || '';
+  document.getElementById('eu-phone').value       = u.phone       || '';
+  document.getElementById('eu-desc').value        = u.description || '';
+  document.getElementById('eu-company').value     = u.company_name|| '';
+  document.getElementById('eu-username').value    = u.username;
+  document.getElementById('eu-email').value       = u.email;
+
+  const typeSelect = document.getElementById('eu-client-type');
+  if (typeSelect) typeSelect.value = u.client_type || 'individual';
+
+  // Показываем блок с типом и компанией только для клиентов
+  const typeRow    = document.getElementById('eu-type-row');
+  const companyRow = document.getElementById('eu-company-row');
+  if (typeRow)    typeRow.hidden    = u.role !== 'client';
+  if (companyRow) companyRow.hidden = !['company','ip'].includes(u.client_type);
+
+  document.getElementById('edituser-error').hidden = true;
+  document.getElementById('eu-modal-title').textContent =
+    `Редактировать: ${u.full_name || u.username}`;
+  openModal('edituser-modal');
+}
+
+function onEuTypeChange() {
+  const val = document.getElementById('eu-client-type').value;
+  const row = document.getElementById('eu-company-row');
+  if (row) row.hidden = !['company','ip'].includes(val);
+}
+
+function closeEditUser() { closeModal('edituser-modal'); }
+
+async function handleEditUser(e) {
+  e.preventDefault();
+  const errEl = document.getElementById('edituser-error');
+  const btn   = document.getElementById('edituser-submit');
+  errEl.hidden = true;
+
+  const id   = document.getElementById('eu-id').value;
+  const type = document.getElementById('eu-client-type')?.value || 'individual';
+
+  const body = {
+    first_name:   document.getElementById('eu-first').value.trim(),
+    last_name:    document.getElementById('eu-last').value.trim(),
+    patronymic:   document.getElementById('eu-patr').value.trim(),
+    phone:        document.getElementById('eu-phone').value.trim(),
+    description:  document.getElementById('eu-desc').value.trim(),
+    client_type:  type,
+    company_name: ['company','ip'].includes(type) ? document.getElementById('eu-company').value.trim() : '',
+  };
+
+  btn.disabled = true; btn.textContent = 'СОХРАНЕНИЕ...';
+
+  try {
+    const res  = await fetch(`${API}/api/users/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token() },
+      body:   JSON.stringify(body),
+    });
+    const data = await res.json();
+    if (!data.success) { errEl.textContent = data.message; errEl.hidden = false; return; }
+    closeEditUser();
+    await loadUsers();
+  } catch {
+    errEl.textContent = 'Ошибка соединения.'; errEl.hidden = false;
+  } finally {
+    btn.disabled = false; btn.textContent = 'СОХРАНИТЬ';
   }
 }
 

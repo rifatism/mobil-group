@@ -333,6 +333,28 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); min-
 .btn-delete svg { width: 14px; height: 14px; }
 .btn-delete:hover { background: #fff3f3; border-color: var(--red); }
 
+.btn-edit-user {
+  padding: 0.35rem 0.75rem;
+  border: 1.5px solid #c5ddf8;
+  border-radius: 6px; background: none;
+  color: var(--blue); font-size: 0.78rem; font-weight: 600;
+  cursor: pointer; transition: background 0.15s, border-color 0.15s;
+  display: flex; align-items: center; gap: 5px;
+}
+.btn-edit-user svg { width: 14px; height: 14px; }
+.btn-edit-user:hover { background: #e3f0ff; border-color: var(--blue); }
+
+.client-type-badge {
+  display: inline-block;
+  margin-top: 3px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 1px 8px;
+  border-radius: 100px;
+  background: #e3f0ff;
+  color: #1565c0;
+}
+
 /* ===== MODALS ===== */
 .modal-backdrop {
   position: fixed; inset: 0;

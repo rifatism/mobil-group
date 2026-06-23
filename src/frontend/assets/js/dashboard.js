@@ -74,55 +74,26 @@ function fmtNum(v, dec = 1) {
   return Number(v).toFixed(dec);
 }
 
-// ─── Period setup ─────────────────────────────────────────────────────────────
-function applyShift(idx) {
+// ─── Period setup (defaults to today, full day) ───────────────────────────────
+function applyShift() {
   const today = todayStr();
-  state.splitterIdx = idx;
-
-  document.querySelectorAll('.sb-shift').forEach(b => b.classList.toggle('active', Number(b.dataset.idx) === idx));
-
-  if (idx === 0) {
-    // Сутки: full day
-    setDates(today, today);
-    state.dateFrom = toISOLocal(today, '00:00:00');
-    state.dateTo   = toISOLocal(today, '23:59:59');
-  } else if (idx === 1) {
-    // День: 06:00-18:00
-    setDates(today, today);
-    state.dateFrom = toISOLocal(today, '06:00:00');
-    state.dateTo   = toISOLocal(today, '18:00:00');
-  } else {
-    // Ночь: 18:00-06:00 next day
-    const tmrw = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
-    setDates(today, tmrw);
-    state.dateFrom = toISOLocal(today, '18:00:00');
-    state.dateTo   = toISOLocal(tmrw, '06:00:00');
-  }
-}
-
-function setDates(from, to) {
-  document.getElementById('sb-date-from').value = from;
-  document.getElementById('sb-date-to').value   = to;
+  state.dateFrom = toISOLocal(today, '00:00:00');
+  state.dateTo   = toISOLocal(today, '23:59:59');
 }
 
 function readDates() {
-  const f = document.getElementById('sb-date-from').value;
-  const t = document.getElementById('sb-date-to').value;
-  if (f) state.dateFrom = toISOLocal(f, state.splitterIdx === 2 ? '18:00:00' : '00:00:00');
-  if (t) state.dateTo   = toISOLocal(t, state.splitterIdx === 2 ? '06:00:00' : '23:59:59');
+  // Dates are fixed to today (no UI picker)
 }
 
 // ─── Map init ─────────────────────────────────────────────────────────────────
 function initMap() {
-  state.map = L.map('db-map', { zoomControl: false }).setView([62, 70], 5);
+  const container = document.getElementById('db-map');
+  state.map = L.map(container, { zoomControl: false }).setView([62, 70], 5);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '© OpenStreetMap',
     maxZoom: 19,
   }).addTo(state.map);
   L.control.zoom({ position: 'topright' }).addTo(state.map);
-  // Flex layout is computed after DOMContentLoaded — force Leaflet to recalculate
-  setTimeout(() => state.map.invalidateSize(), 100);
-  setTimeout(() => state.map.invalidateSize(), 500);
 }
 
 function makePin(status) {
@@ -399,24 +370,24 @@ async function loadSchemas() {
     sel.appendChild(opt);
   });
 
+  // Register listener BEFORE initial loadVehicles so it's always active
+  sel.addEventListener('change', () => {
+    state.schemaId   = sel.value;
+    state.schemaName = sel.options[sel.selectedIndex]?.text || '';
+    document.getElementById('tb-schema-name').textContent = state.schemaName;
+    state.selectedId   = null;
+    state.selectedName = '';
+    state.trips        = [];
+    resetTripsUI();
+    loadVehicles(); // fire-and-forget — no await needed here
+  });
+
   if (data.schemas?.length) {
     state.schemaId   = sel.value;
     state.schemaName = sel.options[sel.selectedIndex]?.text || '';
     document.getElementById('tb-schema-name').textContent = state.schemaName;
     await loadVehicles();
   }
-
-  sel.addEventListener('change', async () => {
-    state.schemaId   = sel.value;
-    state.schemaName = sel.options[sel.selectedIndex]?.text || '';
-    document.getElementById('tb-schema-name').textContent = state.schemaName;
-    state.selectedId = null;
-    state.selectedName = '';
-    state.trips = [];
-    clearTrack();
-    resetTripsUI();
-    await loadVehicles();
-  });
 }
 
 // ─── Vehicles + tree ─────────────────────────────────────────────────────────
@@ -439,25 +410,10 @@ async function loadVehicles() {
   state.vehicles = data.vehicles || [];
   state.splitters = data.splitters || [];
 
-  // Update shift tabs based on TripSplitters from first vehicle that has them
-  const splitterNames = state.splitters.length ? state.splitters : state.vehicles.find(v => v.TripSplitters?.length)?.TripSplitters || [];
-  if (splitterNames.length) updateShiftTabs(splitterNames);
-
   buildTree();
   await loadPositions();
 }
 
-function updateShiftTabs(splitters) {
-  const container = document.getElementById('sb-shift-tabs');
-  container.innerHTML = '';
-  splitters.slice(0, 3).forEach((s, i) => {
-    const btn = document.createElement('button');
-    btn.className = 'sb-shift' + (i === state.splitterIdx ? ' active' : '');
-    btn.dataset.idx = i;
-    btn.textContent = s.Name ?? s.name ?? `Смена ${i}`;
-    container.appendChild(btn);
-  });
-}
 
 // ─── Positions ────────────────────────────────────────────────────────────────
 async function loadPositions() {
@@ -723,28 +679,6 @@ function initSearch() {
   });
 }
 
-// ─── Shift tabs ───────────────────────────────────────────────────────────────
-function initShiftTabs() {
-  document.getElementById('sb-shift-tabs').addEventListener('click', e => {
-    const btn = e.target.closest('.sb-shift');
-    if (!btn) return;
-    const idx = Number(btn.dataset.idx);
-    state.splitterIdx = idx;
-    applyShift(idx);
-    if (state.selectedId) loadTrips();
-  });
-
-  document.getElementById('sb-date-from').addEventListener('change', () => {
-    readDates();
-    document.querySelectorAll('.sb-shift').forEach(b => b.classList.remove('active'));
-    if (state.selectedId) loadTrips();
-  });
-  document.getElementById('sb-date-to').addEventListener('change', () => {
-    readDates();
-    document.querySelectorAll('.sb-shift').forEach(b => b.classList.remove('active'));
-    if (state.selectedId) loadTrips();
-  });
-}
 
 // ─── Refresh ──────────────────────────────────────────────────────────────────
 async function refreshAll() {
@@ -856,7 +790,7 @@ document.addEventListener('click', e => {
 });
 
 // ─── Boot ────────────────────────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', () => {
   if (!getToken()) { logout(); return; }
 
   // Fill user avatar
@@ -868,16 +802,22 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   // Set today as default period
-  applyShift(0);
+  applyShift(); // sets dateFrom/dateTo to today
 
-  initMap();
+  // Init UI controls synchronously
   initDragHandle();
   initSidebar();
   initSearch();
-  initShiftTabs();
   initMapClear();
   initExport();
 
-  await loadSchemas();
-  initRefresh();
+  // Defer map init + data loading until AFTER browser has performed layout.
+  // Double requestAnimationFrame guarantees styles are computed and elements sized.
+  requestAnimationFrame(() => {
+    requestAnimationFrame(async () => {
+      initMap();
+      await loadSchemas();
+      initRefresh();
+    });
+  });
 });

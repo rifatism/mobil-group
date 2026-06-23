@@ -130,6 +130,8 @@ if ($sub === '/positions' && $method === 'GET') {
     $schemaId = $_GET['schemaId'] ?? '';
     if (!$schemaId) { http_response_code(400); json_out(['success' => false, 'message' => 'schemaId required']); exit; }
     $sid  = ag_session();
+    // SelectSchema ensures session context is correct for this schema
+    ag_get(ag_base() . '/SelectSchema?session=' . rawurlencode($sid) . '&schemaID=' . rawurlencode($schemaId));
     $url  = ag_base() . '/GetOnlineInfoAll?session=' . rawurlencode($sid) . '&schemaID=' . rawurlencode($schemaId);
     $data = ag_req($url);
     // Normalize: response is array or dict

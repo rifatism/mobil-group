@@ -123,54 +123,6 @@ html, body { height: 100%; overflow: hidden; font-family: 'Inter', system-ui, sa
 }
 .sb-schema-select option { background: #1f2937; }
 
-/* Period */
-.sb-period-wrap {
-  padding: 6px 12px;
-  flex-shrink: 0;
-}
-.sb-shift-tabs {
-  display: flex;
-  gap: 4px;
-  margin-bottom: 6px;
-}
-.sb-shift {
-  flex: 1;
-  background: var(--sb-item);
-  border: 1px solid #374151;
-  border-radius: 5px;
-  color: var(--sb-muted);
-  font-size: 11px;
-  font-family: inherit;
-  font-weight: 500;
-  padding: 5px 2px;
-  cursor: pointer;
-  transition: all .15s;
-  white-space: nowrap;
-}
-.sb-shift:hover { color: var(--sb-text); border-color: #4b5563; }
-.sb-shift.active { background: var(--blue); border-color: var(--blue); color: #fff; }
-
-.sb-date-row {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-.sb-date-sep { color: var(--sb-muted); font-size: 11px; }
-.sb-date-input {
-  flex: 1;
-  background: var(--sb-item);
-  border: 1px solid #374151;
-  border-radius: 5px;
-  color: var(--sb-text);
-  font-size: 11px;
-  font-family: inherit;
-  padding: 5px 6px;
-  outline: none;
-  cursor: pointer;
-  min-width: 0;
-}
-.sb-date-input::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; }
-
 /* Search */
 .sb-search-wrap {
   position: relative;
@@ -470,6 +422,7 @@ html, body { height: 100%; overflow: hidden; font-family: 'Inter', system-ui, sa
 /* ─── Split container ─────────────────────────────────────────────────────── */
 .split-container {
   flex: 1;
+  min-height: 0;        /* critical: allows flex child to shrink below content size */
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -613,12 +566,14 @@ html, body { height: 100%; overflow: hidden; font-family: 'Inter', system-ui, sa
 /* Map pane */
 .map-pane {
   flex: 1;
+  min-height: 0;        /* critical: allows flex child to shrink below content size */
   position: relative;
   overflow: hidden;
-  min-height: 100px;
 }
 #db-map {
-  width: 100%; height: 100%;
+  /* Absolute fill — the only reliable way to give Leaflet 100% height in flex */
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
   background: #d4d0c8;
 }
 .map-info-bar {

@@ -19,265 +19,431 @@
     <ul class="nav-links">
         <li><a href="index.html">ГЛАВНАЯ</a></li>
         <li><a href="about.html" class="active">О КОМПАНИИ</a></li>
-        <li><a href="#">УСЛУГИ <span class="arrow">▾</span></a></li>
+        <li class="nav-has-drop">
+            <a href="index.html#services" class="nav-drop-trigger">УСЛУГИ <span class="arrow">▾</span></a>
+            <div class="nav-dropdown">
+                <a href="index.html#service-monitoring" class="nav-drop-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1" fill="currentColor" stroke="none"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/></svg>
+                    Мониторинг транспорта
+                </a>
+                <a href="index.html#service-tachograph" class="nav-drop-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="6" width="18" height="12" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><circle cx="17" cy="8" r="1.5"/><line x1="6" y1="14" x2="13" y2="14" stroke-linecap="round"/><line x1="6" y1="16.5" x2="10" y2="16.5" stroke-linecap="round"/></svg>
+                    Тахография
+                </a>
+                <a href="index.html#service-satellite" class="nav-drop-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="17" r="3"/><path d="M6 11c0-3 5-7 9-5" stroke-linecap="round"/><path d="M3 7c0-4 10-8 14-3" stroke-linecap="round"/><line x1="12" y1="14" x2="12" y2="8" stroke-linecap="round"/></svg>
+                    Спутниковая связь
+                </a>
+            </div>
+        </li>
         <li><a href="#">ПРОЕКТЫ</a></li>
-        <li><a href="#">НОВОСТИ</a></li>
-        <li><a href="#">КАРЬЕРА</a></li>
-        <li id="nav-knowledge-item" style="display:none"><a href="knowledge.html" class="nav-link-knowledge">БАЗА ЗНАНИЙ</a></li>
+        <li><a href="news.html">НОВОСТИ</a></li>
+        <li><a href="career.html">КАРЬЕРА</a></li>
     </ul>
     <div class="nav-right">
         <div class="lang-selector">RU <span class="arrow">▾</span></div>
-        <a href="#" class="btn-contacts">КОНТАКТЫ</a>
-        <a href="#" class="btn-login" title="Войти в личный кабинет">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="8" r="4"/>
-                <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
-            </svg>
-            <span>ВОЙТИ</span>
-        </a>
+        <a href="index.html#contact" class="btn-contacts">КОНТАКТЫ</a>
+        <div id="client-dropdown-wrap" style="position:relative">
+            <button id="btn-login-open" class="btn-login" onclick="loginBtnClick()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+                <span id="btn-login-label">ВОЙТИ</span>
+            </button>
+            <div id="client-dropdown" class="client-dropdown">
+                <a id="cd-admin-link" class="cd-item cd-item--admin" href="admin.html" style="display:none">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    Панель администратора
+                </a>
+                <a class="cd-item" href="profile.html">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+                    Профиль
+                </a>
+                <a class="cd-item" href="dashboard.html">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                    Дашборд
+                </a>
+                <div class="cd-divider"></div>
+                <button class="cd-item cd-item--logout" onclick="clientLogout()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                    Выйти
+                </button>
+            </div>
+        </div>
     </div>
 </nav>
 
-<!-- PAGE HERO -->
-<section class="about-hero">
-    <div class="about-hero-bg">
-        <img src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=1920&q=80" alt="О компании">
-        <div class="about-hero-overlay"></div>
+<!-- ===== HERO ===== -->
+<section class="ab-hero">
+    <div class="ab-hero-bg">
+        <img src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=1920&q=80" alt="МобилСервис">
+        <div class="ab-hero-overlay"></div>
     </div>
-    <div class="about-hero-content">
-        <div class="about-breadcrumb">
-            <a href="index.html">Главная</a>
-            <span>/</span>
-            <span>О компании</span>
+    <div class="ab-hero-content">
+        <div class="ab-breadcrumb">
+            <a href="index.html">Главная</a><span>/</span><span>О компании</span>
         </div>
-        <h1 class="about-hero-title">О компании<br><span class="t-accent">МобилСервис</span></h1>
-        <p class="about-hero-sub">Лидер в области мониторинга транспорта и спутниковых технологий — с 1998 года</p>
+        <h1 class="ab-hero-title">О компании<br><span class="t-accent">МобилСервис</span></h1>
+        <p class="ab-hero-sub">Лидер в области мониторинга транспорта<br>и спутниковых технологий — с 1998 года</p>
+    </div>
+    <div class="ab-hero-year">
+        <span class="ab-year-num">1998</span>
+        <span class="ab-year-label">год основания</span>
     </div>
 </section>
 
-<!-- INTRO -->
-<section class="ab-intro section-white">
-    <div class="ab-intro-grid">
-        <div class="ab-intro-text">
+<!-- ===== INTRO ===== -->
+<section class="ab-intro section-white section-diag-top">
+    <div class="ab-intro-inner">
+        <div class="ab-intro-left">
             <p class="ab-overline">MobilService</p>
-            <h2 class="sec-title">Мы создаём технологии,<br>которые <span class="t-accent">меняют будущее</span></h2>
-            <div class="g-line" style="margin: 2rem 0;"></div>
+            <h2 class="sec-title">Мы создаём<br>технологии,<br>которые <span class="t-accent">работают</span><br>там, где нет связи</h2>
+            <div class="ab-gline"></div>
             <p class="sec-desc">ООО МобилСервис — один из ведущих дистрибьюторов и интеграторов решений в области мониторинга транспорта, тахографии и спутниковой связи в Западной Сибири.</p>
-            <p class="sec-desc">Работаем с транспортными, строительными и топливно-энергетическими компаниями — там, где критически важны контроль, надёжность и стабильная связь.</p>
-            <div class="ab-intro-facts">
-                <div class="ab-fact">
-                    <span class="ab-fact-num">1998</span>
-                    <span class="ab-fact-label">год основания</span>
-                </div>
-                <div class="ab-fact">
-                    <span class="ab-fact-num">26</span>
-                    <span class="ab-fact-label">лет на рынке</span>
-                </div>
-                <div class="ab-fact">
-                    <span class="ab-fact-num">Тюмень</span>
-                    <span class="ab-fact-label">головной офис</span>
+            <p class="sec-desc" style="margin-top:1rem">Работаем с транспортными, строительными и топливно-энергетическими компаниями — там, где критически важны контроль, надёжность и стабильная связь в любой точке мира.</p>
+        </div>
+        <div class="ab-intro-right">
+            <div class="ab-intro-img-wrap">
+                <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=900&q=80" alt="Команда МобилСервис">
+                <div class="ab-img-badge">
+                    <span class="ab-badge-big">2500+</span>
+                    <span class="ab-badge-sub">реализованных проектов</span>
                 </div>
             </div>
-        </div>
-        <div class="ab-intro-img">
-            <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=900&q=80" alt="Команда МобилСервис">
-            <div class="ab-intro-badge">
-                <span class="ab-badge-num">2500+</span>
-                <span class="ab-badge-text">реализованных проектов</span>
+            <div class="ab-intro-tags">
+                <span class="ab-tag">GPS / ГЛОНАСС</span>
+                <span class="ab-tag">Тахография</span>
+                <span class="ab-tag">Iridium</span>
+                <span class="ab-tag">VSAT</span>
+                <span class="ab-tag">Видеоаналитика</span>
+                <span class="ab-tag">DSM / ADAS</span>
             </div>
         </div>
     </div>
 </section>
 
-<!-- STATS -->
+<!-- ===== STATS (анимированные счётчики) ===== -->
 <section class="ab-stats section-dark">
-    <div class="ab-stats-grid">
-        <div class="ab-stat">
-            <span class="ab-stat-num">30</span>
-            <span class="ab-stat-label">специалистов в команде</span>
+    <div class="ab-stats-inner">
+        <div class="ab-stat-item">
+            <div class="ab-stat-circle">
+                <svg viewBox="0 0 120 120">
+                    <circle class="ab-ring-bg" cx="60" cy="60" r="52"/>
+                    <circle class="ab-ring-fill" cx="60" cy="60" r="52" data-pct="88"/>
+                </svg>
+                <div class="ab-stat-center">
+                    <span class="ab-counter" data-target="30">0</span>
+                    <span class="ab-stat-unit">чел</span>
+                </div>
+            </div>
+            <p class="ab-stat-name">Специалистов<br>в команде</p>
         </div>
-        <div class="ab-stat">
-            <span class="ab-stat-num">20</span>
-            <span class="ab-stat-label">городов-партнёров</span>
+        <div class="ab-stat-item">
+            <div class="ab-stat-circle">
+                <svg viewBox="0 0 120 120">
+                    <circle class="ab-ring-bg" cx="60" cy="60" r="52"/>
+                    <circle class="ab-ring-fill" cx="60" cy="60" r="52" data-pct="72"/>
+                </svg>
+                <div class="ab-stat-center">
+                    <span class="ab-counter" data-target="20">0</span>
+                    <span class="ab-stat-unit">гор</span>
+                </div>
+            </div>
+            <p class="ab-stat-name">Городов<br>партнёров</p>
         </div>
-        <div class="ab-stat">
-            <span class="ab-stat-num">2500+</span>
-            <span class="ab-stat-label">реализованных проектов</span>
+        <div class="ab-stat-item">
+            <div class="ab-stat-circle">
+                <svg viewBox="0 0 120 120">
+                    <circle class="ab-ring-bg" cx="60" cy="60" r="52"/>
+                    <circle class="ab-ring-fill" cx="60" cy="60" r="52" data-pct="95"/>
+                </svg>
+                <div class="ab-stat-center">
+                    <span class="ab-counter" data-target="2500">0</span>
+                    <span class="ab-stat-unit">+</span>
+                </div>
+            </div>
+            <p class="ab-stat-name">Реализованных<br>проектов</p>
         </div>
-        <div class="ab-stat">
-            <span class="ab-stat-num">3200</span>
-            <span class="ab-stat-label">единиц обслуживаемого транспорта</span>
+        <div class="ab-stat-item">
+            <div class="ab-stat-circle">
+                <svg viewBox="0 0 120 120">
+                    <circle class="ab-ring-bg" cx="60" cy="60" r="52"/>
+                    <circle class="ab-ring-fill" cx="60" cy="60" r="52" data-pct="80"/>
+                </svg>
+                <div class="ab-stat-center">
+                    <span class="ab-counter" data-target="3200">0</span>
+                    <span class="ab-stat-unit">ед</span>
+                </div>
+            </div>
+            <p class="ab-stat-name">Единиц транспорта<br>под управлением</p>
+        </div>
+        <div class="ab-stat-item">
+            <div class="ab-stat-circle">
+                <svg viewBox="0 0 120 120">
+                    <circle class="ab-ring-bg" cx="60" cy="60" r="52"/>
+                    <circle class="ab-ring-fill" cx="60" cy="60" r="52" data-pct="100"/>
+                </svg>
+                <div class="ab-stat-center">
+                    <span class="ab-counter" data-target="26">0</span>
+                    <span class="ab-stat-unit">лет</span>
+                </div>
+            </div>
+            <p class="ab-stat-name">На рынке<br>телематики</p>
         </div>
     </div>
 </section>
 
-<!-- MISSION -->
-<section class="ab-mission section-white section-diag-top">
+<!-- ===== НАПРАВЛЕНИЯ (feat-cards как на главной) ===== -->
+<section class="ab-directions section-white section-diag-top">
+    <div class="ab-dir-header">
+        <p class="ab-overline">Что мы делаем</p>
+        <h2 class="sec-title">Ключевые направления<br><span class="t-accent">деятельности</span></h2>
+    </div>
+    <div class="ab-feat-grid">
+        <div class="ab-feat feat-light reveal">
+            <img class="ab-feat-img" src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80" alt="Мониторинг">
+            <div class="ab-feat-body">
+                <p class="ab-feat-label">Направление 01</p>
+                <h3 class="ab-feat-title">Мониторинг транспорта GPS / ГЛОНАСС</h3>
+                <p class="ab-feat-text">Контроль местоположения, расхода топлива, скорости и маршрутов в режиме реального времени.</p>
+            </div>
+        </div>
+        <div class="ab-feat feat-dark ab-feat-offset reveal">
+            <img class="ab-feat-img" src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&q=80" alt="Спутниковая связь">
+            <div class="ab-feat-body">
+                <p class="ab-feat-label">Направление 02</p>
+                <h3 class="ab-feat-title">Спутниковая связь Iridium и VSAT</h3>
+                <p class="ab-feat-text">Надёжная связь и интернет в любой точке планеты — там, где нет ни одной вышки сотовой сети.</p>
+            </div>
+        </div>
+        <div class="ab-feat feat-light reveal">
+            <img class="ab-feat-img" src="https://images.unsplash.com/photo-1568992688065-536aad8a12f6?w=800&q=80" alt="Тахография">
+            <div class="ab-feat-body">
+                <p class="ab-feat-label">Направление 03</p>
+                <h3 class="ab-feat-title">Тахография и видеоаналитика</h3>
+                <p class="ab-feat-text">Цифровые тахографы, карты водителей, DSM/ADAS — контроль усталости и безопасности вождения.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== ИНФОГРАФИКА — РАСПРЕДЕЛЕНИЕ ПО КЛИЕНТАМ ===== -->
+<section class="ab-infograph section-dark">
+    <div class="ab-infograph-inner">
+        <div class="ab-infograph-left">
+            <p class="ab-overline" style="color:rgba(255,255,255,0.5)">Структура клиентов</p>
+            <h2 class="sec-title" style="color:#fff">Кто работает<br>с <span class="t-accent">МобилСервис</span></h2>
+            <div class="ab-gline"></div>
+            <div class="ab-bar-list">
+                <div class="ab-bar-row reveal">
+                    <span class="ab-bar-label">Топливно-энергетические</span>
+                    <div class="ab-bar-track"><div class="ab-bar-fill" data-w="42"></div></div>
+                    <span class="ab-bar-pct">42%</span>
+                </div>
+                <div class="ab-bar-row reveal">
+                    <span class="ab-bar-label">Транспортные компании</span>
+                    <div class="ab-bar-track"><div class="ab-bar-fill" data-w="28"></div></div>
+                    <span class="ab-bar-pct">28%</span>
+                </div>
+                <div class="ab-bar-row reveal">
+                    <span class="ab-bar-label">Строительные компании</span>
+                    <div class="ab-bar-track"><div class="ab-bar-fill" data-w="16"></div></div>
+                    <span class="ab-bar-pct">16%</span>
+                </div>
+                <div class="ab-bar-row reveal">
+                    <span class="ab-bar-label">Сельхоз и авиация</span>
+                    <div class="ab-bar-track"><div class="ab-bar-fill" data-w="9"></div></div>
+                    <span class="ab-bar-pct">9%</span>
+                </div>
+                <div class="ab-bar-row reveal">
+                    <span class="ab-bar-label">Прочие</span>
+                    <div class="ab-bar-track"><div class="ab-bar-fill" data-w="5"></div></div>
+                    <span class="ab-bar-pct">5%</span>
+                </div>
+            </div>
+        </div>
+        <div class="ab-infograph-right">
+            <div class="ab-donut-wrap">
+                <svg class="ab-donut" viewBox="0 0 220 220">
+                    <circle class="ab-donut-bg" cx="110" cy="110" r="88"/>
+                    <circle class="ab-donut-seg seg1" cx="110" cy="110" r="88" data-pct="42" stroke="#1976d2"/>
+                    <circle class="ab-donut-seg seg2" cx="110" cy="110" r="88" data-pct="28" stroke="#42a5f5"/>
+                    <circle class="ab-donut-seg seg3" cx="110" cy="110" r="88" data-pct="16" stroke="#90caf9"/>
+                    <circle class="ab-donut-seg seg4" cx="110" cy="110" r="88" data-pct="9"  stroke="#bbdefb"/>
+                    <circle class="ab-donut-seg seg5" cx="110" cy="110" r="88" data-pct="5"  stroke="rgba(255,255,255,0.15)"/>
+                </svg>
+                <div class="ab-donut-center">
+                    <span class="ab-donut-num">5</span>
+                    <span class="ab-donut-sub">отраслей</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== ИСТОРИЯ (горизонтальный таймлайн) ===== -->
+<section class="ab-history section-white section-diag-top">
+    <div class="ab-history-header">
+        <p class="ab-overline">История компании</p>
+        <h2 class="sec-title">Более <span class="t-accent">25 лет</span> на рынке<br>телематики и связи</h2>
+    </div>
+    <div class="ab-htl">
+        <div class="ab-htl-line"></div>
+        <div class="ab-htl-items">
+            <div class="ab-htl-item reveal">
+                <div class="ab-htl-dot"></div>
+                <div class="ab-htl-year">1998</div>
+                <h4 class="ab-htl-title">Основание</h4>
+                <p class="ab-htl-text">ООО МобилСервис основано в Тюмени. Первые проекты в области телематики для промышленных предприятий.</p>
+            </div>
+            <div class="ab-htl-item reveal">
+                <div class="ab-htl-dot"></div>
+                <div class="ab-htl-year">2005</div>
+                <h4 class="ab-htl-title">Тахография</h4>
+                <p class="ab-htl-text">Начало работы с цифровыми тахографами. Дилерские соглашения с производителями GPS/ГЛОНАСС оборудования.</p>
+            </div>
+            <div class="ab-htl-item reveal">
+                <div class="ab-htl-dot"></div>
+                <div class="ab-htl-year">2010</div>
+                <h4 class="ab-htl-title">Iridium</h4>
+                <p class="ab-htl-text">Официальный дилер Iridium. Первые проекты спутниковой связи на Ямале и в ХМАО.</p>
+            </div>
+            <div class="ab-htl-item reveal">
+                <div class="ab-htl-dot"></div>
+                <div class="ab-htl-year">2015</div>
+                <h4 class="ab-htl-title">VSAT и видео</h4>
+                <p class="ab-htl-text">Запуск VSAT и видеоаналитики DSM/ADAS/FR. География расширена до 20 городов.</p>
+            </div>
+            <div class="ab-htl-item reveal">
+                <div class="ab-htl-dot"></div>
+                <div class="ab-htl-year">2020</div>
+                <h4 class="ab-htl-title">Полный цикл</h4>
+                <p class="ab-htl-text">Полный цикл услуг: проектирование → поставка → монтаж → обслуживание. Более 2500 проектов.</p>
+            </div>
+            <div class="ab-htl-item reveal">
+                <div class="ab-htl-dot ab-htl-dot--now"></div>
+                <div class="ab-htl-year ab-htl-year--now">2024</div>
+                <h4 class="ab-htl-title">Сейчас</h4>
+                <p class="ab-htl-text">3200 единиц транспорта, 30 специалистов. Газпром, Роснефть, Сибур, СДЕК, РЖД и сотни других.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== ГЕОГРАФИЯ ===== -->
+<section class="ab-geo" style="background:#f4f6f8">
+    <div class="ab-geo-inner">
+        <div class="ab-geo-left">
+            <p class="ab-overline">Присутствие</p>
+            <h2 class="sec-title">Работаем по всей<br>Западной <span class="t-accent">Сибири</span></h2>
+            <div class="ab-gline"></div>
+            <p class="sec-desc">Головной офис в Тюмени, сервисные партнёры в 20 городах региона. Оборудование работает от Урала до Ямала.</p>
+            <div class="ab-geo-cities">
+                <div class="ab-city reveal"><span class="ab-city-dot"></span>Тюмень — штаб-квартира</div>
+                <div class="ab-city reveal"><span class="ab-city-dot"></span>Сургут</div>
+                <div class="ab-city reveal"><span class="ab-city-dot"></span>Ханты-Мансийск</div>
+                <div class="ab-city reveal"><span class="ab-city-dot"></span>Нижневартовск</div>
+                <div class="ab-city reveal"><span class="ab-city-dot"></span>Новый Уренгой</div>
+                <div class="ab-city reveal"><span class="ab-city-dot"></span>Ноябрьск</div>
+                <div class="ab-city reveal"><span class="ab-city-dot ab-city-dot--more"></span>ещё 14 городов</div>
+            </div>
+        </div>
+        <div class="ab-geo-right">
+            <div class="ab-geo-map">
+                <img src="https://images.unsplash.com/photo-1446776653964-20c1d3a81b06?w=900&q=80" alt="Западная Сибирь">
+                <div class="ab-geo-overlay">
+                    <div class="ab-geo-pin" style="top:58%;left:36%">
+                        <div class="ab-pin-dot ab-pin-dot--main"></div>
+                        <span class="ab-pin-label">Тюмень</span>
+                    </div>
+                    <div class="ab-geo-pin" style="top:32%;left:55%">
+                        <div class="ab-pin-dot"></div>
+                        <span class="ab-pin-label">Сургут</span>
+                    </div>
+                    <div class="ab-geo-pin" style="top:22%;left:45%">
+                        <div class="ab-pin-dot"></div>
+                        <span class="ab-pin-label">Новый Уренгой</span>
+                    </div>
+                    <div class="ab-geo-pin" style="top:40%;left:68%">
+                        <div class="ab-pin-dot"></div>
+                        <span class="ab-pin-label">Нижневартовск</span>
+                    </div>
+                    <div class="ab-geo-num">20<span>городов</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== ЦЕННОСТИ ===== -->
+<section class="ab-mission section-dark">
     <div class="ab-mission-inner">
         <div class="ab-mission-header">
-            <p class="ab-overline">Наша миссия</p>
-            <h2 class="sec-title">Сделать сотрудников счастливыми,<br>компании <span class="t-accent">эффективными</span>, страну великой</h2>
+            <p class="ab-overline" style="color:rgba(255,255,255,0.5)">Наша миссия</p>
+            <h2 class="sec-title" style="color:#fff">Сделать компании<br><span class="t-accent">эффективными</span><br>а страну — великой</h2>
         </div>
         <div class="ab-values-grid">
-            <div class="ab-value">
+            <div class="ab-value reveal">
+                <div class="ab-value-num">01</div>
                 <div class="ab-value-icon">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                        <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
-                    </svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
                 </div>
                 <h3 class="ab-value-title">Технологическое лидерство</h3>
-                <p class="ab-value-text">Дистрибьюторы и дилеры мировых лидеров производства оборудования. Постоянно осваиваем новые технологии и участвуем в международных конференциях.</p>
+                <p class="ab-value-text">Дистрибьюторы и дилеры мировых лидеров производства оборудования. Участвуем в международных конференциях и выставках.</p>
             </div>
-            <div class="ab-value">
+            <div class="ab-value reveal">
+                <div class="ab-value-num">02</div>
                 <div class="ab-value-icon">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                        <circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/>
-                    </svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
                 </div>
-                <h3 class="ab-value-title">Надёжность</h3>
-                <p class="ab-value-text">26 лет безупречной работы. Оборудование функционирует в городах и в труднодоступной местности — там, где нет GSM-покрытия и наземных сетей.</p>
+                <h3 class="ab-value-title">Надёжность 24/7</h3>
+                <p class="ab-value-text">26 лет безупречной работы. Оборудование работает в городах и труднодоступных районах — там, где нет GSM-покрытия.</p>
             </div>
-            <div class="ab-value">
+            <div class="ab-value reveal">
+                <div class="ab-value-num">03</div>
                 <div class="ab-value-icon">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                    </svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                 </div>
                 <h3 class="ab-value-title">Клиентоориентированность</h3>
-                <p class="ab-value-text">Подбираем решения комплексно, адаптируем технологии под конкретные задачи каждого клиента и обеспечиваем долгосрочную поддержку.</p>
+                <p class="ab-value-text">Подбираем решения под конкретные задачи каждого клиента. Полный цикл: проектирование, поставка, монтаж, поддержка.</p>
             </div>
-            <div class="ab-value">
+            <div class="ab-value reveal">
+                <div class="ab-value-num">04</div>
                 <div class="ab-value-icon">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-                    </svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
                 </div>
-                <h3 class="ab-value-title">Эффективность</h3>
-                <p class="ab-value-text">Оптимизируем затраты клиентов через системы контроля транспорта: мониторинг местоположения, расхода топлива и качества вождения.</p>
+                <h3 class="ab-value-title">Измеримая эффективность</h3>
+                <p class="ab-value-text">Снижаем затраты клиентов на 15–40% через системы контроля топлива, маршрутов и качества вождения.</p>
             </div>
         </div>
     </div>
 </section>
 
-<!-- HISTORY -->
-<section class="ab-history section-light">
-    <div class="ab-history-inner">
-        <div class="ab-history-header">
-            <p class="ab-overline">История компании</p>
-            <h2 class="sec-title">Более <span class="t-accent">25 лет</span> на рынке<br>телематики и связи</h2>
-        </div>
-        <div class="ab-timeline">
-            <div class="ab-tl-item">
-                <div class="ab-tl-year">1998</div>
-                <div class="ab-tl-dot"></div>
-                <div class="ab-tl-body">
-                    <h4 class="ab-tl-title">Основание компании</h4>
-                    <p class="ab-tl-text">ООО МобилСервис основано в Тюмени. Начало работы в сфере телематики и мониторинга транспорта для промышленных предприятий Западной Сибири.</p>
-                </div>
-            </div>
-            <div class="ab-tl-item">
-                <div class="ab-tl-year">2005</div>
-                <div class="ab-tl-dot"></div>
-                <div class="ab-tl-body">
-                    <h4 class="ab-tl-title">Расширение направлений</h4>
-                    <p class="ab-tl-text">Начало работы с системами тахографии. Заключение дилерских соглашений с ведущими производителями оборудования GPS/ГЛОНАСС.</p>
-                </div>
-            </div>
-            <div class="ab-tl-item">
-                <div class="ab-tl-year">2010</div>
-                <div class="ab-tl-dot"></div>
-                <div class="ab-tl-body">
-                    <h4 class="ab-tl-title">Спутниковая связь Iridium</h4>
-                    <p class="ab-tl-text">Стали официальными дилерами спутниковой связи Iridium. Первые проекты по обеспечению связи в труднодоступных районах Ямала и ХМАО.</p>
-                </div>
-            </div>
-            <div class="ab-tl-item">
-                <div class="ab-tl-year">2015</div>
-                <div class="ab-tl-dot"></div>
-                <div class="ab-tl-body">
-                    <h4 class="ab-tl-title">VSAT и видеоаналитика</h4>
-                    <p class="ab-tl-text">Запуск направления спутникового интернета VSAT и видеоаналитики (DSM/ADAS/FR). Расширение географии до 20 городов-партнёров.</p>
-                </div>
-            </div>
-            <div class="ab-tl-item">
-                <div class="ab-tl-year">2020</div>
-                <div class="ab-tl-dot"></div>
-                <div class="ab-tl-body">
-                    <h4 class="ab-tl-title">Комплексные решения</h4>
-                    <p class="ab-tl-text">Переход к полному циклу услуг: от проектирования и поставки до монтажа, обслуживания и технической поддержки. Более 2500 реализованных проектов.</p>
-                </div>
-            </div>
-            <div class="ab-tl-item">
-                <div class="ab-tl-year">Сейчас</div>
-                <div class="ab-tl-dot ab-tl-dot--active"></div>
-                <div class="ab-tl-body">
-                    <h4 class="ab-tl-title">Лидер региона</h4>
-                    <p class="ab-tl-text">3200 единиц обслуживаемого транспорта, 30 специалистов в команде. Работаем с Газпромом, Роснефтью, Сибуром, СДЕК, РЖД и сотнями других компаний.</p>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- CLIENTS -->
-<section class="ab-clients section-white">
-    <div class="ab-clients-inner">
-        <div class="ab-clients-header">
-            <p class="ab-overline">Наши клиенты</p>
-            <h2 class="sec-title">Работаем с компаниями<br><span class="t-accent">любого масштаба</span></h2>
-            <div class="g-line" style="margin-top: 2rem;"></div>
-        </div>
-        <div class="ab-clients-grid">
-            <div class="ab-client-card">
-                <div class="ab-client-icon">⚡</div>
-                <h4>Топливно-энергетические</h4>
-                <p>Газпром, Роснефть, Сибур и другие нефтяные и газовые корпорации</p>
-            </div>
-            <div class="ab-client-card">
-                <div class="ab-client-icon">🚛</div>
-                <h4>Транспортные компании</h4>
-                <p>СДЕК, РЖД и транспортные операторы с крупными автопарками</p>
-            </div>
-            <div class="ab-client-card">
-                <div class="ab-client-icon">🏗️</div>
-                <h4>Строительные компании</h4>
-                <p>Мониторинг спецтехники на удалённых строительных объектах</p>
-            </div>
-            <div class="ab-client-card">
-                <div class="ab-client-icon">✈️</div>
-                <h4>Малая авиация</h4>
-                <p>Системы связи и мониторинга для авиации в труднодоступных районах</p>
-            </div>
-            <div class="ab-client-card">
-                <div class="ab-client-icon">🌾</div>
-                <h4>Сельхозпредприятия</h4>
-                <p>Контроль сельскохозяйственной техники и мониторинг полевых работ</p>
-            </div>
-            <div class="ab-client-card">
-                <div class="ab-client-icon">🏙️</div>
-                <h4>Городской транспорт</h4>
-                <p>Муниципальный транспорт, коммунальные службы и городская логистика</p>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- CTA -->
-<section class="ab-cta section-dark">
+<!-- ===== CTA ===== -->
+<section class="ab-cta section-white">
     <div class="ab-cta-inner">
-        <h2 class="sec-title sec-title-light">Готовы начать<br>сотрудничество?</h2>
-        <p class="sec-desc sec-desc-light">Свяжитесь с нами — подберём оптимальное решение под задачи вашей компании.</p>
-        <div class="ab-cta-btns">
-            <a href="index.html#contact" class="btn btn-white">СВЯЗАТЬСЯ С НАМИ</a>
-            <a href="#" class="btn btn-ghost">
-                <span class="btn-circle"><img src="assets/images/arr.svg" alt="" class="btn-arr"></span>
-                НАШИ УСЛУГИ
-            </a>
+        <div class="ab-cta-left">
+            <h2 class="sec-title">Готовы начать<br>сотрудничество?</h2>
+            <p class="sec-desc">Свяжитесь с нами — подберём оптимальное решение под задачи вашей компании.</p>
+            <div class="ab-cta-btns">
+                <a href="index.html#contact" class="btn btn-primary">
+                    <span class="btn-circle"><img src="assets/images/arr.svg" alt="" class="btn-arr"></span>
+                    СВЯЗАТЬСЯ С НАМИ
+                </a>
+                <a href="career.html" class="ab-link-btn">КАРЬЕРА В КОМПАНИИ →</a>
+            </div>
+        </div>
+        <div class="ab-cta-right">
+            <div class="ab-cta-card">
+                <div class="ab-cta-phone">+7 (3452) 68-90-90</div>
+                <div class="ab-cta-divider"></div>
+                <div class="ab-cta-info"><span>E-mail:</span> ms@r72.ru</div>
+                <div class="ab-cta-info"><span>Адрес:</span> Тюмень, ул. 50 лет Октября 29</div>
+                <div class="ab-cta-info"><span>График:</span> пн–пт 09:00–18:00</div>
+            </div>
         </div>
     </div>
 </section>
 
-<!-- FOOTER (упрощённый) -->
+<!-- FOOTER -->
 <footer class="footer">
     <div class="footer-grid">
         <div class="f-col">
@@ -287,8 +453,8 @@
                 <li><a href="about.html">О компании</a></li>
                 <li><a href="#">Услуги</a></li>
                 <li><a href="#">Проекты</a></li>
-                <li><a href="#">Новости</a></li>
-                <li><a href="#">Карьера</a></li>
+                <li><a href="news.html">Новости</a></li>
+                <li><a href="career.html">Карьера</a></li>
             </ul>
         </div>
         <div class="f-col f-col-wide">
@@ -312,14 +478,17 @@
             </ul>
         </div>
         <div class="f-col">
-            <div class="footer-logo-wrap">
-                <img src="assets/images/logo.png" alt="МобилСервис" class="logo-img logo-img-footer">
-            </div>
-            <p class="footer-watermark">МобилСервис © 2024</p>
+            <img src="assets/images/logo.png" alt="МобилСервис" class="logo-img logo-img-footer">
         </div>
     </div>
+    <div class="footer-bottom">
+        <p class="f-copy">© МобилСервис 2026. Все права защищены.</p>
+        <p class="f-dev">Тюмень, с 1998 года</p>
+    </div>
+    <div class="footer-watermark">МОБИЛСЕРВИС</div>
 </footer>
 
+<script src="assets/js/script.js?v=3"></script>
 <script src="assets/js/about.js"></script>
 </body>
 </html>

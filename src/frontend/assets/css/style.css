@@ -68,6 +68,70 @@ body {
 .navbar.scrolled .nav-links a:hover { color: var(--green); opacity: 1; }
 .arrow { font-size: 0.65rem; }
 
+/* ── NAV DROPDOWN (Услуги) ── */
+.nav-has-drop { position: relative; }
+
+.nav-drop-trigger { cursor: pointer; }
+.nav-drop-trigger .arrow {
+  display: inline-block;
+  transition: transform 0.22s;
+}
+.nav-has-drop:hover .nav-drop-trigger .arrow { transform: rotate(180deg); }
+
+.nav-dropdown {
+  position: absolute;
+  top: calc(100% + 6px); left: 50%;
+  transform: translateX(-50%) translateY(-6px);
+  width: 230px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.18);
+  border: 1px solid rgba(0,0,0,0.07);
+  padding: 0.45rem;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.2s, transform 0.2s;
+  z-index: 500;
+}
+/* Маленький треугольник-хвост */
+.nav-dropdown::before {
+  content: '';
+  position: absolute;
+  top: -6px; left: 50%; transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-bottom-color: #fff;
+  border-top: none;
+}
+.nav-has-drop:hover .nav-dropdown {
+  opacity: 1; pointer-events: all;
+  transform: translateX(-50%) translateY(0);
+}
+
+.nav-drop-item {
+  display: flex; align-items: center; gap: 0.75rem;
+  padding: 0.7rem 0.85rem;
+  border-radius: 8px;
+  font-size: 0.82rem; font-weight: 600;
+  color: #2c3e50 !important;
+  text-decoration: none;
+  transition: background 0.15s, color 0.15s;
+  letter-spacing: 0;
+}
+.nav-drop-item:hover {
+  background: #f0f4f8;
+  color: #1976d2 !important;
+  opacity: 1 !important;
+}
+.nav-drop-item svg {
+  width: 18px; height: 18px; flex-shrink: 0;
+  color: #1976d2; opacity: 0.8;
+}
+.nav-drop-item:hover svg { opacity: 1; }
+
+/* Прокрутка к секции — небольшой отступ от шапки */
+#services, #service-monitoring, #service-tachograph, #service-satellite {
+  scroll-margin-top: 72px;
+}
+
 /* ── БАЗА ЗНАНИЙ — синяя ссылка в навбаре ── */
 .nav-link-knowledge {
   color: #90caf9 !important;

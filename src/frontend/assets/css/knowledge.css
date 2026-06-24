@@ -427,9 +427,11 @@
   user-select: none;
 }
 .kbt-option:hover { border-color: var(--kb-blue); background: var(--kb-blue-lt); }
-.kbt-option input[type="radio"] { accent-color: var(--kb-blue); width: 16px; height: 16px; flex-shrink: 0; }
+.kbt-option input[type="radio"],
+.kbt-option input[type="checkbox"] { accent-color: var(--kb-blue); width: 16px; height: 16px; flex-shrink: 0; }
 .kbt-option.selected { border-color: var(--kb-blue); background: var(--kb-blue-lt); }
 .kbt-option-text { font-size: 0.9rem; color: var(--kb-text); }
+.kbt-multi-hint { font-size: 0.78rem; color: var(--kb-blue); margin: -0.2rem 0 0.4rem; }
 
 .kbt-nav {
   display: flex; gap: 0.75rem; justify-content: space-between; align-items: center;

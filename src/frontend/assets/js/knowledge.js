@@ -280,6 +280,26 @@ function renderTestModal() {
   const total = qs.length;
   const q     = qs[current];
   const pct   = total ? Math.round((current / total) * 100) : 0;
+  const multi = !!q.multi;
+  const curAns = answers[current];
+  const hasAnswer = multi
+    ? (Array.isArray(curAns) && curAns.length > 0)
+    : curAns !== undefined;
+
+  const optionsHtml = (q.opts || []).map((opt, i) => {
+    if (multi) {
+      const checked = Array.isArray(curAns) && curAns.includes(i);
+      return `<label class="kbt-option ${checked ? 'selected' : ''}" onclick="toggleAnswer(${current}, ${i})">
+        <input type="checkbox" value="${i}" ${checked ? 'checked' : ''}>
+        <span class="kbt-option-text">${escH(opt)}</span>
+      </label>`;
+    } else {
+      return `<label class="kbt-option ${curAns === i ? 'selected' : ''}" onclick="selectAnswer(${current}, ${i})">
+        <input type="radio" name="kbt-opt" value="${i}" ${curAns === i ? 'checked' : ''}>
+        <span class="kbt-option-text">${escH(opt)}</span>
+      </label>`;
+    }
+  }).join('');
 
   document.getElementById('kb-test-content').innerHTML = `
     <div class="kbt-head">
@@ -292,20 +312,14 @@ function renderTestModal() {
     </div>
     <div class="kbt-question">
       <div class="kbt-q-text">${escH(q.q)}</div>
-      <div class="kbt-options">
-        ${(q.opts || []).map((opt, i) => `
-          <label class="kbt-option ${answers[current] === i ? 'selected' : ''}" onclick="selectAnswer(${current}, ${i})">
-            <input type="radio" name="kbt-opt" value="${i}" ${answers[current] === i ? 'checked' : ''}>
-            <span class="kbt-option-text">${escH(opt)}</span>
-          </label>
-        `).join('')}
-      </div>
+      ${multi ? '<p class="kbt-multi-hint">Выберите все верные варианты</p>' : ''}
+      <div class="kbt-options">${optionsHtml}</div>
     </div>
     <div class="kbt-nav">
       <button class="kbt-btn kbt-btn--prev" onclick="prevQuestion()" ${current === 0 ? 'disabled' : ''}>← Назад</button>
       ${current < total - 1
-        ? `<button class="kbt-btn kbt-btn--next" onclick="nextQuestion()" ${answers[current] === undefined ? 'disabled' : ''}>Далее →</button>`
-        : `<button class="kbt-btn kbt-btn--finish" id="kbt-finish-btn" onclick="submitTest()" ${answers[current] === undefined ? 'disabled' : ''}>Завершить</button>`
+        ? `<button class="kbt-btn kbt-btn--next" onclick="nextQuestion()" ${!hasAnswer ? 'disabled' : ''}>Далее →</button>`
+        : `<button class="kbt-btn kbt-btn--finish" id="kbt-finish-btn" onclick="submitTest()" ${!hasAnswer ? 'disabled' : ''}>Завершить</button>`
       }
     </div>
   `;
@@ -320,8 +334,26 @@ function selectAnswer(qIdx, optIdx) {
   if (btn) btn.disabled = false;
 }
 
+function toggleAnswer(qIdx, optIdx) {
+  let cur = testState.answers[qIdx];
+  if (!Array.isArray(cur)) cur = [];
+  const idx = cur.indexOf(optIdx);
+  if (idx === -1) cur.push(optIdx);
+  else cur.splice(idx, 1);
+  testState.answers[qIdx] = cur;
+
+  document.querySelectorAll('.kbt-options .kbt-option').forEach((el, i) => {
+    el.classList.toggle('selected', cur.includes(i));
+  });
+  const btn = document.getElementById('kbt-finish-btn') || document.querySelector('.kbt-btn--next');
+  if (btn) btn.disabled = cur.length === 0;
+}
+
 function nextQuestion() {
-  if (testState.answers[testState.current] === undefined) return;
+  const cur = testState.answers[testState.current];
+  const q   = (testState.test.questions || [])[testState.current];
+  const ok  = q.multi ? (Array.isArray(cur) && cur.length > 0) : cur !== undefined;
+  if (!ok) return;
   testState.current++;
   renderTestModal();
 }

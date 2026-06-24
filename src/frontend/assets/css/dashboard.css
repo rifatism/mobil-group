@@ -359,6 +359,16 @@ html, body { height: 100%; overflow: hidden; font-family: 'Inter', system-ui, sa
 .topbar-btn svg { width: 15px; height: 15px; }
 .topbar-btn.spinning svg { animation: spin .7s linear infinite; }
 
+.topbar-btn--back {
+  text-decoration: none;
+  gap: 5px;
+  padding: 6px 12px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+}
+.topbar-back-label { white-space: nowrap; }
+
 /* Notification bell in dashboard topbar */
 .topbar-notif-wrap { position: relative; display: flex; align-items: center; }
 .topbar-notif-wrap .notif-btn {

@@ -69,10 +69,13 @@ if ($method === 'GET' && $testId && $action !== 'assign') {
     $t = $stmt->fetch();
     if (!$t) { http_response_code(404); echo json_encode(['success'=>false,'message'=>'Тест не найден'],JSON_UNESCAPED_UNICODE); exit; }
 
-    // Убрать правильные ответы для сотрудника
+    // Убрать правильные ответы для сотрудника, но сохранить флаг multi
     $qs = json_decode($t['questions'], true) ?? [];
     if ($role === 'employee') {
-        foreach ($qs as &$q) { unset($q['ans']); }
+        foreach ($qs as &$q) {
+            $q['multi'] = isset($q['ans']) && is_array($q['ans']);
+            unset($q['ans']);
+        }
     }
     $t['questions'] = $qs;
     echo json_encode(['success' => true, 'test' => $t], JSON_UNESCAPED_UNICODE);

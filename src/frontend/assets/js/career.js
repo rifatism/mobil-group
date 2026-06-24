@@ -1,4 +1,4 @@
-const CR_API = 'https://mobil-service.site/backend';
+const CR_API = 'http://localhost:8000';
 
 // Навбар всегда белый на этой странице
 (function () {

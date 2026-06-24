@@ -1,0 +1,17 @@
+# Environment
+.env
+*.env
+
+# Vendor
+vendor/
+
+# Uploads
+uploads/
+*.zip
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log

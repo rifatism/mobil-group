@@ -1,5 +1,5 @@
 // ─── Config ───────────────────────────────────────────────────────────────────
-const API = 'http://localhost:8000';
+const API = 'https://mobil-service.site/backend';
 const AG  = API + '/api/autograf';
 const REFRESH_MS = 60_000;
 

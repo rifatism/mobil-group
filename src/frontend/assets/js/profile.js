@@ -67,7 +67,7 @@ async function loadProfile() {
 }
 
 function fillForm(u) {
-  // Hero
+  // Шапка профиля
   const ini  = initials(u.full_name || u.first_name || u.username);
   const name = u.full_name || u.username;
   setText('hero-avatar', ini);
@@ -75,7 +75,7 @@ function fillForm(u) {
   setText('hero-role',   ROLE_LABELS[u.role] || u.role);
   setText('hero-email',  u.email || '');
 
-  // Fields
+  // Поля формы
   val('f-last',    u.last_name   || '');
   val('f-first',   u.first_name  || '');
   val('f-patr',    u.patronymic  || '');

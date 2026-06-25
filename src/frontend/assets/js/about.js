@@ -57,10 +57,10 @@ function animateRing(el) {
 const statObs = new IntersectionObserver(entries => {
   entries.forEach(e => {
     if (!e.isIntersecting) return;
-    // counter
+    // счётчик
     const counter = e.target.querySelector('.ab-counter');
     if (counter) animateCounter(counter);
-    // ring
+    // кольцо
     const ring = e.target.querySelector('.ab-ring-fill');
     if (ring) animateRing(ring);
     statObs.unobserve(e.target);
@@ -84,11 +84,11 @@ document.querySelectorAll('.ab-stat-item').forEach(el => statObs.observe(el));
     offset += dash;
   });
 
-  // Animate on enter
+  // Анимация при появлении в области видимости
   const donutObs = new IntersectionObserver(entries => {
     entries.forEach(e => {
       if (!e.isIntersecting) return;
-      // Reveal segments one by one
+      // Показываем сегменты поочерёдно
       segs.forEach((seg, i) => {
         seg.style.opacity = '0';
         seg.style.transition = `opacity 0.5s ease ${i * 0.15}s`;

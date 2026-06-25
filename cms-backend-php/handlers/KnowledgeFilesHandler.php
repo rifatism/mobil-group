@@ -19,10 +19,10 @@ $subId  = (int)($GLOBALS['knowledge_file_id'] ?? 0);
 $action = $GLOBALS['knowledge_action'] ?? '';
 $base   = '/var/www/html/uploads/knowledge/';
 
-// ─── Helper: sanitize & resolve path ──────────────────────────────────────────
+// ─── Вспомогательная функция: очистка и разрешение пути ──────────────────────────────────────────
 function kb_resolve(string $raw, string $base): ?string {
     $raw = trim($raw, '/');
-    // Remove only traversal and null bytes
+    // Удаляем только переходы по директориям и нулевые байты
     $raw = preg_replace('#\.\.+#', '', $raw);
     $raw = preg_replace('#[\x00-\x1F\\\\]#', '', $raw);
     $raw = preg_replace('#/+#', '/', trim($raw, '/'));
@@ -34,7 +34,7 @@ function kb_resolve(string $raw, string $base): ?string {
     $real     = realpath($full);
 
     if (!$realBase) return null;
-    if ($raw !== '' && !$real) return null; // doesn't exist
+    if ($raw !== '' && !$real) return null; // не существует
     if ($real && strpos($real . '/', $realBase . '/') !== 0) return null;
 
     return $raw;
@@ -97,11 +97,11 @@ if ($method === 'DELETE' && $action === 'folder_delete') {
         exit;
     }
 
-    // Delete all DB records under this folder path (exact or nested)
+    // Удаляем все записи БД по данному пути папки (точное совпадение или вложенные)
     $like = $db->quote($folderPath . '%');
     $db->exec("DELETE FROM knowledge_files WHERE folder_path = " . $db->quote($folderPath) . " OR folder_path LIKE " . $db->quote($folderPath . '/%'));
 
-    // Recursively delete the directory
+    // Рекурсивное удаление директории
     function kb_rmdir(string $dir): void {
         if (!is_dir($dir)) return;
         foreach (scandir($dir) as $item) {
@@ -117,13 +117,13 @@ if ($method === 'DELETE' && $action === 'folder_delete') {
     exit;
 }
 
-// ─── GET /api/knowledge/files — list directory ─────────────────────────────────
+// ─── GET /api/knowledge/files — список директории ─────────────────────────────────
 if ($method === 'GET' && !$subId) {
     $rawPath = trim($_GET['path'] ?? '');
     $curPath = kb_resolve($rawPath, $base) ?? '';
     $targetDir = kb_dir($base, $curPath);
 
-    // Subfolders
+    // Подпапки
     $folders = [];
     if (is_dir($targetDir)) {
         foreach (scandir($targetDir) as $item) {
@@ -144,13 +144,13 @@ if ($method === 'GET' && !$subId) {
         }
     }
 
-    // DB files for this folder
+    // Файлы из БД для данной папки
     $stmt = $db->prepare("SELECT kf.*, u.full_name AS uploader FROM knowledge_files kf LEFT JOIN users u ON u.id = kf.uploaded_by WHERE kf.folder_path = ? ORDER BY kf.created_at DESC");
     $stmt->execute([$curPath]);
     $dbFiles  = $stmt->fetchAll();
     $dbNames  = array_column($dbFiles, 'filename');
 
-    // Filesystem files not in DB
+    // Файлы на диске, отсутствующие в БД
     $extra = [];
     if (is_dir($targetDir)) {
         foreach (scandir($targetDir) as $fname) {
@@ -184,7 +184,7 @@ if ($method === 'GET' && !$subId) {
     exit;
 }
 
-// ─── POST /api/knowledge/files — upload ───────────────────────────────────────
+// ─── POST /api/knowledge/files — загрузка файла ───────────────────────────────────────
 if ($method === 'POST' && !$action) {
     if ($role !== 'admin') { http_response_code(403); echo json_encode(['success'=>false,'message'=>'Только администратор'],JSON_UNESCAPED_UNICODE); exit; }
 
@@ -235,7 +235,7 @@ if ($method === 'POST' && !$action) {
     exit;
 }
 
-// ─── DELETE /api/knowledge/files/{id} — delete file ───────────────────────────
+// ─── DELETE /api/knowledge/files/{id} — удалить файл ───────────────────────────
 if ($method === 'DELETE' && $subId) {
     if ($role !== 'admin') { http_response_code(403); echo json_encode(['success'=>false,'message'=>'Только администратор'],JSON_UNESCAPED_UNICODE); exit; }
 
@@ -252,7 +252,7 @@ if ($method === 'DELETE' && $subId) {
     exit;
 }
 
-// ─── DELETE without id — delete folder-only file ──────────────────────────────
+// ─── DELETE без id — удалить файл только из папки ──────────────────────────────
 if ($method === 'DELETE' && !$subId && $action !== 'folder_delete') {
     if ($role !== 'admin') { http_response_code(403); echo json_encode(['success'=>false,'message'=>'Только администратор'],JSON_UNESCAPED_UNICODE); exit; }
     $data = json_decode(file_get_contents('php://input'), true) ?? [];

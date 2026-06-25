@@ -518,7 +518,7 @@ const _origReset = typeof resetNavbar  === 'function' ? resetNavbar  : null;
   window._origResetNavbar  = origReset;
   applySession = function(u) { origApply(u); updateMobNav(u); };
   resetNavbar  = function()  { origReset();  updateMobNav(null); };
-  // Sync current session
+  // Синхронизация текущей сессии
   const u = getSession();
   updateMobNav(u || null);
 })();

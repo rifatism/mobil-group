@@ -4,13 +4,13 @@ require_once __DIR__ . '/config/config.php';
 $uri    = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $method = $_SERVER['REQUEST_METHOD'];
 
-// Health check
+// Проверка работоспособности
 if ($uri === '/api/health') {
     echo json_encode(['status' => 'ok', 'time' => date('Y-m-d H:i:s')]);
     exit;
 }
 
-// Login
+// Авторизация
 if ($uri === '/api/login' && $method === 'POST') {
     require_once __DIR__ . '/handlers/LoginHandler.php';
     exit;
@@ -35,44 +35,44 @@ if (preg_match('#^/api/users/(\d+)$#', $uri, $m)) {
     exit;
 }
 
-// News — list / create
+// Новости — список / создание
 if ($uri === '/api/news') {
     require_once __DIR__ . '/handlers/NewsHandler.php';
     exit;
 }
 
-// News — single / update / delete
+// Новости — одна запись / редактирование / удаление
 if (preg_match('#^/api/news/(\d+)$#', $uri, $m)) {
     $GLOBALS['news_id'] = (int)$m[1];
     require_once __DIR__ . '/handlers/NewsHandler.php';
     exit;
 }
 
-// Upload image
+// Загрузка изображения
 if ($uri === '/api/upload' && $method === 'POST') {
     require_once __DIR__ . '/handlers/UploadHandler.php';
     exit;
 }
 
-// Contact form
+// Форма обратной связи
 if ($uri === '/api/contact' && $method === 'POST') {
     require_once __DIR__ . '/handlers/ContactHandler.php';
     exit;
 }
 
-// Career contact (job application)
+// Карьерный запрос (заявка на вакансию)
 if ($uri === '/api/career-contact' && $method === 'POST') {
     require_once __DIR__ . '/handlers/CareerContactHandler.php';
     exit;
 }
 
-// Vacancies — list / create
+// Вакансии — список / создание
 if ($uri === '/api/vacancies') {
     require_once __DIR__ . '/handlers/VacanciesHandler.php';
     exit;
 }
 
-// Vacancies — single / update / delete
+// Вакансии — одна запись / редактирование / удаление
 if (preg_match('#^/api/vacancies/(\d+)$#', $uri, $m)) {
     $GLOBALS['vacancy_id'] = (int)$m[1];
     require_once __DIR__ . '/handlers/VacanciesHandler.php';
@@ -101,14 +101,14 @@ if (preg_match('#^/api/notifications/(\d+)$#', $uri, $m)) {
 }
 
 // ─── Knowledge Base ───────────────────────────────────────────────────────
-// Folders: create / delete
+// Папки: создание / удаление
 if ($uri === '/api/knowledge/folders') {
     $GLOBALS['knowledge_action'] = $method === 'POST' ? 'folder_create' : 'folder_delete';
     require_once __DIR__ . '/handlers/KnowledgeFilesHandler.php';
     exit;
 }
 
-// Files: /api/knowledge/files, /api/knowledge/files/{id}, /api/knowledge/files/{id}/download
+// Файлы: /api/knowledge/files, /api/knowledge/files/{id}, /api/knowledge/files/{id}/download
 if ($uri === '/api/knowledge/files') {
     require_once __DIR__ . '/handlers/KnowledgeFilesHandler.php';
     exit;
@@ -125,31 +125,31 @@ if (preg_match('#^/api/knowledge/files/(\d+)$#', $uri, $m)) {
     exit;
 }
 
-// Tests: list/create
+// Тесты: список / создание
 if ($uri === '/api/knowledge/tests') {
     require_once __DIR__ . '/handlers/KnowledgeTestsHandler.php';
     exit;
 }
-// Tests: submit answer
+// Тесты: отправить ответы
 if ($uri === '/api/knowledge/submit') {
     $GLOBALS['knowledge_action'] = 'submit';
     require_once __DIR__ . '/handlers/KnowledgeTestsHandler.php';
     exit;
 }
-// Tests: results
+// Тесты: результаты
 if ($uri === '/api/knowledge/results') {
     $GLOBALS['knowledge_action'] = 'results';
     require_once __DIR__ . '/handlers/KnowledgeTestsHandler.php';
     exit;
 }
-// Tests: assign /api/knowledge/tests/{id}/assign
+// Тесты: назначить /api/knowledge/tests/{id}/assign
 if (preg_match('#^/api/knowledge/tests/(\d+)/assign$#', $uri, $m)) {
     $GLOBALS['knowledge_test_id'] = (int)$m[1];
     $GLOBALS['knowledge_action']  = 'assign';
     require_once __DIR__ . '/handlers/KnowledgeTestsHandler.php';
     exit;
 }
-// Tests: remove single assignment /api/knowledge/tests/{id}/assign/{assignmentId}
+// Тесты: снять одно назначение /api/knowledge/tests/{id}/assign/{assignmentId}
 if (preg_match('#^/api/knowledge/tests/(\d+)/assign/(\d+)$#', $uri, $m)) {
     $GLOBALS['knowledge_test_id']    = (int)$m[1];
     $GLOBALS['knowledge_action']     = 'assign';
@@ -157,7 +157,7 @@ if (preg_match('#^/api/knowledge/tests/(\d+)/assign/(\d+)$#', $uri, $m)) {
     require_once __DIR__ . '/handlers/KnowledgeTestsHandler.php';
     exit;
 }
-// Tests: single / update / delete
+// Тесты: одна запись / редактирование / удаление
 if (preg_match('#^/api/knowledge/tests/(\d+)$#', $uri, $m)) {
     $GLOBALS['knowledge_test_id'] = (int)$m[1];
     require_once __DIR__ . '/handlers/KnowledgeTestsHandler.php';
@@ -165,12 +165,12 @@ if (preg_match('#^/api/knowledge/tests/(\d+)$#', $uri, $m)) {
 }
 // ─── End Knowledge Base ───────────────────────────────────────────────────
 
-// AutoGRAF proxy — /api/autograf/*
+// Прокси AutoGRAF — /api/autograf/*
 if (str_starts_with($uri, '/api/autograf/')) {
     require_once __DIR__ . '/handlers/AutografHandler.php';
     exit;
 }
 
-// 404
+// 404 — не найдено
 http_response_code(404);
 echo json_encode(['success' => false, 'message' => 'Эндпоинт не найден'], JSON_UNESCAPED_UNICODE);

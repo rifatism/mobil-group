@@ -76,7 +76,7 @@ function renderRows(list) {
         </article>`;
     }).join('');
 
-    // Scroll reveal
+    // Плавное появление при прокрутке
     const obs = new IntersectionObserver(entries => {
         entries.forEach(e => {
             if (e.isIntersecting) { e.target.classList.add('in-view'); obs.unobserve(e.target); }

@@ -1,16 +1,16 @@
-// ─── Config ───────────────────────────────────────────────────────────────────
+// ─── Конфигурация ─────────────────────────────────────────────────────────────
 const API = 'http://localhost:8000';
 const AG  = API + '/api/autograf';
 const REFRESH_MS = 60_000;
 
-// ─── State ────────────────────────────────────────────────────────────────────
+// ─── Состояние ────────────────────────────────────────────────────────────────
 let state = {
   schemaId:      '',
   schemaName:    '',
   groups:        [],   // [{ID, ParentID, Name}]
   vehicles:      [],   // [{ID, ParentID, Name, _regNum, TripSplitters}]
-  positions:     {},   // {deviceId -> parsed position}
-  selectedId:    null, // selected vehicle ID
+  positions:     {},   // {deviceId -> распознанная позиция}
+  selectedId:    null, // ID выбранного ТС
   selectedName:  '',
   splitters:     [],   // [{ID, Name}]
   splitterIdx:   0,
@@ -26,7 +26,7 @@ let state = {
   markerEnd:     null,
 };
 
-// ─── Auth helpers ─────────────────────────────────────────────────────────────
+// ─── Вспомогательные функции авторизации ──────────────────────────────────────
 function getToken() { return localStorage.getItem('cms_token'); }
 function getUser()  { const u = localStorage.getItem('cms_user'); try { return JSON.parse(u); } catch { return null; } }
 
@@ -46,7 +46,7 @@ function logout() {
   location.href = 'index.html';
 }
 
-// ─── Date helpers ─────────────────────────────────────────────────────────────
+// ─── Вспомогательные функции для дат ──────────────────────────────────────────
 function todayStr() {
   return new Date().toISOString().slice(0, 10);
 }
@@ -74,7 +74,7 @@ function fmtNum(v, dec = 1) {
   return Number(v).toFixed(dec);
 }
 
-// ─── Period setup (defaults to today, full day) ───────────────────────────────
+// ─── Настройка периода (по умолчанию сегодня, весь день) ──────────────────────
 function applyShift() {
   const today = todayStr();
   state.dateFrom = toISOLocal(today, '00:00:00');
@@ -82,10 +82,10 @@ function applyShift() {
 }
 
 function readDates() {
-  // Dates are fixed to today (no UI picker)
+  // Даты фиксированы на сегодня (без UI-выбора периода)
 }
 
-// ─── Map init ─────────────────────────────────────────────────────────────────
+// ─── Инициализация карты ──────────────────────────────────────────────────────
 function initMap() {
   const container = document.getElementById('db-map');
   state.map = L.map(container, { zoomControl: false }).setView([62, 70], 5);
@@ -112,12 +112,12 @@ function makePin(status) {
 
 function vehicleStatus(pos) {
   if (!pos) return 'offline';
-  // Use raw state field: 0=engine off (but may be parked/transmitting), 1=engine on
-  // Determine online/offline purely by age of last GPS fix (7 days = definitively no signal)
+  // Используем поле state: 0=двигатель выключен (но может быть на стоянке/передавать данные), 1=двигатель включён
+  // Онлайн/офлайн определяется исключительно по возрасту последней GPS-метки (7 дней = точно нет сигнала)
   const age = pos.time ? (Date.now() - new Date(pos.time).getTime()) / 1000 : 99999;
-  if (age > 604800) return 'offline'; // > 7 days → definitely offline
+  if (age > 604800) return 'offline'; // > 7 суток → точно офлайн
   if (pos.speed > 1) return 'moving';
-  return 'parked'; // engine off OR on but stationary — both show as parked
+  return 'parked'; // двигатель выключен или включён, но без движения — оба случая показываются как стоянка
 }
 
 function parsePositions(raw) {
@@ -142,7 +142,7 @@ function parsePositions(raw) {
   };
   if (Array.isArray(raw)) {
     raw.forEach(p => {
-      if (!p || typeof p !== 'object') return; // skip null / non-object entries
+      if (!p || typeof p !== 'object') return; // пропустить null и не-объектные записи
       const id = String(p.ID ?? p.Id ?? p.DeviceId ?? '');
       if (id) result[id] = parseOne(p);
     });
@@ -162,7 +162,7 @@ function clearAllMarkers() {
 function placeMarkers() {
   const map = state.map;
   if (!map) return;
-  map.invalidateSize(); // ensure correct dimensions after flex layout
+  map.invalidateSize(); // обновить размеры после flex-раскладки
   const bounds = [];
 
   state.vehicles.forEach(v => {
@@ -203,7 +203,7 @@ function buildPopup(v, pos, st) {
           <div class="lp-row">${stLabel}</div>${speed}${addr}${time}${fuel}${odo}`;
 }
 
-// ─── Vehicle Tree ─────────────────────────────────────────────────────────────
+// ─── Дерево транспортных средств ──────────────────────────────────────────────
 function buildTree() {
   const tree = document.getElementById('sb-tree');
   tree.innerHTML = '';
@@ -213,22 +213,22 @@ function buildTree() {
     return;
   }
 
-  // Build group hierarchy
+  // Построение иерархии групп
   const groupMap = {};
   state.groups.forEach(g => { groupMap[g.ID] = { ...g, children: [], vehicles: [] }; });
 
-  // Attach vehicles to their parent group
+  // Привязка ТС к родительской группе
   state.vehicles.forEach(v => {
     const pid = v.ParentID;
     if (pid && groupMap[pid]) groupMap[pid].vehicles.push(v);
     else if (!pid) {
-      // top-level vehicle without group — append to orphan bucket
+      // ТС верхнего уровня без группы — добавляем в корзину «без группы»
       if (!groupMap['__orphan__']) groupMap['__orphan__'] = { ID: '__orphan__', Name: '', children: [], vehicles: [] };
       groupMap['__orphan__'].vehicles.push(v);
     }
   });
 
-  // Build group tree (parent-child links)
+  // Построение дерева групп (связи родитель-потомок)
   const roots = [];
   state.groups.forEach(g => {
     const pid = g.ParentID;
@@ -236,7 +236,7 @@ function buildTree() {
     else roots.push(groupMap[g.ID]);
   });
 
-  // If no groups, just list vehicles flat
+  // Если групп нет — просто выводим список ТС
   if (!roots.length) {
     renderVehicleList(tree, state.vehicles);
     return;
@@ -244,7 +244,7 @@ function buildTree() {
 
   roots.forEach(g => renderGroup(tree, g, 0));
 
-  // Orphaned vehicles (no group)
+  // ТС без группы
   if (groupMap['__orphan__']) {
     renderVehicleList(tree, groupMap['__orphan__'].vehicles);
   }
@@ -273,9 +273,9 @@ function renderGroup(parent, group, depth) {
   const children = document.createElement('div');
   children.className = 'tree-group-children';
 
-  // Render sub-groups first
+  // Сначала отрисовываем подгруппы
   group.children.forEach(child => renderGroup(children, child, depth + 1));
-  // Then vehicles
+  // Затем ТС
   group.vehicles.forEach(v => renderVehicleItem(children, v, depth + 1));
 
   el.append(head, children);
@@ -314,13 +314,13 @@ function updateTreeStatuses() {
     if (st === 'moving' && pos?.speed > 0) {
       spd.textContent = fmtNum(pos.speed, 0) + ' км/ч';
     } else if (st === 'parked') {
-      spd.textContent = ''; // parked — no speed shown
+      spd.textContent = ''; // стоянка — скорость не показываем
     } else {
-      spd.textContent = ''; // offline
+      spd.textContent = ''; // нет связи
     }
   });
 
-  // Stats
+  // Статистика
   let moving = 0, parked = 0, offline = 0;
   state.vehicles.forEach(v => {
     const s = vehicleStatus(state.positions[v.ID]);
@@ -334,7 +334,7 @@ function updateTreeStatuses() {
   document.getElementById('stat-total').textContent   = state.vehicles.length;
 }
 
-// ─── Vehicle selection ────────────────────────────────────────────────────────
+// ─── Выбор транспортного средства ─────────────────────────────────────────────
 function selectVehicle(v, el) {
   if (state.selectedId === v.ID) return;
   state.selectedId   = v.ID;
@@ -348,7 +348,7 @@ function selectVehicle(v, el) {
   clearTrack();
   loadTrips();
 
-  // Pan to vehicle marker if it has valid coordinates
+  // Переместить карту к маркеру ТС, если есть валидные координаты
   const pos = state.positions[v.ID];
   const lat = pos ? Number(pos.lat) : null;
   const lon = pos ? Number(pos.lon) : null;
@@ -365,7 +365,7 @@ function selectVehicleById(id) {
   if (el) selectVehicle(v, el);
 }
 
-// ─── Schema loading ───────────────────────────────────────────────────────────
+// ─── Загрузка схем ────────────────────────────────────────────────────────────
 async function loadSchemas() {
   const data = await apiFetch(`${AG}/schemas`);
   if (!data?.success) return;
@@ -379,7 +379,7 @@ async function loadSchemas() {
     sel.appendChild(opt);
   });
 
-  // Register listener BEFORE initial loadVehicles so it's always active
+  // Регистрируем обработчик ДО первого вызова loadVehicles, чтобы он всегда был активен
   sel.addEventListener('change', () => {
     state.schemaId   = sel.value;
     state.schemaName = sel.options[sel.selectedIndex]?.text || '';
@@ -388,7 +388,7 @@ async function loadSchemas() {
     state.selectedName = '';
     state.trips        = [];
     resetTripsUI();
-    loadVehicles(); // fire-and-forget — no await needed here
+    loadVehicles(); // запуск без ожидания — await здесь не нужен
   });
 
   if (data.schemas?.length) {
@@ -399,7 +399,7 @@ async function loadSchemas() {
   }
 }
 
-// ─── Vehicles + tree ─────────────────────────────────────────────────────────
+// ─── Транспортные средства + дерево ───────────────────────────────────────────
 async function loadVehicles() {
   clearAllMarkers();
   clearTrack();
@@ -443,7 +443,7 @@ async function loadVehicles() {
 }
 
 
-// ─── Positions ────────────────────────────────────────────────────────────────
+// ─── Позиции ──────────────────────────────────────────────────────────────────
 async function loadPositions() {
   let data;
   try {
@@ -465,7 +465,7 @@ async function loadPositions() {
   updateTreeStatuses();
 }
 
-// ─── Vehicle info strip (fuel / location / odometer) ─────────────────────────
+// ─── Инфополоса ТС (топливо / местоположение / одометр) ──────────────────────
 function renderVehicleInfo() {
   const el = document.getElementById('trips-vehicle-info');
   const pos = state.selectedId ? state.positions[state.selectedId] : null;
@@ -493,7 +493,7 @@ function renderVehicleInfo() {
   el.hidden = false;
 }
 
-// ─── Trips ────────────────────────────────────────────────────────────────────
+// ─── Рейсы ────────────────────────────────────────────────────────────────────
 async function loadTrips() {
   if (!state.selectedId || !state.schemaId) return;
 
@@ -540,7 +540,7 @@ function renderTripsTable() {
   let totDist = 0, totMaxSpd = 0, totAvgSpd = 0;
 
   state.trips.forEach((trip, idx) => {
-    // Flexible field extraction to handle different AutoGRAF response variants
+    // Гибкое извлечение полей для поддержки разных вариантов ответа AutoGRAF
     const bt     = trip.BT ?? trip.BeginTime ?? trip.beginTime ?? trip.SD ?? '';
     const et     = trip.ET ?? trip.EndTime   ?? trip.endTime   ?? trip.ED ?? '';
     const dist   = trip.M  ?? trip.Mileage   ?? trip.mileage   ?? trip.Distance ?? null;
@@ -549,7 +549,7 @@ function renderTripsTable() {
     const addrS  = trip.SA ?? trip.StartAddress ?? trip.startAddress ?? trip.AddressFrom ?? '';
     const addrE  = trip.EA ?? trip.EndAddress   ?? trip.endAddress   ?? trip.AddressTo   ?? '';
 
-    // Fuel: check direct AutoGRAF fields first (F1/F2/Fc), then Sensors array
+    // Топливо: сначала проверяем прямые поля AutoGRAF (F1/F2/Fc), затем массив Sensors
     const sensors   = trip.Sensors ?? trip.sensors ?? [];
     const fuelStart = trip.F1 != null ? fmtNum(trip.F1) : extractSensor(sensors, ['Уровень нач', 'FuelStart', 'ДУТ нач', 'Fuel', 'Level']);
     const fuelEnd   = trip.F2 != null ? fmtNum(trip.F2) : extractSensor(sensors, ['Уровень кон', 'FuelEnd',   'ДУТ кон']);
@@ -577,7 +577,7 @@ function renderTripsTable() {
     tbody.appendChild(tr);
   });
 
-  // Footer totals
+  // Итоги в подвале таблицы
   const cnt = state.trips.length;
   tfoot.innerHTML = `<tr>
     <td class="col-num" colspan="3">Итого рейсов: ${cnt}</td>
@@ -600,7 +600,7 @@ function extractSensor(sensors, keys) {
   return null;
 }
 
-// ─── Trip selection → load track ─────────────────────────────────────────────
+// ─── Выбор рейса → загрузка трека ─────────────────────────────────────────────
 async function selectTrip(idx, rowEl, trip) {
   state.selectedTrip = idx;
   document.querySelectorAll('#trips-tbody tr').forEach(r => r.classList.remove('selected'));
@@ -612,7 +612,7 @@ async function selectTrip(idx, rowEl, trip) {
   const et = trip.ET ?? trip.EndTime   ?? trip.endTime   ?? trip.ED ?? '';
   if (!bt || !et) return;
 
-  // Show loading
+  // Показать индикатор загрузки
   document.getElementById('map-loading').hidden = false;
 
   const params = new URLSearchParams({
@@ -647,16 +647,16 @@ function drawTrack(points, bt, et) {
 
   if (!latLngs.length) return;
 
-  // Draw polyline
+  // Рисуем линию маршрута
   state.trackLayer = L.polyline(latLngs, { color: '#1976d2', weight: 4, opacity: .85, lineJoin: 'round' }).addTo(map);
 
-  // Start marker (green)
+  // Маркер начала (зелёный)
   const startIcon = L.divIcon({
     className: '',
     html: '<div style="width:14px;height:14px;border-radius:50%;background:#22c55e;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4)"></div>',
     iconSize: [14, 14], iconAnchor: [7, 7],
   });
-  // End marker (red)
+  // Маркер конца (красный)
   const endIcon = L.divIcon({
     className: '',
     html: '<div style="width:14px;height:14px;border-radius:50%;background:#ef4444;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4)"></div>',
@@ -688,7 +688,7 @@ function showMapInfo(text) {
   bar.hidden = false;
 }
 
-// ─── Drag handle (resize trips ↕ map) ────────────────────────────────────────
+// ─── Разделитель (изменение высоты рейсов ↕ карты) ───────────────────────────
 function initDragHandle() {
   const handle    = document.getElementById('drag-handle');
   const container = document.getElementById('split-container');
@@ -718,7 +718,7 @@ function initDragHandle() {
   });
 }
 
-// ─── Sidebar collapse ─────────────────────────────────────────────────────────
+// ─── Сворачивание боковой панели ──────────────────────────────────────────────
 function initSidebar() {
   document.getElementById('sb-collapse').addEventListener('click', () => {
     document.getElementById('sidebar').classList.add('collapsed');
@@ -733,7 +733,7 @@ function initSidebar() {
   });
 }
 
-// ─── Search filter ────────────────────────────────────────────────────────────
+// ─── Фильтр поиска ────────────────────────────────────────────────────────────
 function initSearch() {
   document.getElementById('sb-search').addEventListener('input', e => {
     const q = e.target.value.toLowerCase().trim();
@@ -749,7 +749,7 @@ function initSearch() {
 }
 
 
-// ─── Refresh ──────────────────────────────────────────────────────────────────
+// ─── Обновление данных ────────────────────────────────────────────────────────
 async function refreshAll() {
   if (!state.schemaId) return;
   const btn = document.getElementById('refresh-btn');
@@ -763,7 +763,7 @@ function initRefresh() {
   state.refreshTimer = setInterval(refreshAll, REFRESH_MS);
 }
 
-// ─── Map clear button ─────────────────────────────────────────────────────────
+// ─── Кнопка очистки карты ─────────────────────────────────────────────────────
 function initMapClear() {
   document.getElementById('map-clear-btn').addEventListener('click', () => {
     clearTrack();
@@ -772,7 +772,7 @@ function initMapClear() {
   });
 }
 
-// ─── Export ───────────────────────────────────────────────────────────────────
+// ─── Экспорт ──────────────────────────────────────────────────────────────────
 function resetTripsUI() {
   document.getElementById('trips-vehicle-info').hidden = true;
   document.getElementById('trips-title').textContent = 'Рейсы';
@@ -849,7 +849,7 @@ function downloadBlob(blob, filename) {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-// ─── User menu ────────────────────────────────────────────────────────────────
+// ─── Меню пользователя ────────────────────────────────────────────────────────
 function toggleUserMenu() {
   document.getElementById('user-dropdown').classList.toggle('open');
 }
@@ -859,11 +859,11 @@ document.addEventListener('click', e => {
   }
 });
 
-// ─── Boot ────────────────────────────────────────────────────────────────────
+// ─── Запуск ───────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   if (!getToken()) { logout(); return; }
 
-  // Fill user avatar
+  // Заполнение аватара пользователя
   const user = getUser();
   if (user) {
     const displayName = user.full_name || user.username || user.email || '?';
@@ -871,18 +871,18 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('topbar-username').textContent = displayName;
   }
 
-  // Set today as default period
-  applyShift(); // sets dateFrom/dateTo to today
+  // Установить сегодня как период по умолчанию
+  applyShift(); // устанавливает dateFrom/dateTo на сегодня
 
-  // Init UI controls synchronously
+  // Синхронная инициализация элементов управления
   initDragHandle();
   initSidebar();
   initSearch();
   initMapClear();
   initExport();
 
-  // Defer map init + data loading until AFTER browser has performed layout.
-  // Double requestAnimationFrame guarantees styles are computed and elements sized.
+  // Откладываем инициализацию карты и загрузку данных до завершения браузерной раскладки.
+  // Двойной requestAnimationFrame гарантирует, что стили вычислены и элементы получили размеры.
   requestAnimationFrame(() => {
     requestAnimationFrame(async () => {
       initMap();

@@ -8,7 +8,7 @@ $method = $_SERVER['REQUEST_METHOD'];
 $uri    = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $sub    = preg_replace('#^/api/autograf#', '', $uri);
 
-// ─── AutoGRAF session cache ───────────────────────────────────────────────────
+// ─── Кэш сессии AutoGRAF ───────────────────────────────────────────────────
 
 function ag_base(): string  { return $_ENV['AG_BASE_URL'] ?? 'https://ag.r72.ru/ServiceJSON'; }
 function ag_user(): string  { return $_ENV['AG_USERNAME']  ?? 'testapi'; }
@@ -41,12 +41,12 @@ function ag_session_refresh(): string {
     return ag_session_new();
 }
 
-// Run AutoGRAF request; on empty/error response retry once with a fresh session.
+// Выполнить запрос к AutoGRAF; при пустом/ошибочном ответе повторить один раз с новой сессией.
 function ag_req_retry(string $url, ?array $post_body = null): array {
     $raw  = $post_body !== null ? ag_post($url, $post_body) : ag_get($url);
     $data = json_decode($raw, true);
     if (!empty($data) && is_array($data)) return $data;
-    // Session may have expired — refresh and retry
+    // Сессия могла истечь — обновляем и повторяем
     $newSid = ag_session_refresh();
     $url2 = preg_replace('/session=[^&]+/', 'session=' . rawurlencode($newSid), $url);
     $raw2 = $post_body !== null ? ag_post($url2, $post_body) : ag_get($url2);
@@ -94,9 +94,9 @@ function json_out(array $data): void {
     echo json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 }
 
-// ─── Routes ──────────────────────────────────────────────────────────────────
+// ─── Маршруты ──────────────────────────────────────────────────────────────────
 
-// GET /api/autograf/schemas
+// GET /api/autograf/schemas — схемы
 if ($sub === '/schemas' && $method === 'GET') {
     $sid  = ag_session();
     $url  = ag_base() . '/EnumSchemas?session=' . rawurlencode($sid);
@@ -106,7 +106,7 @@ if ($sub === '/schemas' && $method === 'GET') {
 }
 
 // GET /api/autograf/vehicles?schemaId=X
-// Returns devices with Groups hierarchy
+// Возвращает устройства с иерархией групп
 if ($sub === '/vehicles' && $method === 'GET') {
     $schemaId = $_GET['schemaId'] ?? '';
     if (!$schemaId) { http_response_code(400); json_out(['success' => false, 'message' => 'schemaId required']); exit; }
@@ -115,7 +115,7 @@ if ($sub === '/vehicles' && $method === 'GET') {
     $url  = ag_base() . '/EnumDevices?session=' . rawurlencode($sid) . '&schemaID=' . rawurlencode($schemaId);
     $data = ag_req_retry($url);
 
-    // Extract reg numbers; strip heavy fields to reduce response size
+    // Извлекаем рег. номера; удаляем тяжёлые поля для уменьшения размера ответа
     $items = $data['Items'] ?? [];
     $splitters = [];
     foreach ($items as &$item) {
@@ -126,7 +126,7 @@ if ($sub === '/vehicles' && $method === 'GET') {
                 break;
             }
         }
-        // TripSplitters extracted once to top-level; remove from each item to slim response
+        // TripSplitters выносим на верхний уровень один раз; удаляем из каждого элемента для уменьшения ответа
         if (!empty($item['TripSplitters']) && empty($splitters)) {
             $splitters = $item['TripSplitters'];
         }
@@ -146,7 +146,7 @@ if ($sub === '/vehicles' && $method === 'GET') {
 }
 
 // GET /api/autograf/positions?schemaId=X
-// Uses GetOnlineInfoAll — last known GPS for all devices
+// Использует GetOnlineInfoAll — последнее известное GPS-положение всех устройств
 if ($sub === '/positions' && $method === 'GET') {
     $schemaId = $_GET['schemaId'] ?? '';
     if (!$schemaId) { http_response_code(400); json_out(['success' => false, 'message' => 'schemaId required']); exit; }
@@ -154,7 +154,7 @@ if ($sub === '/positions' && $method === 'GET') {
     ag_get(ag_base() . '/SelectSchema?session=' . rawurlencode($sid) . '&schemaID=' . rawurlencode($schemaId));
     $url  = ag_base() . '/GetOnlineInfoAll?session=' . rawurlencode($sid) . '&schemaID=' . rawurlencode($schemaId);
     $data = ag_req_retry($url);
-    // Normalize: response is array or dict; filter out null entries
+    // Нормализация: ответ может быть массивом или словарём; фильтруем null-элементы
     if (!isset($data[0]) && is_array($data)) {
         $data = array_values($data);
     }
@@ -163,7 +163,7 @@ if ($sub === '/positions' && $method === 'GET') {
     exit;
 }
 
-// GET /api/autograf/trips?schemaId=X&deviceId=Y&from=ISO&to=ISO&splitterIdx=N
+// GET /api/autograf/trips?schemaId=X&deviceId=Y&from=ISO&to=ISO&splitterIdx=N — поездки
 if ($sub === '/trips' && $method === 'GET') {
     $schemaId    = $_GET['schemaId']    ?? '';
     $deviceId    = $_GET['deviceId']    ?? '';
@@ -192,7 +192,7 @@ if ($sub === '/trips' && $method === 'GET') {
     exit;
 }
 
-// GET /api/autograf/track?schemaId=X&deviceId=Y&from=ISO&to=ISO&splitterIdx=N
+// GET /api/autograf/track?schemaId=X&deviceId=Y&from=ISO&to=ISO&splitterIdx=N — трек
 if ($sub === '/track' && $method === 'GET') {
     $schemaId    = $_GET['schemaId']    ?? '';
     $deviceId    = $_GET['deviceId']    ?? '';
@@ -215,7 +215,7 @@ if ($sub === '/track' && $method === 'GET') {
     exit;
 }
 
-// GET /api/autograf/params?schemaId=X&splitterId=Y&deviceIds=ID1,ID2,...
+// GET /api/autograf/params?schemaId=X&splitterId=Y&deviceIds=ID1,ID2,... — параметры
 if ($sub === '/params' && $method === 'GET') {
     $schemaId   = $_GET['schemaId']   ?? '';
     $splitterId = $_GET['splitterId'] ?? '';

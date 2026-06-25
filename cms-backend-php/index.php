@@ -66,6 +66,12 @@ if ($uri === '/api/career-contact' && $method === 'POST') {
     exit;
 }
 
+// AI HR-чат (Gemini)
+if ($uri === '/api/ai-chat' && $method === 'POST') {
+    require_once __DIR__ . '/handlers/AiChatHandler.php';
+    exit;
+}
+
 // Вакансии — список / создание
 if ($uri === '/api/vacancies') {
     require_once __DIR__ . '/handlers/VacanciesHandler.php';

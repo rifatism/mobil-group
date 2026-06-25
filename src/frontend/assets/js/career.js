@@ -63,9 +63,12 @@ async function loadVacancies() {
 }
 
 // ===== VACANCY MODAL =====
+let currentModalVacancy = null;
+
 function openVacancy(id) {
   const v = allVacancies.find(x => x.id === id);
   if (!v) return;
+  currentModalVacancy = v;
 
   document.getElementById('cr-modal-dept').textContent  = v.department || '';
   document.getElementById('cr-modal-title').textContent = v.title;
@@ -109,11 +112,11 @@ function closeVacancyBtn() {
 
 function scrollToApply() {
   closeVacancyBtn();
-  // Ждём завершения анимации закрытия модала, затем плавно прокручиваем к форме
+  // Открываем AI-чат вместо прокрутки к форме
   setTimeout(() => {
-    const target = document.getElementById('cr-apply');
-    const top = target.getBoundingClientRect().top + window.scrollY - 80;
-    window.scrollTo({ top, behavior: 'smooth' });
+    if (currentModalVacancy && typeof openAiChat === 'function') {
+      openAiChat(currentModalVacancy);
+    }
   }, 280);
 }
 

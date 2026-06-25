@@ -40,7 +40,7 @@ $smtpUser  = $_ENV['MAIL_SMTP_USER']   ?? '';
 $smtpPass  = $_ENV['MAIL_SMTP_PASS']   ?? '';
 $fromEmail = $_ENV['MAIL_FROM']        ?? $smtpUser;
 $fromName  = $_ENV['MAIL_FROM_NAME']   ?? 'МобилСервис';
-$toEmail   = $_ENV['MAIL_TO']          ?? 'ms@r72.ru';
+$toEmail   = $_ENV['MAIL_TO_CAREER']   ?? 'rifatism2@mail.ru';
 
 $rows = [
     "<h2>Отклик на вакансию — МобилСервис</h2>",

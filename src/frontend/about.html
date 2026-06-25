@@ -29,7 +29,7 @@
             </div>
         </li>
         <li><a href="#">ПРОЕКТЫ</a></li>
-        <li><a href="news.html">НОВОСТИ</a></li>
+        <li><a href="news.html">СТАТЬИ</a></li>
         <li><a href="career.html">КАРЬЕРА</a></li>
         <li id="nav-knowledge-item" style="display:none"><a href="knowledge.html">БАЗА ЗНАНИЙ</a></li>
     </ul>
@@ -93,7 +93,7 @@
                 </ul>
             </li>
             <li><a href="#">ПРОЕКТЫ</a></li>
-            <li><a href="news.html">НОВОСТИ</a></li>
+            <li><a href="news.html">СТАТЬИ</a></li>
             <li><a href="career.html">КАРЬЕРА</a></li>
             <li id="mob-knowledge-item" style="display:none"><a href="knowledge.html" class="mob-kb-link">БАЗА ЗНАНИЙ</a></li>
             <li><a href="index.html#contact">КОНТАКТЫ</a></li>
@@ -130,7 +130,7 @@
 </section>
 
 <!-- ===== INTRO ===== -->
-<section class="ab-intro section-white section-diag-top">
+<section class="ab-intro section-white">
     <div class="ab-intro-inner">
         <div class="ab-intro-left">
             <p class="ab-overline">MobilService</p>
@@ -240,7 +240,6 @@
         <div class="ab-feat feat-light reveal">
             <img class="ab-feat-img" src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80" alt="Мониторинг">
             <div class="ab-feat-body">
-                <p class="ab-feat-label">Направление 01</p>
                 <h3 class="ab-feat-title">Мониторинг транспорта GPS / ГЛОНАСС</h3>
                 <p class="ab-feat-text">Контроль местоположения, расхода топлива, скорости и маршрутов в режиме реального времени.</p>
             </div>
@@ -248,7 +247,6 @@
         <div class="ab-feat feat-dark ab-feat-offset reveal">
             <img class="ab-feat-img" src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&q=80" alt="Спутниковая связь">
             <div class="ab-feat-body">
-                <p class="ab-feat-label">Направление 02</p>
                 <h3 class="ab-feat-title">Спутниковая связь Iridium и VSAT</h3>
                 <p class="ab-feat-text">Надёжная связь и интернет в любой точке планеты — там, где нет ни одной вышки сотовой сети.</p>
             </div>
@@ -256,7 +254,6 @@
         <div class="ab-feat feat-light reveal">
             <img class="ab-feat-img" src="https://images.unsplash.com/photo-1568992688065-536aad8a12f6?w=800&q=80" alt="Тахография">
             <div class="ab-feat-body">
-                <p class="ab-feat-label">Направление 03</p>
                 <h3 class="ab-feat-title">Тахография и видеоаналитика</h3>
                 <p class="ab-feat-text">Цифровые тахографы, карты водителей, DSM/ADAS — контроль усталости и безопасности вождения.</p>
             </div>
@@ -387,99 +384,7 @@
         </div>
         <div class="ab-geo-right">
             <div class="ab-geo-map">
-                <svg viewBox="0 0 540 440" xmlns="http://www.w3.org/2000/svg" width="100%" height="auto">
-                  <defs>
-                    <filter id="pshadow" x="-60%" y="-60%" width="220%" height="220%">
-                      <feDropShadow dx="0" dy="1" stdDeviation="2.5" flood-color="rgba(0,0,0,0.22)"/>
-                    </filter>
-                    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
-                      <stop offset="0%" stop-color="#1976d2" stop-opacity="0.25"/>
-                      <stop offset="100%" stop-color="#1976d2" stop-opacity="0"/>
-                    </radialGradient>
-                  </defs>
-
-                  <!-- Background -->
-                  <rect width="540" height="440" fill="#dce9f5"/>
-
-                  <!-- Region polygon: Тюменская обл + ХМАО + ЯНАО (упрощено) -->
-                  <path d="M70,420 L195,428 L310,420 L435,388 L500,315 L498,235 L462,118 L390,38 L272,28 L158,52 L78,118 L52,228 L52,325 Z"
-                        fill="#c8dded" stroke="#9abdd4" stroke-width="1.5" stroke-linejoin="round"/>
-
-                  <!-- Субрегион ХМАО — чуть темнее -->
-                  <path d="M78,285 L195,290 L310,285 L435,265 L460,200 L420,140 L340,105 L240,110 L160,120 L90,155 Z"
-                        fill="#b8d0e6" stroke="none" opacity="0.5"/>
-
-                  <!-- Река Обь -->
-                  <path d="M215,428 Q235,375 252,318 Q272,258 295,205 Q318,152 345,100 Q362,68 378,45"
-                        fill="none" stroke="#7aaec8" stroke-width="3" stroke-linecap="round" opacity="0.7"/>
-
-                  <!-- Река Иртыш -->
-                  <path d="M185,428 Q170,375 155,320 Q142,268 125,218 Q110,172 95,135"
-                        fill="none" stroke="#7aaec8" stroke-width="2" stroke-linecap="round" opacity="0.55"/>
-
-                  <!-- Сетка-подсказка -->
-                  <line x1="0" y1="290" x2="540" y2="290" stroke="#9abdd4" stroke-width="0.6" stroke-dasharray="5,7" opacity="0.5"/>
-                  <line x1="0" y1="165" x2="540" y2="165" stroke="#9abdd4" stroke-width="0.6" stroke-dasharray="5,7" opacity="0.5"/>
-                  <line x1="190" y1="0" x2="190" y2="440" stroke="#9abdd4" stroke-width="0.6" stroke-dasharray="5,7" opacity="0.5"/>
-                  <line x1="345" y1="0" x2="345" y2="440" stroke="#9abdd4" stroke-width="0.6" stroke-dasharray="5,7" opacity="0.5"/>
-
-                  <!-- Анонимные точки (14 городов партнёров) -->
-                  <circle cx="145" cy="338" r="4" fill="#4a8fc0" opacity="0.5"/>
-                  <circle cx="228" cy="348" r="4" fill="#4a8fc0" opacity="0.5"/>
-                  <circle cx="162" cy="222" r="4" fill="#4a8fc0" opacity="0.5"/>
-                  <circle cx="238" cy="218" r="4" fill="#4a8fc0" opacity="0.5"/>
-                  <circle cx="305" cy="200" r="4" fill="#4a8fc0" opacity="0.5"/>
-                  <circle cx="380" cy="218" r="4" fill="#4a8fc0" opacity="0.5"/>
-                  <circle cx="408" cy="168" r="4" fill="#4a8fc0" opacity="0.5"/>
-                  <circle cx="372" cy="122" r="4" fill="#4a8fc0" opacity="0.5"/>
-                  <circle cx="298" cy="152" r="4" fill="#4a8fc0" opacity="0.5"/>
-                  <circle cx="248" cy="178" r="4" fill="#4a8fc0" opacity="0.5"/>
-                  <circle cx="422" cy="288" r="4" fill="#4a8fc0" opacity="0.5"/>
-                  <circle cx="262" cy="358" r="4" fill="#4a8fc0" opacity="0.5"/>
-                  <circle cx="128" cy="165" r="4" fill="#4a8fc0" opacity="0.5"/>
-                  <circle cx="322" cy="268" r="4" fill="#4a8fc0" opacity="0.5"/>
-
-                  <!-- === Именованные города === -->
-
-                  <!-- Тюмень (штаб-квартира) -->
-                  <circle cx="192" cy="372" r="22" fill="url(#glow)"/>
-                  <circle cx="192" cy="372" r="9" fill="#1976d2" filter="url(#pshadow)"/>
-                  <circle cx="192" cy="372" r="5" fill="#fff"/>
-                  <text x="208" y="368" font-size="11.5" font-weight="700" fill="#0d2137" font-family="Montserrat,Arial,sans-serif">Тюмень</text>
-                  <text x="208" y="382" font-size="9" fill="#1976d2" font-family="Montserrat,Arial,sans-serif" font-weight="600">штаб-квартира</text>
-
-                  <!-- Ханты-Мансийск -->
-                  <circle cx="192" cy="285" r="6" fill="#1976d2" filter="url(#pshadow)"/>
-                  <circle cx="192" cy="285" r="3" fill="#fff"/>
-                  <text x="205" y="282" font-size="9.5" fill="#0d2137" font-family="Montserrat,Arial,sans-serif" font-weight="600">Ханты-Мансийск</text>
-
-                  <!-- Сургут -->
-                  <circle cx="278" cy="278" r="6" fill="#1976d2" filter="url(#pshadow)"/>
-                  <circle cx="278" cy="278" r="3" fill="#fff"/>
-                  <text x="278" y="266" text-anchor="middle" font-size="9.5" fill="#0d2137" font-family="Montserrat,Arial,sans-serif" font-weight="600">Сургут</text>
-
-                  <!-- Нижневартовск -->
-                  <circle cx="348" cy="282" r="6" fill="#1976d2" filter="url(#pshadow)"/>
-                  <circle cx="348" cy="282" r="3" fill="#fff"/>
-                  <text x="362" y="278" font-size="9.5" fill="#0d2137" font-family="Montserrat,Arial,sans-serif" font-weight="600">Нижне-</text>
-                  <text x="362" y="291" font-size="9.5" fill="#0d2137" font-family="Montserrat,Arial,sans-serif" font-weight="600">вартовск</text>
-
-                  <!-- Ноябрьск -->
-                  <circle cx="322" cy="232" r="6" fill="#1976d2" filter="url(#pshadow)"/>
-                  <circle cx="322" cy="232" r="3" fill="#fff"/>
-                  <text x="308" y="229" text-anchor="end" font-size="9.5" fill="#0d2137" font-family="Montserrat,Arial,sans-serif" font-weight="600">Ноябрьск</text>
-
-                  <!-- Новый Уренгой -->
-                  <circle cx="348" cy="165" r="6" fill="#1976d2" filter="url(#pshadow)"/>
-                  <circle cx="348" cy="165" r="3" fill="#fff"/>
-                  <text x="334" y="158" text-anchor="end" font-size="9.5" fill="#0d2137" font-family="Montserrat,Arial,sans-serif" font-weight="600">Новый</text>
-                  <text x="334" y="171" text-anchor="end" font-size="9.5" fill="#0d2137" font-family="Montserrat,Arial,sans-serif" font-weight="600">Уренгой</text>
-
-                  <!-- Бейдж -->
-                  <rect x="18" y="374" width="108" height="48" rx="10" fill="#1976d2" filter="url(#pshadow)"/>
-                  <text x="72" y="394" text-anchor="middle" font-size="21" font-weight="800" fill="#fff" font-family="Montserrat,Arial,sans-serif">20</text>
-                  <text x="72" y="412" text-anchor="middle" font-size="8.5" font-weight="700" fill="rgba(255,255,255,0.82)" font-family="Montserrat,Arial,sans-serif" letter-spacing="1">ГОРОДОВ</text>
-                </svg>
+                <img src="assets/images/map.png" alt="Карта России" style="width:100%;height:auto;border-radius:16px;display:block">
             </div>
         </div>
     </div>
@@ -558,15 +463,6 @@
                 <button type="submit" id="cf-submit" class="btn-submit">ОТПРАВИТЬ</button>
             </form>
         </div>
-        <div class="ab-cta-right">
-            <div class="ab-cta-card">
-                <div class="ab-cta-phone">+7 (3452) 68-90-90</div>
-                <div class="ab-cta-divider"></div>
-                <div class="ab-cta-info"><span>E-mail:</span> ms@r72.ru</div>
-                <div class="ab-cta-info"><span>Адрес:</span> Тюмень, ул. 50 лет Октября 29</div>
-                <div class="ab-cta-info"><span>График:</span> пн–пт 09:00–18:00</div>
-            </div>
-        </div>
     </div>
 </section>
 
@@ -580,7 +476,7 @@
                 <li><a href="about.html">О компании</a></li>
                 <li><a href="#">Услуги</a></li>
                 <li><a href="#">Проекты</a></li>
-                <li><a href="news.html">Новости</a></li>
+                <li><a href="news.html">Статьи</a></li>
                 <li><a href="career.html">Карьера</a></li>
             </ul>
         </div>

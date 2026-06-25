@@ -409,7 +409,7 @@ function renderNewsGrid() {
 
   const grid = document.getElementById('news-grid');
   if (!filtered.length) {
-    grid.innerHTML = '<div class="admin-news-empty">Новостей не найдено</div>';
+    grid.innerHTML = '<div class="admin-news-empty">Статей не найдено</div>';
     return;
   }
 
@@ -452,7 +452,7 @@ function renderNewsGrid() {
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
           Редактировать
         </button>
-        <button class="anc-btn anc-btn--del" onclick="confirmDeleteNews(${n.id}, '${esc(n.title)}')" title="Удалить новость">
+        <button class="anc-btn anc-btn--del" onclick="confirmDeleteNews(${n.id}, '${esc(n.title)}')" title="Удалить статью">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
         </button>
       </div>
@@ -478,7 +478,7 @@ async function toggleArchiveNews(id, archived) {
 
 // --- Открыть модал добавления ---
 function openAddNews() {
-  document.getElementById('news-modal-title').textContent = 'Добавить новость';
+  document.getElementById('news-modal-title').textContent = 'Добавить статью';
   document.getElementById('news-form').reset();
   document.getElementById('nm-id').value    = '';
   document.getElementById('nm-image').value = '';
@@ -493,7 +493,7 @@ function openEditNews(id) {
   const n = allNews.find(x => x.id === id);
   if (!n) return;
 
-  document.getElementById('news-modal-title').textContent = 'Редактировать новость';
+  document.getElementById('news-modal-title').textContent = 'Редактировать статью';
   document.getElementById('nm-id').value       = n.id;
   document.getElementById('nm-title').value    = n.title   || '';
   document.getElementById('nm-excerpt').value  = n.excerpt || '';
@@ -623,9 +623,9 @@ async function publishNews(id) {
 // --- Удаление новости ---
 function confirmDeleteNews(id, title) {
   deleteTarget = id;
-  document.getElementById('confirm-modal-title').textContent = 'Удалить новость?';
+  document.getElementById('confirm-modal-title').textContent = 'Удалить статью?';
   document.getElementById('confirm-text').textContent =
-    `Новость «${title}» будет удалена. Это действие нельзя отменить.`;
+    `Статья «${title}» будет удалена. Это действие нельзя отменить.`;
   document.getElementById('confirm-ok').onclick = doDeleteNews;
   openModal('confirm-modal');
 }

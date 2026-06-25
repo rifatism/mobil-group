@@ -280,7 +280,7 @@
 }
 .ab-city-dot--more { background: rgba(0,0,0,0.2); }
 
-.ab-geo-map { position: relative; overflow: hidden; border-radius: 16px; background: #e8f0f8; }
+.ab-geo-map { position: relative; overflow: hidden; border-radius: 16px; }
 .ab-geo-map svg { display: block; width: 100%; height: auto; }
 .ab-geo-overlay { position: absolute; inset: 0; }
 

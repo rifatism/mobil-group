@@ -40,24 +40,25 @@ $systemPrompt = <<<PROMPT
 Описание вакансии: {$vacancyDesc}
 Требования: {$vacancyReq}
 
-Твоя задача — провести короткое первичное интервью. Узнай:
+Твоя задача — провести короткое первичное интервью. Узнай СТРОГО В ТАКОМ ПОРЯДКЕ:
 1. Имя кандидата
 2. Релевантный опыт и ключевые навыки
 3. Почему хочет работать именно в МобилСервис
-4. Зарплатные ожидания (если сам упомянет)
+4. Номер телефона для связи — ОБЯЗАТЕЛЬНО, без него нельзя передавать данные HR
 
 Правила:
 - Задавай по одному вопросу за раз, не перегружай кандидата
 - Будь дружелюбным, профессиональным, позитивным
 - Пиши только на русском языке
-- После 3-5 обменов сообщениями, когда достаточно информации — вынеси решение
+- Телефон — обязательное поле: если кандидат не дал телефон, мягко попроси его перед вынесением решения
+- Только после получения телефона можно выносить решение
 
-Когда примешь решение, добавь строго в САМЫЙ КОНЕЦ своего ответа (ПОСЛЕ обычного текста для кандидата) этот блок:
-%%DECISION%%{"suitable":true,"name":"ИМЯ КАНДИДАТА","summary":"КРАТКОЕ РЕЗЮМЕ 1-2 ПРЕДЛОЖЕНИЯ"}%%END%%
+Когда получишь имя, опыт, мотивацию И телефон — вынеси решение. Добавь строго в САМЫЙ КОНЕЦ своего ответа (ПОСЛЕ обычного текста для кандидата) этот блок:
+%%DECISION%%{"suitable":true,"name":"ИМЯ КАНДИДАТА","phone":"ТЕЛЕФОН","summary":"КРАТКОЕ РЕЗЮМЕ 1-2 ПРЕДЛОЖЕНИЯ"}%%END%%
 или
-%%DECISION%%{"suitable":false,"name":"ИМЯ КАНДИДАТА","summary":"КРАТКОЕ ОБЪЯСНЕНИЕ"}%%END%%
+%%DECISION%%{"suitable":false,"name":"ИМЯ КАНДИДАТА","phone":"ТЕЛЕФОН","summary":"КРАТКОЕ ОБЪЯСНЕНИЕ"}%%END%%
 
-Если suitable=true: скажи кандидату что его данные переданы HR-менеджеру и с ним свяжутся в ближайшее время.
+Если suitable=true: скажи кандидату что его данные и телефон переданы HR-менеджеру и с ним свяжутся в ближайшее время.
 Если suitable=false: поблагодари за интерес, вежливо сообщи что кандидатура не совсем подходит, пожелай удачи.
 Блок %%DECISION%%...%%END%% НИКОГДА не показывай кандидату — он только для внутренней обработки.
 PROMPT;
@@ -122,6 +123,7 @@ if (preg_match('/%%DECISION%%(.+?)%%END%%/s', $aiText, $matches)) {
 
     if (is_array($decision) && !empty($decision['suitable'])) {
         $approved = true;
+        saveCandidate($vacancy, $decision, $history, $message);
         sendApprovedEmail($vacancy, $decision, $history, $message);
     }
 }
@@ -131,6 +133,37 @@ echo json_encode([
     'reply'    => $aiText,
     'approved' => $approved,
 ], JSON_UNESCAPED_UNICODE);
+
+// ─── Сохранение кандидата в БД ────────────────────────────────────────────
+function saveCandidate(array $vacancy, array $decision, array $history, string $lastMsg): void
+{
+    try {
+        require_once __DIR__ . '/../config/database.php';
+        $db = (new Database())->getConnection();
+
+        $lines = [];
+        foreach ($history as $msg) {
+            $role    = ($msg['role'] ?? '') === 'model' ? 'Ассистент' : 'Кандидат';
+            $lines[] = "[{$role}]: " . trim($msg['text'] ?? '');
+        }
+        $lines[]    = "[Кандидат]: {$lastMsg}";
+        $transcript = implode("\n", $lines);
+
+        $stmt = $db->prepare(
+            "INSERT INTO ai_candidates (candidate_name, candidate_phone, vacancy_title, ai_summary, transcript)
+             VALUES (?, ?, ?, ?, ?)"
+        );
+        $stmt->execute([
+            $decision['name']    ?? 'Кандидат',
+            $decision['phone']   ?? '',
+            $vacancy['title']    ?? 'не указана',
+            $decision['summary'] ?? '',
+            $transcript,
+        ]);
+    } catch (\Exception $e) {
+        error_log('AiChat saveCandidate error: ' . $e->getMessage());
+    }
+}
 
 // ─── Отправка письма администратору ────────────────────────────────────────
 function sendApprovedEmail(array $vacancy, array $decision, array $history, string $lastMsg): void
@@ -143,9 +176,10 @@ function sendApprovedEmail(array $vacancy, array $decision, array $history, stri
     $fromName  = $_ENV['MAIL_FROM_NAME']   ?? 'МобилСервис';
     $toEmail   = $_ENV['MAIL_TO_CAREER']   ?? 'ms@r72.ru';
 
-    $candidateName = htmlspecialchars($decision['name']    ?? 'Кандидат');
-    $summary       = htmlspecialchars($decision['summary'] ?? '');
-    $vacancyTitle  = htmlspecialchars($vacancy['title']    ?? 'не указана');
+    $candidateName  = htmlspecialchars($decision['name']    ?? 'Кандидат');
+    $candidatePhone = htmlspecialchars($decision['phone']  ?? '—');
+    $summary        = htmlspecialchars($decision['summary'] ?? '');
+    $vacancyTitle   = htmlspecialchars($vacancy['title']   ?? 'не указана');
 
     $rows = '';
     foreach ($history as $msg) {
@@ -166,6 +200,7 @@ function sendApprovedEmail(array $vacancy, array $decision, array $history, stri
   <div style='background:#e8f0fe;padding:20px 28px;border-left:4px solid #1976d2'>
     <table cellpadding='0' cellspacing='0'>
       <tr><td style='padding:3px 12px 3px 0;color:#555;font-size:14px'>Кандидат:</td><td style='font-weight:bold;font-size:14px'>{$candidateName}</td></tr>
+      <tr><td style='padding:3px 12px 3px 0;color:#555;font-size:14px'>Телефон:</td><td style='font-weight:bold;font-size:14px'>{$candidatePhone}</td></tr>
       <tr><td style='padding:3px 12px 3px 0;color:#555;font-size:14px'>Вакансия:</td><td style='font-weight:bold;font-size:14px'>{$vacancyTitle}</td></tr>
       <tr><td valign='top' style='padding:3px 12px 3px 0;color:#555;font-size:14px'>Вывод ИИ:</td><td style='font-size:14px'>{$summary}</td></tr>
     </table>

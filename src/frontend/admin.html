@@ -34,6 +34,10 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
         База знаний
       </a>
+      <a class="nav-item" data-section="candidates" onclick="switchSection('candidates', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Кандидаты
+      </a>
     </nav>
 
     <a class="sidebar-back" href="index.html">
@@ -260,6 +264,22 @@
           </div>
         </div>
 
+      </section>
+
+      <!-- ===== КАНДИДАТЫ ===== -->
+      <section id="section-candidates" class="content-section">
+        <div class="section-toolbar">
+          <div class="filter-tabs">
+            <button class="filter-tab active" id="cand-tab-ai"   onclick="switchCandidatesTab('ai', this)">🤖 AI Ассистент</button>
+            <button class="filter-tab"         id="cand-tab-form" onclick="switchCandidatesTab('form', this)">📋 Форма заявок</button>
+          </div>
+        </div>
+        <div id="candidates-ai-list">
+          <div class="table-loader"><span class="loader"></span></div>
+        </div>
+        <div id="candidates-form-list" style="display:none">
+          <div class="table-loader"><span class="loader"></span></div>
+        </div>
       </section>
 
     </main>

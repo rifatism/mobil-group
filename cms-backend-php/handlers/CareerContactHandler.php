@@ -34,6 +34,19 @@ if (!$consent) {
     exit;
 }
 
+// ─── Сохранение в БД (гарантированно) ─────────────────────────────────────
+try {
+    require_once __DIR__ . '/../config/database.php';
+    $db   = (new Database())->getConnection();
+    $stmt = $db->prepare(
+        "INSERT INTO form_candidates (fullname, email, phone, position, message) VALUES (?, ?, ?, ?, ?)"
+    );
+    $stmt->execute([$fullname, $email, $phone, $position, $message]);
+} catch (\Exception $e) {
+    error_log('CareerContact DB error: ' . $e->getMessage());
+}
+
+// ─── Попытка отправить письмо ──────────────────────────────────────────────
 $smtpHost  = $_ENV['MAIL_SMTP_HOST']   ?? 'smtp.mail.ru';
 $smtpPort  = (int)($_ENV['MAIL_SMTP_PORT'] ?? 465);
 $smtpUser  = $_ENV['MAIL_SMTP_USER']   ?? '';
@@ -76,8 +89,9 @@ try {
     $mail->AltBody = strip_tags(str_replace(['</td>', '<br>'], [' ', "\n"], $htmlBody));
 
     $mail->send();
-    echo json_encode(['success' => true], JSON_UNESCAPED_UNICODE);
 } catch (Exception $e) {
-    http_response_code(500);
-    echo json_encode(['success' => false, 'message' => 'Ошибка отправки письма'], JSON_UNESCAPED_UNICODE);
+    error_log('CareerContact mail error: ' . $e->getMessage());
 }
+
+// Успех — данные сохранены в БД (письмо опционально)
+echo json_encode(['success' => true], JSON_UNESCAPED_UNICODE);

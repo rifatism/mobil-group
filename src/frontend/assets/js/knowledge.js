@@ -1,4 +1,4 @@
-const KB_API = 'https://mobil-service.site/backend';
+const KB_API = 'http://localhost:8000';
 
 // ─── AUTH ────────────────────────────────────────────────────────────────────
 function kbToken() { return localStorage.getItem('cms_token'); }

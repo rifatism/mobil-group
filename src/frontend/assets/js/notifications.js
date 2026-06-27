@@ -2,7 +2,7 @@
  * Notifications widget — подключается на любой странице где есть #notif-bell-wrap
  */
 (function () {
-  const API = 'https://mobil-service.site/backend';
+  const API = 'http://localhost:8000';
   let pollTimer = null;
   let unreadCount = 0;
 

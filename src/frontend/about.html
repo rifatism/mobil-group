@@ -383,8 +383,15 @@
             </div>
         </div>
         <div class="ab-geo-right">
-            <div class="ab-geo-map">
+            <div class="ab-geo-map" style="position:relative;">
                 <img src="assets/images/map.png" alt="Карта России" style="width:100%;height:auto;border-radius:16px;display:block">
+                <!-- Метки городов — left/top в % относительно картинки карты -->
+                <div class="ab-map-pin" style="left:30%;top:calc(47% + 100px)"><span class="ab-pin-dot ab-pin-dot--main"></span><span class="ab-pin-label">Тюмень</span></div>
+                <div class="ab-map-pin" style="left:31%;top:calc(38% + 100px)"><span class="ab-pin-dot"></span><span class="ab-pin-label">Ханты-Мансийск</span></div>
+                <div class="ab-map-pin" style="left:33%;top:calc(37% + 100px)"><span class="ab-pin-dot"></span><span class="ab-pin-label">Сургут</span></div>
+                <div class="ab-map-pin" style="left:35%;top:calc(38% + 100px)"><span class="ab-pin-dot"></span><span class="ab-pin-label">Нижневартовск</span></div>
+                <div class="ab-map-pin" style="left:34%;top:calc(33% + 100px)"><span class="ab-pin-dot"></span><span class="ab-pin-label">Ноябрьск</span></div>
+                <div class="ab-map-pin" style="left:35%;top:calc(26% + 100px)"><span class="ab-pin-dot"></span><span class="ab-pin-label">Новый Уренгой</span></div>
             </div>
         </div>
     </div>
@@ -538,5 +545,6 @@
 
 <script src="assets/js/script.js?v=3"></script>
 <script src="assets/js/about.js"></script>
+<script src="assets/js/cookies.js"></script>
 </body>
 </html>

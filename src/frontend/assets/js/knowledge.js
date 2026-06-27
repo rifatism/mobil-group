@@ -129,7 +129,6 @@ function renderTests() {
           <div class="kb-test-title">${escH(t.title)}</div>
           <div class="kb-test-meta">
             ${qCount ? `<span class="kb-test-tag">${qCount} вопр.</span>` : ''}
-            <span class="kb-test-tag kb-test-tag--assign">Назначен: ${assigns}×</span>
           </div>
           ${t.description ? `<div class="kb-test-desc">${escH(t.description)}</div>` : ''}
         </div>

@@ -94,6 +94,12 @@ if (preg_match('#^/api/form-candidates/(\d+)$#', $uri, $m)) {
     require_once __DIR__ . '/handlers/FormCandidatesHandler.php';
     exit;
 }
+if (preg_match('#^/api/form-candidates/(\d+)/resume$#', $uri, $m)) {
+    $GLOBALS['form_candidate_id']     = (int)$m[1];
+    $GLOBALS['form_candidate_action'] = 'resume';
+    require_once __DIR__ . '/handlers/FormCandidatesHandler.php';
+    exit;
+}
 
 // Вакансии — список / создание
 if ($uri === '/api/vacancies') {

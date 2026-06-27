@@ -414,6 +414,18 @@
                 <label>Сопроводительное письмо</label>
                 <textarea id="cr-message" placeholder="Расскажите о себе, опыте работы и почему хотите работать в МобилСервис..."></textarea>
             </div>
+            <div class="cr-field">
+                <label>Резюме <span class="cr-file-hint">(PDF, DOC, DOCX — до 5 МБ)</span></label>
+                <div class="cr-file-wrap" id="cr-file-wrap">
+                    <input type="file" id="cr-resume" accept=".pdf,.doc,.docx" class="cr-file-input">
+                    <label for="cr-resume" class="cr-file-label" id="cr-file-label">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                        <span id="cr-file-name">Прикрепить резюме</span>
+                    </label>
+                    <button type="button" class="cr-file-clear" id="cr-file-clear" hidden onclick="clearResume()">✕</button>
+                </div>
+                <p id="cr-file-error" class="cr-file-error" hidden></p>
+            </div>
             <label class="cr-consent-row">
                 <input type="checkbox" id="cr-consent" required>
                 <span>Я согласен(а) на обработку персональных данных в соответствии с политикой конфиденциальности компании МобилСервис.</span>

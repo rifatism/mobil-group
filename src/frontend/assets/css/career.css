@@ -688,6 +688,40 @@
 .cr-status.success { display: block; background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
 .cr-status.error   { display: block; background: #fdecea; color: #c62828; border: 1px solid #ffcdd2; }
 
+/* ===== FILE UPLOAD ===== */
+.cr-file-hint { font-size: 0.75rem; color: rgba(255,255,255,0.35); font-weight: 400; margin-left: 0.4rem; }
+.cr-file-input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.cr-file-wrap {
+    position: relative;
+    display: flex; align-items: center; gap: 0.5rem;
+}
+.cr-file-label {
+    flex: 1; display: flex; align-items: center; gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: rgba(255,255,255,0.06);
+    border: 1.5px dashed rgba(255,255,255,0.2);
+    border-radius: 4px;
+    cursor: pointer;
+    color: rgba(255,255,255,0.5);
+    font-size: 0.88rem;
+    transition: border-color 0.2s, background 0.2s;
+}
+.cr-file-label svg { width: 18px; height: 18px; flex-shrink: 0; }
+.cr-file-label:hover { border-color: var(--green); color: rgba(255,255,255,0.8); }
+.cr-file-wrap.has-file .cr-file-label {
+    border-color: var(--green); border-style: solid;
+    color: #fff; background: rgba(25,118,210,0.12);
+}
+.cr-file-clear {
+    flex-shrink: 0; width: 28px; height: 28px;
+    background: rgba(255,255,255,0.1); border: none;
+    border-radius: 50%; cursor: pointer; color: rgba(255,255,255,0.5);
+    font-size: 0.75rem; display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s, color 0.15s;
+}
+.cr-file-clear:hover { background: rgba(220,38,38,0.3); color: #fff; }
+.cr-file-error { font-size: 0.8rem; color: #ef5350; margin-top: 0.35rem; }
+
 /* ===== LOGO FOOTER ===== */
 .logo-img-footer {
     height: 60px;

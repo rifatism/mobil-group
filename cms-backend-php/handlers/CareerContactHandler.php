@@ -8,13 +8,26 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-$data     = json_decode(file_get_contents('php://input'), true) ?? [];
-$fullname = trim($data['fullname'] ?? '');
-$email    = trim($data['email']    ?? '');
-$phone    = trim($data['phone']    ?? '');
-$position = trim($data['position'] ?? '');
-$message  = trim($data['message']  ?? '');
-$consent  = !empty($data['consent']);
+// Поддержка FormData (multipart) и JSON
+$contentType = $_SERVER['CONTENT_TYPE'] ?? '';
+if (str_contains($contentType, 'multipart/form-data')) {
+    $fullname = trim($_POST['fullname'] ?? '');
+    $email    = trim($_POST['email']    ?? '');
+    $phone    = trim($_POST['phone']    ?? '');
+    $position = trim($_POST['position'] ?? '');
+    $message  = trim($_POST['message']  ?? '');
+    $consent  = !empty($_POST['consent']);
+    $resume   = $_FILES['resume'] ?? null;
+} else {
+    $data     = json_decode(file_get_contents('php://input'), true) ?? [];
+    $fullname = trim($data['fullname'] ?? '');
+    $email    = trim($data['email']    ?? '');
+    $phone    = trim($data['phone']    ?? '');
+    $position = trim($data['position'] ?? '');
+    $message  = trim($data['message']  ?? '');
+    $consent  = !empty($data['consent']);
+    $resume   = null;
+}
 
 if ($fullname === '' || $email === '') {
     http_response_code(400);
@@ -34,14 +47,34 @@ if (!$consent) {
     exit;
 }
 
+// ─── Сохранение файла резюме ──────────────────────────────────────────────
+$resumeSavedPath = null;
+$resumeOrigName  = null;
+if ($resume && isset($resume['tmp_name']) && $resume['error'] === UPLOAD_ERR_OK) {
+    if ($resume['size'] <= 5 * 1024 * 1024) {
+        $ext      = strtolower(pathinfo($resume['name'], PATHINFO_EXTENSION));
+        $allowed  = ['pdf', 'doc', 'docx'];
+        if (in_array($ext, $allowed, true)) {
+            $saveDir = __DIR__ . '/../uploads/resumes/';
+            if (!is_dir($saveDir)) mkdir($saveDir, 0755, true);
+            $safeName = date('Ymd_His') . '_' . preg_replace('/[^a-zA-Z0-9._-]/', '_', $resume['name']);
+            $fullPath = $saveDir . $safeName;
+            if (move_uploaded_file($resume['tmp_name'], $fullPath)) {
+                $resumeSavedPath = 'resumes/' . $safeName;
+                $resumeOrigName  = $resume['name'];
+            }
+        }
+    }
+}
+
 // ─── Сохранение в БД (гарантированно) ─────────────────────────────────────
 try {
     require_once __DIR__ . '/../config/database.php';
     $db   = (new Database())->getConnection();
     $stmt = $db->prepare(
-        "INSERT INTO form_candidates (fullname, email, phone, position, message) VALUES (?, ?, ?, ?, ?)"
+        "INSERT INTO form_candidates (fullname, email, phone, position, message, resume_name, resume_path) VALUES (?, ?, ?, ?, ?, ?, ?)"
     );
-    $stmt->execute([$fullname, $email, $phone, $position, $message]);
+    $stmt->execute([$fullname, $email, $phone, $position, $message, $resumeOrigName, $resumeSavedPath]);
 } catch (\Exception $e) {
     error_log('CareerContact DB error: ' . $e->getMessage());
 }
@@ -82,6 +115,10 @@ try {
     $mail->setFrom($fromEmail, $fromName);
     $mail->addAddress($toEmail);
     $mail->addReplyTo($email, $fullname);
+
+    if ($resumeSavedPath) {
+        $mail->addAttachment(__DIR__ . '/../uploads/' . $resumeSavedPath, $resumeOrigName);
+    }
 
     $mail->isHTML(true);
     $mail->Subject = 'Отклик на вакансию' . ($position ? ': ' . $position : '') . ' — ' . $fullname;

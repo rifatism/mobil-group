@@ -35,13 +35,13 @@ if (!$consent) {
     exit;
 }
 
-$smtpHost   = $_ENV['MAIL_SMTP_HOST']   ?? 'smtp.yandex.ru';
+$smtpHost   = $_ENV['MAIL_SMTP_HOST']   ?? 'smtp.mail.ru';
 $smtpPort   = (int)($_ENV['MAIL_SMTP_PORT'] ?? 465);
 $smtpUser   = $_ENV['MAIL_SMTP_USER']   ?? '';
 $smtpPass   = $_ENV['MAIL_SMTP_PASS']   ?? '';
 $fromEmail  = $_ENV['MAIL_FROM']        ?? $smtpUser;
 $fromName   = $_ENV['MAIL_FROM_NAME']   ?? 'МобилСервис';
-$toEmail    = $_ENV['MAIL_TO']          ?? 'ms@r72.ru';
+$toEmail    = $_ENV['MAIL_TO']          ?? 'rifatism@mail.ru';
 
 $bodyLines = [
     "<h2>Новая заявка с сайта МобилСервис</h2>",

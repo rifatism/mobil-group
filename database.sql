@@ -63,6 +63,28 @@ CREATE TABLE IF NOT EXISTS users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Кандидаты с формы заявок
+CREATE TABLE IF NOT EXISTS form_candidates (
+    id       INT AUTO_INCREMENT PRIMARY KEY,
+    fullname VARCHAR(150) NOT NULL,
+    email    VARCHAR(100) NOT NULL,
+    phone    VARCHAR(50)  DEFAULT '',
+    position VARCHAR(200) DEFAULT '',
+    message  TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- AI HR-чат: одобренные кандидаты
+CREATE TABLE IF NOT EXISTS ai_candidates (
+    id              INT AUTO_INCREMENT PRIMARY KEY,
+    candidate_name  VARCHAR(150) NOT NULL,
+    candidate_phone VARCHAR(50)  DEFAULT '',
+    vacancy_title   VARCHAR(200) NOT NULL,
+    ai_summary      TEXT,
+    transcript      LONGTEXT,
+    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Администратор по умолчанию (пароль: admin123)
 INSERT IGNORE INTO users (username, full_name, email, password, role)
 VALUES ('admin', 'Администратор', 'admin@mobilservice.ru',

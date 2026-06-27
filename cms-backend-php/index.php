@@ -2,6 +2,7 @@
 require_once __DIR__ . '/config/config.php';
 
 $uri    = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+$uri    = preg_replace('#^/backend#', '', $uri) ?: '/';
 $method = $_SERVER['REQUEST_METHOD'];
 
 // Проверка работоспособности
@@ -63,6 +64,40 @@ if ($uri === '/api/contact' && $method === 'POST') {
 // Карьерный запрос (заявка на вакансию)
 if ($uri === '/api/career-contact' && $method === 'POST') {
     require_once __DIR__ . '/handlers/CareerContactHandler.php';
+    exit;
+}
+
+// AI HR-чат (Groq)
+if ($uri === '/api/ai-chat' && $method === 'POST') {
+    require_once __DIR__ . '/handlers/AiChatHandler.php';
+    exit;
+}
+
+// AI кандидаты — список / удаление
+if ($uri === '/api/ai-candidates') {
+    require_once __DIR__ . '/handlers/AiCandidatesHandler.php';
+    exit;
+}
+if (preg_match('#^/api/ai-candidates/(\d+)$#', $uri, $m)) {
+    $GLOBALS['ai_candidate_id'] = (int)$m[1];
+    require_once __DIR__ . '/handlers/AiCandidatesHandler.php';
+    exit;
+}
+
+// Кандидаты с формы — список / удаление
+if ($uri === '/api/form-candidates') {
+    require_once __DIR__ . '/handlers/FormCandidatesHandler.php';
+    exit;
+}
+if (preg_match('#^/api/form-candidates/(\d+)$#', $uri, $m)) {
+    $GLOBALS['form_candidate_id'] = (int)$m[1];
+    require_once __DIR__ . '/handlers/FormCandidatesHandler.php';
+    exit;
+}
+if (preg_match('#^/api/form-candidates/(\d+)/resume$#', $uri, $m)) {
+    $GLOBALS['form_candidate_id']     = (int)$m[1];
+    $GLOBALS['form_candidate_action'] = 'resume';
+    require_once __DIR__ . '/handlers/FormCandidatesHandler.php';
     exit;
 }
 

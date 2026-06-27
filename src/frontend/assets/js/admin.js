@@ -66,9 +66,9 @@ function logout() {
 }
 
 // ===== SECTIONS =====
-const SECTION_TITLES  = { users: 'Пользователи', news: 'Статьи', vacancies: 'Вакансии', knowledge: 'База знаний' };
-const ADD_HANDLERS    = { users: 'openAddUser()', news: 'openAddNews()', vacancies: 'openAddVac()', knowledge: '' };
-const ADD_BTN_LABELS  = { users: 'Добавить', news: 'Добавить статью', vacancies: 'Добавить вакансию', knowledge: '' };
+const SECTION_TITLES  = { users: 'Пользователи', news: 'Статьи', vacancies: 'Вакансии', knowledge: 'База знаний', candidates: 'Кандидаты' };
+const ADD_HANDLERS    = { users: 'openAddUser()', news: 'openAddNews()', vacancies: 'openAddVac()', knowledge: '', candidates: '' };
+const ADD_BTN_LABELS  = { users: 'Добавить', news: 'Добавить статью', vacancies: 'Добавить вакансию', knowledge: '', candidates: '' };
 
 function switchSection(name, el) {
   document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
@@ -78,12 +78,13 @@ function switchSection(name, el) {
   document.getElementById('page-title').textContent = SECTION_TITLES[name] || name;
   const addBtn = document.querySelector('.btn-header-add');
   addBtn.setAttribute('onclick', ADD_HANDLERS[name] || '');
-  addBtn.style.display = name === 'knowledge' ? 'none' : '';
+  addBtn.style.display = (name === 'knowledge' || name === 'candidates') ? 'none' : '';
   const labelEl = addBtn.querySelector('.add-btn-label');
   if (labelEl) labelEl.textContent = ADD_BTN_LABELS[name] || 'Добавить';
-  if (name === 'news')      loadNews();
-  if (name === 'vacancies') loadVacancies();
-  if (name === 'knowledge') loadKnowledgeSection();
+  if (name === 'news')       loadNews();
+  if (name === 'vacancies')  loadVacancies();
+  if (name === 'knowledge')  loadKnowledgeSection();
+  if (name === 'candidates') { loadAiCandidates(); loadFormCandidates(); }
   // Закрыть сайдбар на мобильном
   const sidebar  = document.querySelector('.sidebar');
   const backdrop = document.getElementById('sidebar-backdrop');
@@ -1463,4 +1464,133 @@ async function handleAssignTest() {
   } catch {
     errEl.textContent = 'Ошибка соединения.'; errEl.hidden = false;
   }
+}
+// ===== CANDIDATES =====
+function switchCandidatesTab(tab, el) {
+  document.querySelectorAll('#section-candidates .filter-tab').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('candidates-ai-list').style.display   = tab === 'ai'   ? '' : 'none';
+  document.getElementById('candidates-form-list').style.display = tab === 'form' ? '' : 'none';
+}
+
+function candidateCard(fields, deleteCall, badge, transcript) {
+  return '<div style="margin-bottom:1rem;padding:1.2rem 1.4rem;border:1px solid #e0e6ef;border-radius:10px;background:#fff">'
+    + '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem">'
+    + '<div style="flex:1;min-width:0">'
+    + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap">'
+    + badge
+    + '</div>'
+    + fields
+    + '</div>'
+    + '<button onclick="' + deleteCall + '" style="background:none;border:1px solid #e0e0e0;border-radius:6px;padding:5px 10px;cursor:pointer;color:#999;font-size:12px;flex-shrink:0">Удалить</button>'
+    + '</div>'
+    + (transcript
+        ? '<details style="margin-top:12px"><summary style="cursor:pointer;font-size:12px;color:#888;user-select:none">Показать диалог</summary>'
+          + '<div style="margin-top:8px;padding:10px;background:#f4f6f8;border-radius:8px;font-size:12px;line-height:1.7;color:#333;max-height:200px;overflow-y:auto">' + transcript + '</div></details>'
+        : '')
+    + '</div>';
+}
+
+async function loadAiCandidates() {
+  const wrap = document.getElementById('candidates-ai-list');
+  if (!wrap) return;
+  wrap.innerHTML = '<div class="table-loader"><span class="loader"></span></div>';
+  try {
+    const token = localStorage.getItem('cms_token');
+    const data  = await fetch(API + '/api/ai-candidates', { headers: { 'Authorization': 'Bearer ' + token } }).then(r => r.json());
+    const list  = data.candidates || [];
+    if (!list.length) { wrap.innerHTML = '<div style="padding:2rem;text-align:center;color:#888">Пока нет одобренных кандидатов от AI</div>'; return; }
+    wrap.innerHTML = list.map(c => {
+      const date       = new Date(c.created_at).toLocaleString('ru-RU');
+      const transcript = (c.transcript || '').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+      const badge      = '<span style="background:#1976d2;color:#fff;font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px">&#x1F916; Рекомендован ИИ</span>'
+                       + '<span style="color:#888;font-size:12px">' + date + '</span>';
+      const fields     = '<div style="font-size:1rem;font-weight:600;color:#1a1a2e">' + escH(c.candidate_name) + '</div>'
+                       + '<div style="font-size:13px;color:#555;margin-top:2px">&#128222; <b>' + escH(c.candidate_phone || '—') + '</b> &nbsp;&middot;&nbsp; Вакансия: <b>' + escH(c.vacancy_title) + '</b></div>'
+                       + '<div style="font-size:13px;color:#444;margin-top:6px;line-height:1.5">' + escH(c.ai_summary) + '</div>';
+      return candidateCard(fields, 'deleteAiCandidate(' + c.id + ',this)', badge, transcript);
+    }).join('');
+  } catch {
+    wrap.innerHTML = '<div style="padding:2rem;text-align:center;color:#c00">Ошибка загрузки</div>';
+  }
+}
+
+async function deleteAiCandidate(id, btn) {
+  if (!confirm('Удалить запись?')) return;
+  btn.disabled = true;
+  try {
+    await fetch(API + '/api/ai-candidates/' + id, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + localStorage.getItem('cms_token') } });
+    loadAiCandidates();
+  } catch { btn.disabled = false; }
+}
+
+async function loadFormCandidates() {
+  const wrap = document.getElementById('candidates-form-list');
+  if (!wrap) return;
+  wrap.innerHTML = '<div class="table-loader"><span class="loader"></span></div>';
+  try {
+    const token = localStorage.getItem('cms_token');
+    const data  = await fetch(API + '/api/form-candidates', { headers: { 'Authorization': 'Bearer ' + token } }).then(r => r.json());
+    const list  = data.candidates || [];
+    if (!list.length) { wrap.innerHTML = '<div style="padding:2rem;text-align:center;color:#888">Заявок с формы пока нет</div>'; return; }
+    wrap.innerHTML = list.map(c => {
+      const date   = new Date(c.created_at).toLocaleString('ru-RU');
+      const badge  = '<span style="background:#388e3c;color:#fff;font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px">&#128203; Форма заявок</span>'
+                   + '<span style="color:#888;font-size:12px">' + date + '</span>';
+      const resumeBtn = c.resume_path
+        ? `<button onclick="downloadResume(${c.id}, '${escH(c.resume_name || 'resume')}')"
+              style="display:inline-flex;align-items:center;gap:5px;margin-top:8px;padding:4px 12px;
+                     background:#e3f0fc;color:#1565c0;border-radius:6px;font-size:12px;font-weight:600;
+                     border:1px solid #bbdefb;cursor:pointer">
+             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+               <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+             </svg>
+             ${escH(c.resume_name || 'Резюме')}
+           </button>`
+        : '';
+      const fields = '<div style="font-size:1rem;font-weight:600;color:#1a1a2e">' + escH(c.fullname) + '</div>'
+                   + '<div style="font-size:13px;color:#555;margin-top:2px">'
+                   + (c.phone ? '&#128222; <b>' + escH(c.phone) + '</b> &nbsp;&middot;&nbsp; ' : '')
+                   + '&#128231; <b>' + escH(c.email) + '</b>'
+                   + (c.position ? ' &nbsp;&middot;&nbsp; Вакансия: <b>' + escH(c.position) + '</b>' : '')
+                   + '</div>'
+                   + (c.message ? '<div style="font-size:13px;color:#444;margin-top:6px;line-height:1.5">' + escH(c.message) + '</div>' : '')
+                   + resumeBtn;
+      return candidateCard(fields, 'deleteFormCandidate(' + c.id + ',this)', badge, '');
+    }).join('');
+  } catch {
+    wrap.innerHTML = '<div style="padding:2rem;text-align:center;color:#c00">Ошибка загрузки</div>';
+  }
+}
+
+async function downloadResume(id, filename) {
+  try {
+    const res = await fetch(`${API}/api/form-candidates/${id}/resume`, {
+      headers: { Authorization: 'Bearer ' + token() }
+    });
+    if (!res.ok) { alert('Файл не найден.'); return; }
+    const blob = await res.blob();
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  } catch { alert('Ошибка при скачивании файла.'); }
+}
+
+async function deleteFormCandidate(id, btn) {
+  if (!confirm('Удалить запись?')) return;
+  btn.disabled = true;
+  try {
+    await fetch(API + '/api/form-candidates/' + id, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + localStorage.getItem('cms_token') } });
+    loadFormCandidates();
+  } catch { btn.disabled = false; }
+}
+
+function escH(s) {
+  return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }

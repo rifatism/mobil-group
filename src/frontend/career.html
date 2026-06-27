@@ -9,6 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="stylesheet" href="assets/css/career.css">
+    <link rel="stylesheet" href="assets/css/ai-chat.css">
 </head>
 <body>
 
@@ -413,6 +414,18 @@
                 <label>Сопроводительное письмо</label>
                 <textarea id="cr-message" placeholder="Расскажите о себе, опыте работы и почему хотите работать в МобилСервис..."></textarea>
             </div>
+            <div class="cr-field">
+                <label>Резюме <span class="cr-file-hint">(PDF, DOC, DOCX — до 5 МБ)</span></label>
+                <div class="cr-file-wrap" id="cr-file-wrap">
+                    <input type="file" id="cr-resume" accept=".pdf,.doc,.docx" class="cr-file-input">
+                    <label for="cr-resume" class="cr-file-label" id="cr-file-label">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                        <span id="cr-file-name">Прикрепить резюме</span>
+                    </label>
+                    <button type="button" class="cr-file-clear" id="cr-file-clear" hidden onclick="clearResume()">✕</button>
+                </div>
+                <p id="cr-file-error" class="cr-file-error" hidden></p>
+            </div>
             <label class="cr-consent-row">
                 <input type="checkbox" id="cr-consent" required>
                 <span>Я согласен(а) на обработку персональных данных в соответствии с политикой конфиденциальности компании МобилСервис.</span>
@@ -475,6 +488,35 @@
     <div class="footer-watermark">МОБИЛСЕРВИС</div>
 </footer>
 
+<!-- ===== AI CHAT WIDGET ===== -->
+<div id="ai-chat-widget">
+    <div class="ai-chat-header">
+        <div class="ai-chat-avatar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2a9 9 0 0 1 9 9c0 4.97-4.03 9-9 9s-9-4.03-9-9a9 9 0 0 1 9-9z"/>
+                <path d="M9 10h.01M15 10h.01M9.5 14.5s1 1.5 2.5 1.5 2.5-1.5 2.5-1.5"/>
+            </svg>
+        </div>
+        <div class="ai-chat-header-info">
+            <div class="ai-chat-header-title">AI HR-ассистент</div>
+            <div class="ai-chat-header-sub" id="ai-chat-header-sub">МобилСервис</div>
+        </div>
+        <div class="ai-chat-header-btns">
+            <button onclick="aiChatMinimize()" title="Свернуть">&#8722;</button>
+            <button onclick="aiChatClose()" title="Закрыть">&#215;</button>
+        </div>
+    </div>
+    <div class="ai-chat-messages" id="ai-chat-messages"></div>
+    <div class="ai-chat-footer">
+        <textarea id="ai-chat-input" rows="1" placeholder="Введите сообщение…"></textarea>
+        <button id="ai-chat-send" title="Отправить">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+            </svg>
+        </button>
+    </div>
+</div>
+
 <!-- МОДАЛ ВАКАНСИИ -->
 <div id="cr-modal" class="cr-modal-backdrop" onclick="closeVacancy(event)">
     <div class="cr-modal-card">
@@ -527,6 +569,7 @@
 
 <script src="assets/js/script.js?v=3"></script>
 <script src="assets/js/career.js"></script>
+<script src="assets/js/ai-chat.js"></script>
 <script>
 // Счётчики инфографики
 (function() {

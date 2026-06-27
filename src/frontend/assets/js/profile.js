@@ -1,4 +1,4 @@
-const API = 'http://localhost:8000';
+const API = 'https://mobil-service.site/backend';
 const ROLE_LABELS = { admin: 'Администратор', employee: 'Сотрудник', client: 'Клиент' };
 const CLIENT_TYPE_LABELS = {
   individual:   'Физическое лицо',

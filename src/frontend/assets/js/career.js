@@ -1,4 +1,4 @@
-const CR_API = 'http://localhost:8000';
+const CR_API = 'https://mobil-service.site/backend';
 
 // Навбар всегда белый на этой странице
 (function () {
@@ -146,23 +146,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
     statusEl.className = 'cr-status';
 
-    const body = {
-      fullname: document.getElementById('cr-fullname').value.trim(),
-      email:    document.getElementById('cr-email').value.trim(),
-      phone:    document.getElementById('cr-phone').value.trim(),
-      position: document.getElementById('cr-position').value.trim(),
-      message:  document.getElementById('cr-message').value.trim(),
-      consent:  document.getElementById('cr-consent').checked,
-    };
+    const fileInput  = document.getElementById('cr-resume');
+    const fileErrEl  = document.getElementById('cr-file-error');
+    const file       = fileInput?.files[0] || null;
+
+    if (fileErrEl) fileErrEl.hidden = true;
+
+    if (file && file.size > 5 * 1024 * 1024) {
+      fileErrEl.textContent = 'Файл превышает 5 МБ. Выберите файл меньшего размера.';
+      fileErrEl.hidden = false;
+      return;
+    }
+
+    const fd = new FormData();
+    fd.append('fullname', document.getElementById('cr-fullname').value.trim());
+    fd.append('email',    document.getElementById('cr-email').value.trim());
+    fd.append('phone',    document.getElementById('cr-phone').value.trim());
+    fd.append('position', document.getElementById('cr-position').value.trim());
+    fd.append('message',  document.getElementById('cr-message').value.trim());
+    fd.append('consent',  document.getElementById('cr-consent').checked ? '1' : '');
+    if (file) fd.append('resume', file, file.name);
 
     btn.disabled    = true;
     btn.textContent = 'ОТПРАВКА...';
 
     try {
       const res  = await fetch(CR_API + '/api/career-contact', {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify(body),
+        method: 'POST',
+        body:   fd,
       });
       const data = await res.json();
 
@@ -170,6 +181,7 @@ document.addEventListener('DOMContentLoaded', () => {
         statusEl.textContent = 'Ваш отклик отправлен! Мы свяжемся с вами в ближайшее время.';
         statusEl.className   = 'cr-status success';
         form.reset();
+        clearResume();
       } else {
         statusEl.textContent = data.message || 'Ошибка при отправке. Попробуйте позже.';
         statusEl.className   = 'cr-status error';
@@ -181,5 +193,41 @@ document.addEventListener('DOMContentLoaded', () => {
       btn.disabled    = false;
       btn.textContent = 'ОТПРАВИТЬ ОТКЛИК';
     }
+  });
+});
+
+function clearResume() {
+  const input  = document.getElementById('cr-resume');
+  const nameEl = document.getElementById('cr-file-name');
+  const clear  = document.getElementById('cr-file-clear');
+  const wrap   = document.getElementById('cr-file-wrap');
+  const errEl  = document.getElementById('cr-file-error');
+  if (input)  input.value = '';
+  if (nameEl) nameEl.textContent = 'Прикрепить резюме';
+  if (clear)  clear.hidden = true;
+  if (wrap)   wrap.classList.remove('has-file');
+  if (errEl)  errEl.hidden = true;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const input = document.getElementById('cr-resume');
+  if (!input) return;
+  input.addEventListener('change', () => {
+    const file   = input.files[0];
+    const nameEl = document.getElementById('cr-file-name');
+    const clear  = document.getElementById('cr-file-clear');
+    const wrap   = document.getElementById('cr-file-wrap');
+    const errEl  = document.getElementById('cr-file-error');
+    if (!file) { clearResume(); return; }
+    if (file.size > 5 * 1024 * 1024) {
+      errEl.textContent = 'Файл превышает 5 МБ. Выберите файл меньшего размера.';
+      errEl.hidden = false;
+      input.value  = '';
+      return;
+    }
+    errEl.hidden = true;
+    nameEl.textContent = file.name;
+    clear.hidden = false;
+    wrap.classList.add('has-file');
   });
 });

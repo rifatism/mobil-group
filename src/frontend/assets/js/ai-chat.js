@@ -1,7 +1,7 @@
 (function () {
   'use strict';
 
-  const API_BASE = typeof CR_API !== 'undefined' ? CR_API : 'http://localhost:8000';
+  const API_BASE = typeof CR_API !== 'undefined' ? CR_API : 'https://mobil-service.site/backend';
 
   let currentVacancy = null;
   let history = [];   // [{role:'user'|'model', text:'...'}]

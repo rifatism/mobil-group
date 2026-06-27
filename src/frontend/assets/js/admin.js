@@ -1,4 +1,4 @@
-const API = 'http://localhost:8000';
+const API = 'https://mobil-service.site/backend';
 const ROLE_LABELS = { admin: 'Администратор', employee: 'Сотрудник', client: 'Клиент' };
 
 let allUsers    = [];
@@ -1537,18 +1537,49 @@ async function loadFormCandidates() {
       const date   = new Date(c.created_at).toLocaleString('ru-RU');
       const badge  = '<span style="background:#388e3c;color:#fff;font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px">&#128203; Форма заявок</span>'
                    + '<span style="color:#888;font-size:12px">' + date + '</span>';
+      const resumeBtn = c.resume_path
+        ? `<button onclick="downloadResume(${c.id}, '${escH(c.resume_name || 'resume')}')"
+              style="display:inline-flex;align-items:center;gap:5px;margin-top:8px;padding:4px 12px;
+                     background:#e3f0fc;color:#1565c0;border-radius:6px;font-size:12px;font-weight:600;
+                     border:1px solid #bbdefb;cursor:pointer">
+             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+               <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+             </svg>
+             ${escH(c.resume_name || 'Резюме')}
+           </button>`
+        : '';
       const fields = '<div style="font-size:1rem;font-weight:600;color:#1a1a2e">' + escH(c.fullname) + '</div>'
                    + '<div style="font-size:13px;color:#555;margin-top:2px">'
                    + (c.phone ? '&#128222; <b>' + escH(c.phone) + '</b> &nbsp;&middot;&nbsp; ' : '')
                    + '&#128231; <b>' + escH(c.email) + '</b>'
                    + (c.position ? ' &nbsp;&middot;&nbsp; Вакансия: <b>' + escH(c.position) + '</b>' : '')
                    + '</div>'
-                   + (c.message ? '<div style="font-size:13px;color:#444;margin-top:6px;line-height:1.5">' + escH(c.message) + '</div>' : '');
+                   + (c.message ? '<div style="font-size:13px;color:#444;margin-top:6px;line-height:1.5">' + escH(c.message) + '</div>' : '')
+                   + resumeBtn;
       return candidateCard(fields, 'deleteFormCandidate(' + c.id + ',this)', badge, '');
     }).join('');
   } catch {
     wrap.innerHTML = '<div style="padding:2rem;text-align:center;color:#c00">Ошибка загрузки</div>';
   }
+}
+
+async function downloadResume(id, filename) {
+  try {
+    const res = await fetch(`${API}/api/form-candidates/${id}/resume`, {
+      headers: { Authorization: 'Bearer ' + token() }
+    });
+    if (!res.ok) { alert('Файл не найден.'); return; }
+    const blob = await res.blob();
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  } catch { alert('Ошибка при скачивании файла.'); }
 }
 
 async function deleteFormCandidate(id, btn) {

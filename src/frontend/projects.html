@@ -1,111 +1,14 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png" href="assets/images/icon.png">
-    <title>Политика конфиденциальности | МобилСервис</title>
+    <title>Проекты | МобилСервис</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/style.css">
-    <style>
-        .prv-hero {
-            background: linear-gradient(135deg, #080f1c 0%, #0f1e38 100%);
-            padding: 140px 2rem 60px;
-            text-align: center;
-        }
-        .prv-hero h1 {
-            font-family: var(--font-nav);
-            font-size: clamp(1.8rem, 4vw, 2.8rem);
-            font-weight: 800;
-            color: #fff;
-            letter-spacing: -0.02em;
-        }
-        .prv-hero p {
-            margin-top: 0.75rem;
-            color: rgba(255,255,255,0.45);
-            font-size: 0.88rem;
-        }
-        .prv-body {
-            background: #f4f6fa;
-            padding: 60px 2rem 80px;
-        }
-        .prv-card {
-            max-width: 820px;
-            margin: 0 auto;
-            background: #fff;
-            border-radius: 20px;
-            box-shadow: 0 4px 32px rgba(25,118,210,0.07);
-            padding: 52px 56px;
-        }
-        .prv-card h2 {
-            font-family: var(--font-nav);
-            font-size: 1.05rem;
-            font-weight: 700;
-            color: #0d2137;
-            margin: 2.2rem 0 0.65rem;
-            padding-bottom: 0.4rem;
-            border-bottom: 2px solid #e8f0f8;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        .prv-card h2:first-of-type { margin-top: 0; }
-        .prv-num {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 24px; height: 24px;
-            border-radius: 50%;
-            background: #1976d2;
-            color: #fff;
-            font-size: 0.7rem;
-            font-weight: 800;
-            flex-shrink: 0;
-        }
-        .prv-card p {
-            color: #3a4a5c;
-            font-size: 0.92rem;
-            line-height: 1.8;
-            margin-bottom: 0.8rem;
-        }
-        .prv-card ul {
-            padding-left: 1.2rem;
-            margin-bottom: 0.9rem;
-        }
-        .prv-card ul li {
-            color: #3a4a5c;
-            font-size: 0.92rem;
-            line-height: 1.8;
-            margin-bottom: 0.3rem;
-        }
-        .prv-card a { color: #1976d2; text-decoration: none; }
-        .prv-card a:hover { text-decoration: underline; }
-        .prv-date-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            background: #eef4fd;
-            border: 1px solid #d0e4f7;
-            border-radius: 8px;
-            padding: 7px 14px;
-            font-size: 0.8rem;
-            color: #1976d2;
-            font-weight: 600;
-            margin-bottom: 2.2rem;
-        }
-        .prv-contact-box {
-            background: #f0f7ff;
-            border: 1px solid #d0e4f7;
-            border-radius: 12px;
-            padding: 20px 24px;
-            margin-top: 0.5rem;
-        }
-        .prv-contact-box p { margin: 0; }
-        @media (max-width: 640px) {
-            .prv-card { padding: 28px 20px; }
-        }
-    </style>
+    <link rel="stylesheet" href="assets/css/projects.css">
 </head>
 <body>
 
@@ -125,7 +28,7 @@
                 <a href="index.html#service-satellite" class="nav-drop-item">Спутниковая связь</a>
             </div>
         </li>
-        <li><a href="projects.html">ПРОЕКТЫ</a></li>
+        <li><a href="projects.html" class="active">ПРОЕКТЫ</a></li>
         <li><a href="news.html">СТАТЬИ</a></li>
         <li><a href="career.html">КАРЬЕРА</a></li>
         <li id="nav-knowledge-item" style="display:none"><a href="knowledge.html">БАЗА ЗНАНИЙ</a></li>
@@ -189,7 +92,7 @@
                     <li><a href="index.html#service-satellite">Спутниковая связь</a></li>
                 </ul>
             </li>
-            <li><a href="projects.html">ПРОЕКТЫ</a></li>
+            <li><a href="projects.html" class="mob-active">ПРОЕКТЫ</a></li>
             <li><a href="news.html">СТАТЬИ</a></li>
             <li><a href="career.html">КАРЬЕРА</a></li>
             <li id="mob-knowledge-item" style="display:none"><a href="knowledge.html" class="mob-kb-link">БАЗА ЗНАНИЙ</a></li>
@@ -211,87 +114,39 @@
 </div>
 
 <!-- HERO -->
-<section class="prv-hero">
-    <h1>Политика конфиденциальности</h1>
-    <p>Последнее обновление: 27 июня 2026 г.</p>
+<section class="prj-hero">
+    <div class="prj-hero-bg"></div>
+    <div class="prj-hero-content">
+        <p class="prj-hero-over">Кейсы и реализованные работы</p>
+        <h1>Наши <span class="t-accent">проекты</span></h1>
+        <p>Реальные задачи клиентов — эффективные решения МобилСервис.<br>Мониторинг, тахография, спутниковая связь.</p>
+    </div>
 </section>
 
-<!-- CONTENT -->
-<section class="prv-body">
-    <div class="prv-card">
+<!-- ФИЛЬТРЫ -->
+<div class="prj-filters">
+    <div class="prj-filter-inner" id="prj-filter-wrap">
+        <button class="prj-cat-btn active">Все проекты</button>
+    </div>
+</div>
 
-        <h2><span class="prv-num">1</span> Общие положения</h2>
-        <p>Настоящая Политика конфиденциальности определяет порядок обработки и защиты персональных данных пользователей сайта <strong>mobilservice.ru</strong>, принадлежащего ООО «МобилСервис» (далее — «Оператор»).</p>
-        <p>Используя сайт, вы соглашаетесь с условиями настоящей Политики. Если вы не согласны — пожалуйста, прекратите использование сайта.</p>
-
-        <h2><span class="prv-num">2</span> Оператор персональных данных</h2>
-        <div class="prv-contact-box">
-            <p><strong>ООО «МобилСервис»</strong><br>
-            Адрес: г. Тюмень, ул. 50 лет Октября, 29<br>
-            Email: <a href="mailto:ms@r72.ru">ms@r72.ru</a><br>
-            Телефон: <a href="tel:+73452689090">+7 (3452) 68-90-90</a></p>
+<!-- СЕТКА ПРОЕКТОВ -->
+<section class="prj-grid-section">
+    <div class="prj-grid-inner">
+        <div class="prj-grid" id="prj-grid">
+            <div class="prj-loading"><span class="prj-spinner"></span> Загрузка проектов...</div>
         </div>
+    </div>
+</section>
 
-        <h2><span class="prv-num">3</span> Какие данные мы собираем</h2>
-        <ul>
-            <li>Имя, фамилия (при заполнении форм обратной связи или регистрации)</li>
-            <li>Адрес электронной почты и номер телефона</li>
-            <li>Данные о посещении сайта: IP-адрес, тип браузера, просматриваемые страницы, время визита — через Яндекс Метрику</li>
-            <li>Файлы cookie браузера</li>
-        </ul>
-
-        <h2><span class="prv-num">4</span> Цели обработки данных</h2>
-        <ul>
-            <li>Обработка запросов и обращений пользователей</li>
-            <li>Анализ посещаемости и улучшение качества сайта (Яндекс Метрика)</li>
-            <li>Рассмотрение заявок от кандидатов на вакансии</li>
-            <li>Обеспечение работы личного кабинета пользователя</li>
-            <li>Исполнение договорных обязательств</li>
-        </ul>
-
-        <h2><span class="prv-num">5</span> Файлы cookie</h2>
-        <p>Наш сайт использует файлы cookie — небольшие текстовые файлы, сохраняемые в вашем браузере. Cookie помогают нам:</p>
-        <ul>
-            <li>Поддерживать сессию авторизованного пользователя</li>
-            <li>Анализировать трафик с помощью Яндекс Метрики</li>
-            <li>Запоминать ваши настройки и предпочтения</li>
-        </ul>
-        <p>Вы можете отключить cookie в настройках браузера, однако это может повлиять на корректную работу некоторых функций сайта.</p>
-
-        <h2><span class="prv-num">6</span> Яндекс Метрика</h2>
-        <p>На сайте установлен счётчик Яндекс Метрики. Сервис собирает обезличенные данные о поведении посетителей: просмотры страниц, источники трафика, время на сайте. Данные обрабатываются ООО «Яндекс» в соответствии с их <a href="https://yandex.ru/legal/confidential/" target="_blank" rel="noopener">политикой конфиденциальности</a>.</p>
-
-        <h2><span class="prv-num">7</span> Передача данных третьим лицам</h2>
-        <p>Компания не продаёт и не передаёт персональные данные третьим лицам, за исключением случаев:</p>
-        <ul>
-            <li>Требования законодательства Российской Федерации</li>
-            <li>Необходимости исполнения договора с пользователем</li>
-            <li>Получения явного согласия пользователя</li>
-        </ul>
-
-        <h2><span class="prv-num">8</span> Защита данных</h2>
-        <p>Оператор принимает организационные и технические меры для защиты персональных данных от несанкционированного доступа, изменения или уничтожения. Доступ к данным имеют только уполномоченные сотрудники.</p>
-
-        <h2><span class="prv-num">9</span> Права пользователей</h2>
-        <p>В соответствии с Федеральным законом № 152-ФЗ «О персональных данных» вы вправе:</p>
-        <ul>
-            <li>Получить информацию об обработке ваших персональных данных</li>
-            <li>Потребовать уточнения, блокировки или уничтожения данных</li>
-            <li>Отозвать согласие на обработку персональных данных</li>
-            <li>Обратиться с жалобой в Роскомнадзор</li>
-        </ul>
-
-        <h2><span class="prv-num">10</span> Изменения политики</h2>
-        <p>Компания оставляет за собой право вносить изменения в настоящую Политику. Актуальная версия всегда доступна на данной странице.</p>
-
-        <h2><span class="prv-num">11</span> Контакты</h2>
-        <div class="prv-contact-box">
-            <p>По вопросам обработки персональных данных обращайтесь:<br>
-            Email: <a href="mailto:ms@r72.ru">ms@r72.ru</a> &nbsp;·&nbsp;
-            Телефон: <a href="tel:+73452689090">+7 (3452) 68-90-90</a><br>
-            <span style="color:#6b7a8d;font-size:0.85rem">пн–пт, 09:00–18:00</span></p>
+<!-- ЛОГОТИПЫ КЛИЕНТОВ -->
+<section class="prj-clients" id="prj-clients-section">
+    <div class="prj-clients-inner">
+        <div class="prj-clients-head">
+            <p class="prj-clients-over">Доверяют нам</p>
+            <h2>Наши клиенты</h2>
         </div>
-
+        <div class="prj-logos-grid" id="prj-logos-grid"></div>
     </div>
 </section>
 
@@ -304,7 +159,7 @@
                 <li><a href="index.html">Главная</a></li>
                 <li><a href="about.html">О компании</a></li>
                 <li><a href="#">Услуги</a></li>
-                <li><a href="projects.html">ПРОЕКТЫ</a></li>
+                <li><a href="projects.html">Проекты</a></li>
                 <li><a href="news.html">Статьи</a></li>
                 <li><a href="career.html">Карьера</a></li>
             </ul>
@@ -337,6 +192,23 @@
     <div class="footer-watermark">МОБИЛСЕРВИС</div>
 </footer>
 
+<!-- МОДАЛ ПРОЕКТА -->
+<div id="prj-modal" class="prj-modal-backdrop">
+    <div class="prj-modal-card">
+        <div class="prj-modal-img-wrap" id="prj-modal-img-wrap"></div>
+        <div class="prj-modal-body">
+            <div class="prj-modal-meta">
+                <span class="prj-modal-cat" id="prj-modal-cat"></span>
+                <span class="prj-modal-year" id="prj-modal-year"></span>
+                <span class="prj-modal-client" id="prj-modal-client"></span>
+            </div>
+            <h2 class="prj-modal-title" id="prj-modal-title"></h2>
+            <div class="prj-modal-content" id="prj-modal-content"></div>
+        </div>
+        <button class="prj-modal-close" onclick="closeProjectModal()">×</button>
+    </div>
+</div>
+
 <!-- LOGIN MODAL -->
 <div id="login-modal" class="modal-backdrop">
   <div class="modal-card">
@@ -367,6 +239,7 @@
 </div>
 
 <script src="assets/js/script.js?v=3"></script>
+<script src="assets/js/projects.js"></script>
 <script src="assets/js/cookies.js"></script>
 </body>
 </html>

@@ -200,6 +200,18 @@ if (preg_match('#^/api/knowledge/tests/(\d+)$#', $uri, $m)) {
 }
 // ─── End Knowledge Base ───────────────────────────────────────────────────
 
+// Проекты — список / создание
+if ($uri === '/api/projects') {
+    require_once __DIR__ . '/handlers/ProjectsHandler.php';
+    exit;
+}
+// Проекты — одна запись / редактирование / удаление
+if (preg_match('#^/api/projects/(\d+)$#', $uri, $m)) {
+    $GLOBALS['project_id'] = (int)$m[1];
+    require_once __DIR__ . '/handlers/ProjectsHandler.php';
+    exit;
+}
+
 // Прокси AutoGRAF — /api/autograf/*
 if (str_starts_with($uri, '/api/autograf/')) {
     require_once __DIR__ . '/handlers/AutografHandler.php';

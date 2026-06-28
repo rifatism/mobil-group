@@ -34,6 +34,10 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
         База знаний
       </a>
+      <a class="nav-item" data-section="projects" onclick="switchSection('projects', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg>
+        Проекты
+      </a>
       <a class="nav-item" data-section="candidates" onclick="switchSection('candidates', this)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         Кандидаты
@@ -141,6 +145,24 @@
           <div class="table-loader"><span class="loader"></span></div>
         </div>
 
+      </section>
+
+      <!-- ===== РАЗДЕЛ: ПРОЕКТЫ ===== -->
+      <section id="section-projects" class="content-section">
+        <div class="section-toolbar">
+          <div class="filter-tabs">
+            <button class="filter-tab active" onclick="setProjFilter('all', this)">Все <span class="tab-count" id="pc-all">0</span></button>
+            <button class="filter-tab" onclick="setProjFilter('1', this)">Опубликованные <span class="tab-count" id="pc-pub">0</span></button>
+            <button class="filter-tab" onclick="setProjFilter('0', this)">Черновики <span class="tab-count" id="pc-draft">0</span></button>
+          </div>
+          <div class="search-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="proj-search" placeholder="Поиск по названию..." oninput="renderProjGrid()">
+          </div>
+        </div>
+        <div id="proj-grid" class="admin-news-grid">
+          <div class="table-loader"><span class="loader"></span></div>
+        </div>
       </section>
 
       <!-- ===== РАЗДЕЛ: ВАКАНСИИ ===== -->
@@ -417,6 +439,101 @@
 
       <p id="news-modal-error" class="modal-msg modal-msg--error" hidden></p>
       <button type="submit" id="news-modal-submit" class="modal-btn">СОХРАНИТЬ</button>
+    </form>
+  </div>
+</div>
+
+<!-- ===== МОДАЛ ПРОЕКТА ===== -->
+<div id="proj-modal" class="modal-backdrop" onclick="backdropClick(event, 'proj-modal')">
+  <div class="modal-card modal-card--wide">
+    <button class="modal-close" onclick="closeProjModal()">&times;</button>
+    <div class="modal-header">
+      <div class="modal-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg>
+      </div>
+      <h2 class="modal-title" id="proj-modal-title">Добавить проект</h2>
+      <p class="modal-sub">МобилСервис — кейсы и реализованные проекты</p>
+    </div>
+    <form id="proj-form" class="modal-form" onsubmit="handleSaveProject(event)">
+      <input type="hidden" id="pm-id">
+
+      <div class="modal-field">
+        <label>Название проекта <span class="req">*</span></label>
+        <input id="pm-title" type="text" placeholder="Например: Мониторинг флота ООО «Газпром»" required>
+      </div>
+
+      <div class="modal-field">
+        <label>Фотография проекта</label>
+        <div class="img-upload-area" id="proj-img-upload-area" onclick="document.getElementById('pm-file').click()">
+          <div id="proj-img-preview" class="img-preview-wrap" hidden>
+            <img id="proj-img-preview-img" src="" alt="Превью">
+            <button type="button" class="img-preview-remove" onclick="removeProjImg(event)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+          </div>
+          <div id="proj-img-placeholder" class="img-placeholder">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            <span>Нажмите для загрузки фото</span>
+            <small>JPEG, PNG, WebP — до 5 МБ</small>
+          </div>
+        </div>
+        <input type="file" id="pm-file" accept="image/*" style="display:none" onchange="handleProjFileSelect(this)">
+        <input type="hidden" id="pm-image">
+        <p id="pm-upload-status" class="nm-upload-status" hidden></p>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+        <div class="modal-field" style="margin:0">
+          <label>Компания-клиент</label>
+          <input id="pm-client-name" type="text" placeholder="Название компании">
+        </div>
+        <div class="modal-field" style="margin:0">
+          <label>Год реализации</label>
+          <input id="pm-year" type="number" placeholder="2024" min="2000" max="2099">
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+        <div class="modal-field" style="margin:0">
+          <label>Логотип клиента (URL)</label>
+          <input id="pm-client-logo" type="text" placeholder="https://...">
+        </div>
+        <div class="modal-field" style="margin:0">
+          <label>Категория</label>
+          <select id="pm-category">
+            <option value="">— выберите —</option>
+            <option value="Мониторинг транспорта">Мониторинг транспорта</option>
+            <option value="Тахография">Тахография</option>
+            <option value="Спутниковая связь">Спутниковая связь</option>
+            <option value="Видеоаналитика">Видеоаналитика</option>
+            <option value="Комплексный проект">Комплексный проект</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="modal-field">
+        <label>Краткое описание</label>
+        <input id="pm-description" type="text" placeholder="Одно-два предложения о проекте (до 300 символов)" maxlength="300">
+      </div>
+
+      <div class="modal-field">
+        <label>Описание проекта</label>
+        <textarea id="pm-content" placeholder="Подробное описание: задача, решение, результат..." rows="5"></textarea>
+      </div>
+
+      <label class="nm-published-row">
+        <div class="nm-toggle-wrap">
+          <input type="checkbox" id="pm-published" class="nm-toggle-input">
+          <span class="nm-toggle-slider"></span>
+        </div>
+        <div>
+          <span class="nm-toggle-label">Опубликовать</span>
+          <span class="nm-toggle-hint">Снимите галочку, чтобы сохранить как черновик</span>
+        </div>
+      </label>
+
+      <p id="proj-modal-error" class="modal-msg modal-msg--error" hidden></p>
+      <button type="submit" id="proj-modal-submit" class="modal-btn">СОХРАНИТЬ</button>
     </form>
   </div>
 </div>

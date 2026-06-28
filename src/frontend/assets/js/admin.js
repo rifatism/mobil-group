@@ -66,9 +66,9 @@ function logout() {
 }
 
 // ===== SECTIONS =====
-const SECTION_TITLES  = { users: 'Пользователи', news: 'Статьи', vacancies: 'Вакансии', knowledge: 'База знаний', candidates: 'Кандидаты' };
-const ADD_HANDLERS    = { users: 'openAddUser()', news: 'openAddNews()', vacancies: 'openAddVac()', knowledge: '', candidates: '' };
-const ADD_BTN_LABELS  = { users: 'Добавить', news: 'Добавить статью', vacancies: 'Добавить вакансию', knowledge: '', candidates: '' };
+const SECTION_TITLES  = { users: 'Пользователи', news: 'Статьи', projects: 'Проекты', vacancies: 'Вакансии', knowledge: 'База знаний', candidates: 'Кандидаты' };
+const ADD_HANDLERS    = { users: 'openAddUser()', news: 'openAddNews()', projects: 'openAddProject()', vacancies: 'openAddVac()', knowledge: '', candidates: '' };
+const ADD_BTN_LABELS  = { users: 'Добавить', news: 'Добавить статью', projects: 'Добавить проект', vacancies: 'Добавить вакансию', knowledge: '', candidates: '' };
 
 function switchSection(name, el) {
   document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
@@ -82,6 +82,7 @@ function switchSection(name, el) {
   const labelEl = addBtn.querySelector('.add-btn-label');
   if (labelEl) labelEl.textContent = ADD_BTN_LABELS[name] || 'Добавить';
   if (name === 'news')       loadNews();
+  if (name === 'projects')   loadProjects();
   if (name === 'vacancies')  loadVacancies();
   if (name === 'knowledge')  loadKnowledgeSection();
   if (name === 'candidates') { loadAiCandidates(); loadFormCandidates(); }
@@ -1594,3 +1595,215 @@ async function deleteFormCandidate(id, btn) {
 function escH(s) {
   return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
+
+// ===================================================================
+// ===== ПРОЕКТЫ =====================================================
+// ===================================================================
+let allProjects  = [];
+let projFilter   = 'all';
+
+async function loadProjects() {
+  const grid = document.getElementById('proj-grid');
+  grid.innerHTML = '<div class="table-loader"><span class="loader"></span></div>';
+  try {
+    const res  = await fetch(API + '/api/projects?all=1', { headers: { Authorization: 'Bearer ' + token() } });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.message);
+    allProjects = data.projects;
+    updateProjCounts();
+    renderProjGrid();
+  } catch (err) {
+    grid.innerHTML = `<div class="admin-news-empty">Ошибка загрузки: ${esc(err.message)}</div>`;
+  }
+}
+
+function updateProjCounts() {
+  let pub = 0, draft = 0;
+  allProjects.forEach(p => { p.published ? pub++ : draft++; });
+  document.getElementById('pc-all').textContent   = allProjects.length;
+  document.getElementById('pc-pub').textContent   = pub;
+  document.getElementById('pc-draft').textContent = draft;
+}
+
+function setProjFilter(val, el) {
+  projFilter = val;
+  document.querySelectorAll('#section-projects .filter-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  renderProjGrid();
+}
+
+function renderProjGrid() {
+  const q = (document.getElementById('proj-search').value || '').toLowerCase().trim();
+  const filtered = allProjects.filter(p => {
+    const matchPub = projFilter === 'all' || String(p.published) === projFilter;
+    const matchQ   = !q || p.title.toLowerCase().includes(q);
+    return matchPub && matchQ;
+  });
+  const grid = document.getElementById('proj-grid');
+  if (!filtered.length) {
+    grid.innerHTML = '<div class="admin-news-empty">Проектов не найдено</div>';
+    return;
+  }
+  grid.innerHTML = filtered.map(p => {
+    const imgBlock = p.image
+      ? `<img src="${esc(p.image)}" alt="${esc(p.title)}" onerror="this.style.display='none'">`
+      : `<div class="anc-img-placeholder"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg></div>`;
+    const pubBadge = p.published
+      ? '<span class="anc-badge anc-badge--pub">Опубликован</span>'
+      : '<span class="anc-badge anc-badge--draft">Черновик</span>';
+    const catTag = p.category ? `<span class="anc-badge" style="background:#e8f0f8;color:#1976d2">${esc(p.category)}</span>` : '';
+    return `<div class="anc-card">
+      <div class="anc-img">${imgBlock}</div>
+      <div class="anc-body">
+        <div class="anc-meta">${pubBadge}${catTag}<span class="anc-date">${p.year || ''}</span></div>
+        <h3 class="anc-title">${esc(p.title)}</h3>
+        ${p.client_name ? `<p class="anc-excerpt">Клиент: ${esc(p.client_name)}</p>` : ''}
+        ${p.description ? `<p class="anc-excerpt">${esc(p.description)}</p>` : ''}
+      </div>
+      <div class="anc-actions">
+        <button class="anc-btn anc-btn--edit" onclick="openEditProject(${p.id})">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          Редактировать
+        </button>
+        <button class="anc-btn anc-btn--del" onclick="confirmDeleteProject(${p.id}, '${esc(p.title)}')" title="Удалить проект">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openAddProject() {
+  document.getElementById('proj-modal-title').textContent = 'Добавить проект';
+  document.getElementById('proj-form').reset();
+  document.getElementById('pm-id').value    = '';
+  document.getElementById('pm-image').value = '';
+  document.getElementById('pm-year').value  = new Date().getFullYear();
+  document.getElementById('proj-modal-error').hidden = true;
+  setProjImgPreview('');
+  openModal('proj-modal');
+}
+
+function openEditProject(id) {
+  const p = allProjects.find(x => x.id === id);
+  if (!p) return;
+  document.getElementById('proj-modal-title').textContent = 'Редактировать проект';
+  document.getElementById('pm-id').value          = p.id;
+  document.getElementById('pm-title').value       = p.title       || '';
+  document.getElementById('pm-description').value = p.description || '';
+  document.getElementById('pm-content').value     = p.content     || '';
+  document.getElementById('pm-image').value       = p.image       || '';
+  document.getElementById('pm-client-name').value = p.client_name || '';
+  document.getElementById('pm-client-logo').value = p.client_logo || '';
+  document.getElementById('pm-category').value    = p.category    || '';
+  document.getElementById('pm-year').value        = p.year        || '';
+  document.getElementById('pm-published').checked = !!p.published;
+  document.getElementById('proj-modal-error').hidden = true;
+  setProjImgPreview(p.image || '');
+  openModal('proj-modal');
+}
+
+function closeProjModal() { closeModal('proj-modal'); }
+
+function setProjImgPreview(url) {
+  const preview     = document.getElementById('proj-img-preview');
+  const previewImg  = document.getElementById('proj-img-preview-img');
+  const placeholder = document.getElementById('proj-img-placeholder');
+  if (url) {
+    previewImg.src     = url;
+    preview.hidden     = false;
+    placeholder.hidden = true;
+  } else {
+    preview.hidden     = true;
+    placeholder.hidden = false;
+  }
+}
+
+function removeProjImg(e) {
+  e.stopPropagation();
+  document.getElementById('pm-image').value = '';
+  setProjImgPreview('');
+}
+
+async function handleProjFileSelect(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const status = document.getElementById('pm-upload-status');
+  status.textContent = 'Загрузка...';
+  status.hidden = false;
+  try {
+    const fd = new FormData();
+    fd.append('file', file);
+    const res  = await fetch(API + '/api/upload', { method: 'POST', headers: { Authorization: 'Bearer ' + token() }, body: fd });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.message || 'Ошибка загрузки');
+    document.getElementById('pm-image').value = data.url;
+    setProjImgPreview(data.url);
+    status.hidden = true;
+  } catch (err) {
+    status.textContent = 'Ошибка: ' + err.message;
+  }
+  input.value = '';
+}
+
+async function handleSaveProject(e) {
+  e.preventDefault();
+  const errEl = document.getElementById('proj-modal-error');
+  const btn   = document.getElementById('proj-modal-submit');
+  errEl.hidden = true;
+  const id   = document.getElementById('pm-id').value;
+  const body = {
+    title:       document.getElementById('pm-title').value.trim(),
+    description: document.getElementById('pm-description').value.trim(),
+    content:     document.getElementById('pm-content').value.trim(),
+    image:       document.getElementById('pm-image').value.trim(),
+    client_name: document.getElementById('pm-client-name').value.trim(),
+    client_logo: document.getElementById('pm-client-logo').value.trim(),
+    category:    document.getElementById('pm-category').value,
+    year:        parseInt(document.getElementById('pm-year').value) || new Date().getFullYear(),
+    published:   document.getElementById('pm-published').checked ? 1 : 0,
+  };
+  if (!body.title) { errEl.textContent = 'Введите название проекта'; errEl.hidden = false; return; }
+  btn.disabled = true;
+  try {
+    const url = id ? `${API}/api/projects/${id}` : `${API}/api/projects`;
+    const res  = await fetch(url, {
+      method: id ? 'PUT' : 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token() },
+      body: JSON.stringify(body),
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.message);
+    closeModal('proj-modal');
+    await loadProjects();
+  } catch (err) {
+    errEl.textContent = err.message;
+    errEl.hidden = false;
+  } finally { btn.disabled = false; }
+}
+
+async function confirmDeleteProject(id, title) {
+  document.getElementById('confirm-modal-title').textContent   = 'Удалить проект?';
+  document.getElementById('confirm-modal-message').textContent = `Проект "${title}" будет удалён. Это действие нельзя отменить.`;
+  deleteTarget = { type: 'project', id };
+  document.getElementById('confirm-ok').onclick = doDeleteProject;
+  openModal('confirm-modal');
+}
+
+async function doDeleteProject() {
+  if (!deleteTarget) return;
+  const { id } = deleteTarget;
+  const btn = document.getElementById('confirm-ok');
+  btn.disabled = true; btn.textContent = 'Удаление...';
+  try {
+    await fetch(`${API}/api/projects/${id}`, {
+      method: 'DELETE',
+      headers: { Authorization: 'Bearer ' + token() }
+    });
+    closeModal('confirm-modal');
+    deleteTarget = null;
+    await loadProjects();
+  } catch { alert('Ошибка соединения.'); }
+  finally { btn.disabled = false; btn.textContent = 'Удалить'; }
+}
+

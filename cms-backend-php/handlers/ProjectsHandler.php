@@ -12,7 +12,7 @@ $db->exec("CREATE TABLE IF NOT EXISTS projects (
     title VARCHAR(200) NOT NULL,
     slug VARCHAR(250) UNIQUE,
     description VARCHAR(400) DEFAULT '',
-    content TEXT DEFAULT '',
+    content TEXT NULL,
     image VARCHAR(255) DEFAULT '',
     client_name VARCHAR(150) DEFAULT '',
     client_logo VARCHAR(255) DEFAULT '',
@@ -38,7 +38,8 @@ if ($method === 'GET') {
         $showAll = isset($_GET['all']) && $_GET['all'] === '1';
         if ($showAll) {
             $token = Auth::require();
-            Auth::requireRole($token, 'admin');
+            Auth::requireRole($token, 'admin', 'employee');
+            Auth::requirePermission($token, 'projects', ['add']);
             $stmt = $db->query("SELECT * FROM projects ORDER BY created_at DESC");
         } else {
             $stmt = $db->query("SELECT * FROM projects WHERE published = 1 ORDER BY year DESC, created_at DESC");
@@ -49,7 +50,8 @@ if ($method === 'GET') {
 }
 
 $token = Auth::require();
-Auth::requireRole($token, 'admin');
+Auth::requireRole($token, 'admin', 'employee');
+Auth::requirePermission($token, 'projects', ['add']);
 
 if ($method === 'POST') {
     $data  = json_decode(file_get_contents('php://input'), true) ?? [];

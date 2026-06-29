@@ -28,7 +28,8 @@ if ($method === 'GET') {
         $showArch = isset($_GET['archive']) && $_GET['archive'] === '1';
         if ($showAll) {
             $token = Auth::require();
-            Auth::requireRole($token, 'admin');
+            Auth::requireRole($token, 'admin', 'employee');
+            Auth::requirePermission($token, 'articles', ['add', 'view']);
             $stmt = $db->query("SELECT * FROM news ORDER BY created_at DESC");
         } elseif ($showArch) {
             $stmt = $db->query("SELECT id, title, slug, excerpt, content, image, author, views, created_at, archived FROM news WHERE published = 1 AND archived = 1 ORDER BY created_at DESC");
@@ -40,9 +41,10 @@ if ($method === 'GET') {
     exit;
 }
 
-// POST / PUT / DELETE — только admin
+// POST / PUT / DELETE — admin или employee с правом articles=add
 $token = Auth::require();
-Auth::requireRole($token, 'admin');
+Auth::requireRole($token, 'admin', 'employee');
+Auth::requirePermission($token, 'articles', ['add']);
 
 if ($method === 'POST') {
     $data  = json_decode(file_get_contents('php://input'), true) ?? [];

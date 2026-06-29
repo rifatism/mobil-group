@@ -9,7 +9,7 @@ $db    = (new Database())->getConnection();
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $stmt = $db->prepare(
         "SELECT id, username, first_name, last_name, patronymic, full_name,
-                email, phone, description, client_type, company_name, role, created_at
+                email, phone, description, client_type, company_name, role, created_at, permissions
          FROM users WHERE id = ? LIMIT 1"
     );
     $stmt->execute([$token->uid]);
@@ -21,6 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         exit;
     }
 
+    $user['permissions'] = $user['permissions'] ? (json_decode($user['permissions'], true) ?? null) : null;
     echo json_encode(['success' => true, 'user' => $user], JSON_UNESCAPED_UNICODE);
     exit;
 }

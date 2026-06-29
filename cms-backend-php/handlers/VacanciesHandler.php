@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../middleware/Auth.php';
 
@@ -23,7 +23,8 @@ if ($method === 'GET') {
     $showAll = isset($_GET['all']) && $_GET['all'] === '1';
     if ($showAll) {
         $token = Auth::require();
-        Auth::requireRole($token, 'admin');
+        Auth::requireRole($token, 'admin', 'employee');
+        Auth::requirePermission($token, 'vacancies', ['add']);
         $stmt = $db->query("SELECT * FROM vacancies ORDER BY created_at DESC");
     } else {
         $stmt = $db->query("SELECT * FROM vacancies WHERE published = 1 ORDER BY created_at DESC");
@@ -34,7 +35,8 @@ if ($method === 'GET') {
 
 if ($method === 'POST') {
     $token = Auth::require();
-    Auth::requireRole($token, 'admin');
+    Auth::requireRole($token, 'admin', 'employee');
+    Auth::requirePermission($token, 'vacancies', ['add']);
 
     $body = json_decode(file_get_contents('php://input'), true) ?? [];
     $title = trim($body['title'] ?? '');
@@ -63,7 +65,8 @@ if ($method === 'POST') {
 
 if ($method === 'PUT' && $id) {
     $token = Auth::require();
-    Auth::requireRole($token, 'admin');
+    Auth::requireRole($token, 'admin', 'employee');
+    Auth::requirePermission($token, 'vacancies', ['add']);
 
     $body  = json_decode(file_get_contents('php://input'), true) ?? [];
     $title = trim($body['title'] ?? '');
@@ -92,7 +95,8 @@ if ($method === 'PUT' && $id) {
 
 if ($method === 'DELETE' && $id) {
     $token = Auth::require();
-    Auth::requireRole($token, 'admin');
+    Auth::requireRole($token, 'admin', 'employee');
+    Auth::requirePermission($token, 'vacancies', ['add']);
 
     $db->prepare("DELETE FROM vacancies WHERE id = ?")->execute([$id]);
     echo json_encode(['success' => true], JSON_UNESCAPED_UNICODE);

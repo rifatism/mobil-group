@@ -7,23 +7,14 @@ const REFRESH_MS = 60_000;
 let state = {
   schemaId:      '',
   schemaName:    '',
-  groups:        [],   // [{ID, ParentID, Name}]
-  vehicles:      [],   // [{ID, ParentID, Name, _regNum, TripSplitters}]
-  positions:     {},   // {deviceId -> распознанная позиция}
-  selectedId:    null, // ID выбранного ТС
+  groups:        [],
+  vehicles:      [],
+  positions:     {},
+  selectedId:    null,
   selectedName:  '',
-  splitters:     [],   // [{ID, Name}]
-  splitterIdx:   0,
-  dateFrom:      '',
-  dateTo:        '',
-  trips:         [],
-  selectedTrip:  null,
   refreshTimer:  null,
-  markers:       {},   // {deviceId -> L.Marker}
-  trackLayer:    null,
+  markers:       {},
   map:           null,
-  markerStart:   null,
-  markerEnd:     null,
 };
 
 // ─── Вспомогательные функции авторизации ──────────────────────────────────────
@@ -62,27 +53,9 @@ function fmtDateTime(iso) {
   return d.toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' });
 }
 
-function fmtTime(iso) {
-  if (!iso) return '—';
-  const d = new Date(iso);
-  if (isNaN(d)) return iso;
-  return d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
-}
-
 function fmtNum(v, dec = 1) {
   if (v == null || v === '' || isNaN(Number(v))) return '—';
   return Number(v).toFixed(dec);
-}
-
-// ─── Настройка периода (по умолчанию сегодня, весь день) ──────────────────────
-function applyShift() {
-  const today = todayStr();
-  state.dateFrom = toISOLocal(today, '00:00:00');
-  state.dateTo   = toISOLocal(today, '23:59:59');
-}
-
-function readDates() {
-  // Даты фиксированы на сегодня (без UI-выбора периода)
 }
 
 // ─── Инициализация карты ──────────────────────────────────────────────────────
@@ -127,14 +100,18 @@ function parsePositions(raw) {
     const fin = p.Final ?? {};
     const cons = fin.Consumption2;
     const odo  = fin.CANTotalDistance;
+    // Корневые Lat/Lng — текущая позиция; LastPosition — исторический кэш (приоритет ниже)
+    const lat = p.Lat ?? p.lat ?? p.X ?? lp.Lat ?? lp.lat ?? null;
+    const lon = p.Lng ?? p.lng ?? p.Lon ?? p.lon ?? p.Y ?? lp.Lng ?? lp.lng ?? lp.Lon ?? null;
+    const time = p.DT ?? p.DTLocal ?? p.LastData ?? lp.DT ?? lp.DTLocal ?? null;
     return {
-      lat:         lp.Lat ?? lp.lat ?? p.Lat ?? null,
-      lon:         lp.Lng ?? lp.lng ?? lp.Lon ?? p.Lng ?? null,
+      lat,
+      lon,
       speed:       p.Speed ?? p.speed ?? 0,
-      time:        p.DT ?? p.DTLocal ?? p.LastData ?? null,
-      address:     p.Address ?? '',
+      time,
+      address:     p.Address ?? lp.Address ?? '',
       state:       p.State ?? -1,
-      course:      p.Course ?? 0,
+      course:      p.Course ?? lp.Course ?? 0,
       currLocation: fin.CurrLocation || '',
       consumption:  (cons != null && Number(cons) > 0) ? Number(cons) : null,
       canOdometer:  (odo  != null && Number(odo)  > 0) ? Number(odo)  : null,
@@ -345,10 +322,6 @@ function selectVehicle(v, el) {
 
   document.getElementById('tb-vehicle-name').textContent = v.Name;
 
-  clearTrack();
-  loadTrips();
-
-  // Переместить карту к маркеру ТС, если есть валидные координаты
   const pos = state.positions[v.ID];
   const lat = pos ? Number(pos.lat) : null;
   const lon = pos ? Number(pos.lon) : null;
@@ -379,16 +352,13 @@ async function loadSchemas() {
     sel.appendChild(opt);
   });
 
-  // Регистрируем обработчик ДО первого вызова loadVehicles, чтобы он всегда был активен
   sel.addEventListener('change', () => {
     state.schemaId   = sel.value;
     state.schemaName = sel.options[sel.selectedIndex]?.text || '';
     document.getElementById('tb-schema-name').textContent = state.schemaName;
     state.selectedId   = null;
     state.selectedName = '';
-    state.trips        = [];
-    resetTripsUI();
-    loadVehicles(); // запуск без ожидания — await здесь не нужен
+    loadVehicles();
   });
 
   if (data.schemas?.length) {
@@ -402,7 +372,6 @@ async function loadSchemas() {
 // ─── Транспортные средства + дерево ───────────────────────────────────────────
 async function loadVehicles() {
   clearAllMarkers();
-  clearTrack();
   state.positions = {};
   state.vehicles  = [];
   state.groups    = [];
@@ -426,9 +395,8 @@ async function loadVehicles() {
     return;
   }
 
-  state.groups    = data.groups    || [];
-  state.vehicles  = data.vehicles  || [];
-  state.splitters = data.splitters || [];
+  state.groups   = data.groups   || [];
+  state.vehicles = data.vehicles || [];
   console.log(`[vehicles] schema=${state.schemaId} groups=${state.groups.length} vehicles=${state.vehicles.length}`);
 
   try {
@@ -454,7 +422,11 @@ async function loadPositions() {
   }
   if (!data?.success) { console.warn('[positions] bad response:', data); return; }
 
-  state.positions = parsePositions(data.positions || []);
+  const rawPositions = data.positions || [];
+  if (rawPositions.length > 0) {
+    console.debug('[positions] raw sample (первый объект от AutoGRAF):', JSON.stringify(rawPositions[0], null, 2));
+  }
+  state.positions = parsePositions(rawPositions);
   console.log(`[positions] parsed=${Object.keys(state.positions).length}`);
 
   try {
@@ -463,259 +435,6 @@ async function loadPositions() {
     console.error('[placeMarkers] error:', e);
   }
   updateTreeStatuses();
-}
-
-// ─── Инфополоса ТС (топливо / местоположение / одометр) ──────────────────────
-function renderVehicleInfo() {
-  const el = document.getElementById('trips-vehicle-info');
-  const pos = state.selectedId ? state.positions[state.selectedId] : null;
-
-  if (!pos) { el.hidden = true; return; }
-
-  const items = [];
-
-  const loc = pos.currLocation || pos.address;
-  if (loc) {
-    items.push(`<span class="trips-vinfo-item"><span class="trips-vinfo-label">📍</span> <span class="trips-vinfo-value" title="${loc}" style="max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${loc}</span></span>`);
-  }
-
-  if (pos.consumption != null) {
-    items.push(`<span class="trips-vinfo-item"><span class="trips-vinfo-label">⛽ Расход:</span> <span class="trips-vinfo-value">${fmtNum(pos.consumption, 1)} л/ч</span></span>`);
-  }
-
-  if (pos.canOdometer != null) {
-    items.push(`<span class="trips-vinfo-item"><span class="trips-vinfo-label">📏 Одометр:</span> <span class="trips-vinfo-value">${fmtNum(pos.canOdometer)} км</span></span>`);
-  }
-
-  if (!items.length) { el.hidden = true; return; }
-
-  el.innerHTML = items.join('<span class="trips-vinfo-sep"> · </span>');
-  el.hidden = false;
-}
-
-// ─── Рейсы ────────────────────────────────────────────────────────────────────
-async function loadTrips() {
-  if (!state.selectedId || !state.schemaId) return;
-
-  readDates();
-  const params = new URLSearchParams({
-    schemaId:    state.schemaId,
-    deviceId:    state.selectedId,
-    from:        state.dateFrom,
-    to:          state.dateTo,
-    splitterIdx: state.splitterIdx,
-  });
-
-  const emptyEl = document.getElementById('trips-empty');
-  const table   = document.getElementById('trips-table');
-  emptyEl.innerHTML = '<div class="sb-spinner" style="border-top-color:var(--blue);border-color:#e5e7eb;"></div>';
-  emptyEl.hidden = false;
-  table.hidden = true;
-
-  const data = await apiFetch(`${AG}/trips?${params}`);
-  state.trips = data?.trips || [];
-
-  document.getElementById('trips-title').textContent = `Рейсы — ${state.selectedName}`;
-  renderVehicleInfo();
-  renderTripsTable();
-}
-
-function renderTripsTable() {
-  const emptyEl = document.getElementById('trips-empty');
-  const table   = document.getElementById('trips-table');
-  const tbody   = document.getElementById('trips-tbody');
-  const tfoot   = document.getElementById('trips-tfoot');
-
-  if (!state.trips.length) {
-    emptyEl.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:48px;height:48px;opacity:.2"><rect x="1" y="3" width="15" height="13" rx="1"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg><p>Рейсы не найдены за выбранный период</p>';
-    emptyEl.hidden = false;
-    table.hidden = true;
-    return;
-  }
-
-  emptyEl.hidden = true;
-  table.hidden = false;
-  tbody.innerHTML = '';
-
-  let totDist = 0, totMaxSpd = 0, totAvgSpd = 0;
-
-  state.trips.forEach((trip, idx) => {
-    // Гибкое извлечение полей для поддержки разных вариантов ответа AutoGRAF
-    const bt     = trip.BT ?? trip.BeginTime ?? trip.beginTime ?? trip.SD ?? '';
-    const et     = trip.ET ?? trip.EndTime   ?? trip.endTime   ?? trip.ED ?? '';
-    const dist   = trip.M  ?? trip.Mileage   ?? trip.mileage   ?? trip.Distance ?? null;
-    const maxSpd = trip.MaxSpeed ?? trip.Mxs ?? trip.maxSpeed  ?? null;
-    const avgSpd = trip.AvgSpeed ?? trip.Avs ?? trip.avgSpeed  ?? null;
-    const addrS  = trip.SA ?? trip.StartAddress ?? trip.startAddress ?? trip.AddressFrom ?? '';
-    const addrE  = trip.EA ?? trip.EndAddress   ?? trip.endAddress   ?? trip.AddressTo   ?? '';
-
-    // Топливо: сначала проверяем прямые поля AutoGRAF (F1/F2/Fc), затем массив Sensors
-    const sensors   = trip.Sensors ?? trip.sensors ?? [];
-    const fuelStart = trip.F1 != null ? fmtNum(trip.F1) : extractSensor(sensors, ['Уровень нач', 'FuelStart', 'ДУТ нач', 'Fuel', 'Level']);
-    const fuelEnd   = trip.F2 != null ? fmtNum(trip.F2) : extractSensor(sensors, ['Уровень кон', 'FuelEnd',   'ДУТ кон']);
-    const fuelCons  = trip.Fc != null ? fmtNum(trip.Fc) : extractSensor(sensors, ['Расход', 'Consumption', 'Consume']);
-
-    if (dist != null) totDist   += Number(dist);
-    if (maxSpd != null && Number(maxSpd) > totMaxSpd) totMaxSpd = Number(maxSpd);
-    if (avgSpd != null) totAvgSpd += Number(avgSpd);
-
-    const tr = document.createElement('tr');
-    tr.dataset.idx = idx;
-    tr.innerHTML = `
-      <td class="col-num">${idx + 1}</td>
-      <td class="col-date">${fmtDateTime(bt)}</td>
-      <td class="col-date">${fmtDateTime(et)}</td>
-      <td class="col-num" style="text-align:right">${dist != null ? fmtNum(dist) : '—'}</td>
-      <td class="col-num" style="text-align:right">${maxSpd != null ? fmtNum(maxSpd, 0) : '—'}</td>
-      <td class="col-num" style="text-align:right">${avgSpd != null ? fmtNum(avgSpd, 0) : '—'}</td>
-      <td class="col-addr" title="${addrS}">${addrS || '—'}</td>
-      <td class="col-addr" title="${addrE}">${addrE || '—'}</td>
-      <td class="col-fuel" style="text-align:right">${fuelStart ?? '—'}</td>
-      <td class="col-fuel" style="text-align:right">${fuelEnd   ?? '—'}</td>
-      <td class="col-fuel" style="text-align:right">${fuelCons  ?? '—'}</td>`;
-    tr.addEventListener('click', () => selectTrip(idx, tr, trip));
-    tbody.appendChild(tr);
-  });
-
-  // Итоги в подвале таблицы
-  const cnt = state.trips.length;
-  tfoot.innerHTML = `<tr>
-    <td class="col-num" colspan="3">Итого рейсов: ${cnt}</td>
-    <td class="col-num" style="text-align:right">${fmtNum(totDist)}</td>
-    <td class="col-num" style="text-align:right">${fmtNum(totMaxSpd, 0)}</td>
-    <td class="col-num" style="text-align:right">${cnt > 0 ? fmtNum(totAvgSpd / cnt, 0) : '—'}</td>
-    <td colspan="5"></td>
-  </tr>`;
-}
-
-function extractSensor(sensors, keys) {
-  if (!Array.isArray(sensors) || !sensors.length) return null;
-  for (const s of sensors) {
-    const name = s.Name ?? s.name ?? '';
-    if (keys.some(k => name.toLowerCase().includes(k.toLowerCase()))) {
-      const v = s.Value ?? s.value ?? s.V ?? s.v;
-      if (v != null) return fmtNum(v);
-    }
-  }
-  return null;
-}
-
-// ─── Выбор рейса → загрузка трека ─────────────────────────────────────────────
-async function selectTrip(idx, rowEl, trip) {
-  state.selectedTrip = idx;
-  document.querySelectorAll('#trips-tbody tr').forEach(r => r.classList.remove('selected'));
-  rowEl.classList.add('selected');
-
-  clearTrack();
-
-  const bt = trip.BT ?? trip.BeginTime ?? trip.beginTime ?? trip.SD ?? '';
-  const et = trip.ET ?? trip.EndTime   ?? trip.endTime   ?? trip.ED ?? '';
-  if (!bt || !et) return;
-
-  // Показать индикатор загрузки
-  document.getElementById('map-loading').hidden = false;
-
-  const params = new URLSearchParams({
-    schemaId:    state.schemaId,
-    deviceId:    state.selectedId,
-    from:        bt,
-    to:          et,
-    splitterIdx: state.splitterIdx,
-  });
-
-  const data = await apiFetch(`${AG}/track?${params}`);
-  document.getElementById('map-loading').hidden = true;
-
-  const points = data?.track || [];
-  if (!points.length) {
-    showMapInfo('Трек не найден для данного рейса');
-    return;
-  }
-
-  drawTrack(points, bt, et);
-}
-
-function drawTrack(points, bt, et) {
-  const map = state.map;
-  const latLngs = points
-    .map(p => {
-      const lat = p.Lat ?? p.lat;
-      const lng = p.Lng ?? p.lng ?? p.Lon ?? p.lon;
-      return (lat && lng) ? [lat, lng] : null;
-    })
-    .filter(Boolean);
-
-  if (!latLngs.length) return;
-
-  // Рисуем линию маршрута
-  state.trackLayer = L.polyline(latLngs, { color: '#1976d2', weight: 4, opacity: .85, lineJoin: 'round' }).addTo(map);
-
-  // Маркер начала (зелёный)
-  const startIcon = L.divIcon({
-    className: '',
-    html: '<div style="width:14px;height:14px;border-radius:50%;background:#22c55e;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4)"></div>',
-    iconSize: [14, 14], iconAnchor: [7, 7],
-  });
-  // Маркер конца (красный)
-  const endIcon = L.divIcon({
-    className: '',
-    html: '<div style="width:14px;height:14px;border-radius:50%;background:#ef4444;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4)"></div>',
-    iconSize: [14, 14], iconAnchor: [7, 7],
-  });
-
-  state.markerStart = L.marker(latLngs[0], { icon: startIcon }).addTo(map)
-    .bindPopup(`<b>Начало рейса</b><br>${fmtDateTime(bt)}`);
-  state.markerEnd = L.marker(latLngs[latLngs.length - 1], { icon: endIcon }).addTo(map)
-    .bindPopup(`<b>Конец рейса</b><br>${fmtDateTime(et)}`);
-
-  map.fitBounds(state.trackLayer.getBounds(), { padding: [40, 40] });
-
-  const info = `${fmtDateTime(bt)} → ${fmtTime(et)} · ${points.length} точек`;
-  showMapInfo(info);
-}
-
-function clearTrack() {
-  const map = state.map;
-  if (state.trackLayer)   { map.removeLayer(state.trackLayer);  state.trackLayer  = null; }
-  if (state.markerStart)  { map.removeLayer(state.markerStart); state.markerStart = null; }
-  if (state.markerEnd)    { map.removeLayer(state.markerEnd);   state.markerEnd   = null; }
-  document.getElementById('map-info-bar').hidden = true;
-}
-
-function showMapInfo(text) {
-  const bar = document.getElementById('map-info-bar');
-  document.getElementById('map-info-trip').textContent = text;
-  bar.hidden = false;
-}
-
-// ─── Разделитель (изменение высоты рейсов ↕ карты) ───────────────────────────
-function initDragHandle() {
-  const handle    = document.getElementById('drag-handle');
-  const container = document.getElementById('split-container');
-  let dragging = false, startY = 0, startH = 0;
-
-  handle.addEventListener('mousedown', e => {
-    dragging = true;
-    startY = e.clientY;
-    startH = document.getElementById('trips-pane').offsetHeight;
-    document.body.style.cursor = 'row-resize';
-    document.body.style.userSelect = 'none';
-  });
-
-  document.addEventListener('mousemove', e => {
-    if (!dragging) return;
-    const delta  = e.clientY - startY;
-    const newH   = Math.max(80, Math.min(startH + delta, container.clientHeight - 120));
-    document.documentElement.style.setProperty('--trips-h', newH + 'px');
-  });
-
-  document.addEventListener('mouseup', () => {
-    if (!dragging) return;
-    dragging = false;
-    document.body.style.cursor = '';
-    document.body.style.userSelect = '';
-    state.map?.invalidateSize();
-  });
 }
 
 // ─── Сворачивание боковой панели ──────────────────────────────────────────────
@@ -763,92 +482,6 @@ function initRefresh() {
   state.refreshTimer = setInterval(refreshAll, REFRESH_MS);
 }
 
-// ─── Кнопка очистки карты ─────────────────────────────────────────────────────
-function initMapClear() {
-  document.getElementById('map-clear-btn').addEventListener('click', () => {
-    clearTrack();
-    document.querySelectorAll('#trips-tbody tr').forEach(r => r.classList.remove('selected'));
-    state.selectedTrip = null;
-  });
-}
-
-// ─── Экспорт ──────────────────────────────────────────────────────────────────
-function resetTripsUI() {
-  document.getElementById('trips-vehicle-info').hidden = true;
-  document.getElementById('trips-title').textContent = 'Рейсы';
-  document.getElementById('trips-empty').innerHTML = `
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:48px;height:48px;opacity:.25"><rect x="1" y="3" width="15" height="13" rx="1"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-    <p>Выберите транспортное средство<br>для просмотра рейсов</p>`;
-  document.getElementById('trips-empty').hidden = false;
-  document.getElementById('trips-table').hidden = true;
-  document.getElementById('trips-tbody').innerHTML = '';
-  document.getElementById('trips-tfoot').innerHTML = '';
-}
-
-function initExport() {
-  document.getElementById('btn-export-csv').addEventListener('click', exportCSV);
-  document.getElementById('btn-export-excel').addEventListener('click', exportExcel);
-  document.getElementById('btn-export-pdf').addEventListener('click', exportPDF);
-}
-
-function tripsToRows() {
-  if (!state.trips.length) return [];
-  return state.trips.map((t, i) => ({
-    '№': i + 1,
-    'Начало':    fmtDateTime(t.BT ?? t.BeginTime ?? ''),
-    'Конец':     fmtDateTime(t.ET ?? t.EndTime   ?? ''),
-    'Пробег':    fmtNum(t.M  ?? t.Mileage   ?? null),
-    'V макс':    fmtNum(t.MaxSpeed ?? t.Mxs ?? null, 0),
-    'V ср':      fmtNum(t.AvgSpeed ?? t.Avs ?? null, 0),
-    'Откуда':    t.SA ?? t.StartAddress ?? '',
-    'Куда':      t.EA ?? t.EndAddress   ?? '',
-  }));
-}
-
-function exportCSV() {
-  const rows = tripsToRows();
-  if (!rows.length) return alert('Нет данных для экспорта');
-  const header = Object.keys(rows[0]).join(';');
-  const body   = rows.map(r => Object.values(r).join(';')).join('\n');
-  const blob   = new Blob(['﻿' + header + '\n' + body], { type: 'text/csv;charset=utf-8;' });
-  downloadBlob(blob, `trips_${state.selectedName.replace(/[^а-яa-z0-9]/gi, '_')}.csv`);
-}
-
-function exportExcel() {
-  const rows = tripsToRows();
-  if (!rows.length) return alert('Нет данных для экспорта');
-  const header = Object.keys(rows[0]).join('\t');
-  const body   = rows.map(r => Object.values(r).join('\t')).join('\n');
-  const blob   = new Blob(['﻿' + header + '\n' + body], { type: 'application/vnd.ms-excel;charset=utf-8;' });
-  downloadBlob(blob, `trips_${state.selectedName.replace(/[^а-яa-z0-9]/gi, '_')}.xls`);
-}
-
-function exportPDF() {
-  const rows = tripsToRows();
-  if (!rows.length) return alert('Нет данных для экспорта');
-  const win = window.open('', '_blank');
-  const headers = Object.keys(rows[0]).map(k => `<th>${k}</th>`).join('');
-  const body    = rows.map(r => '<tr>' + Object.values(r).map(v => `<td>${v}</td>`).join('') + '</tr>').join('');
-  win.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8">
-    <title>Рейсы — ${state.selectedName}</title>
-    <style>body{font-family:Arial,sans-serif;font-size:11px;padding:16px}
-      h2{margin-bottom:8px;font-size:14px}
-      table{border-collapse:collapse;width:100%}
-      th,td{border:1px solid #ccc;padding:4px 6px;text-align:left}
-      th{background:#1976d2;color:#fff}</style></head>
-    <body><h2>Рейсы — ${state.selectedName}</h2>
-    <table><thead><tr>${headers}</tr></thead><tbody>${body}</tbody></table>
-    <script>window.print();<\/script></body></html>`);
-  win.document.close();
-}
-
-function downloadBlob(blob, filename) {
-  const url = URL.createObjectURL(blob);
-  const a   = document.createElement('a');
-  a.href = url; a.download = filename; a.click();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
-}
-
 // ─── Меню пользователя ────────────────────────────────────────────────────────
 function toggleUserMenu() {
   document.getElementById('user-dropdown').classList.toggle('open');
@@ -871,15 +504,8 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('topbar-username').textContent = displayName;
   }
 
-  // Установить сегодня как период по умолчанию
-  applyShift(); // устанавливает dateFrom/dateTo на сегодня
-
-  // Синхронная инициализация элементов управления
-  initDragHandle();
   initSidebar();
   initSearch();
-  initMapClear();
-  initExport();
 
   // Откладываем инициализацию карты и загрузку данных до завершения браузерной раскладки.
   // Двойной requestAnimationFrame гарантирует, что стили вычислены и элементы получили размеры.

@@ -3,38 +3,82 @@
 /* Hero */
 .prj-hero {
     position: relative;
-    min-height: 420px;
+    min-height: 480px;
     display: flex; align-items: center; justify-content: center;
-    text-align: center;
     overflow: hidden;
-    padding: 140px 2rem 80px;
+    padding: 150px 3rem 90px;
+    text-align: left;
 }
 .prj-hero-bg {
     position: absolute; inset: 0;
-    background: linear-gradient(135deg, #080f1c 0%, #0f1e38 60%, #0d2137 100%);
+    background: linear-gradient(135deg, #060d1a 0%, #0c1a30 55%, #0d2137 100%);
 }
 .prj-hero-bg::after {
     content: '';
     position: absolute; inset: 0;
-    background: radial-gradient(ellipse at 60% 50%, rgba(25,118,210,0.18) 0%, transparent 70%);
+    background: radial-gradient(ellipse at 70% 40%, rgba(25,118,210,0.15) 0%, transparent 65%);
 }
-.prj-hero-content { position: relative; z-index: 1; }
-.prj-hero-over {
+.prj-hero-content {
+    position: relative; z-index: 1;
+    width: 100%; max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Badge */
+.prj-hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(25,118,210,0.12);
+    border: 1px solid rgba(25,118,210,0.35);
+    border-radius: 50px;
+    padding: 6px 16px;
     font-family: var(--font-nav); font-size: 0.72rem; font-weight: 700;
-    letter-spacing: 0.18em; color: #1976d2; text-transform: uppercase;
-    margin-bottom: 1rem;
+    letter-spacing: 0.12em; color: #90caf9;
+    text-transform: uppercase;
+    margin-bottom: 2rem;
 }
-.prj-hero h1 {
+.prj-hero-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: #1976d2;
+    box-shadow: 0 0 0 3px rgba(25,118,210,0.35);
+    flex-shrink: 0;
+}
+
+/* Title */
+.prj-hero-title {
+    display: flex; flex-direction: column;
+    gap: 0; margin-bottom: 2rem;
+}
+.prj-title-line1 {
     font-family: var(--font-nav);
-    font-size: clamp(2rem, 5vw, 3.4rem);
-    font-weight: 800; color: #fff;
-    letter-spacing: -0.02em; line-height: 1.1;
-    margin-bottom: 1.2rem;
+    font-size: clamp(3rem, 6.5vw, 7rem);
+    font-weight: 300;
+    color: rgba(255,255,255,0.35);
+    letter-spacing: -0.03em;
+    line-height: 1.0;
+    display: block;
 }
-.prj-hero p {
-    color: rgba(255,255,255,0.55);
-    font-size: 1.05rem; max-width: 520px; margin: 0 auto;
+.prj-title-line2 {
+    font-family: var(--font-nav);
+    font-size: clamp(3rem, 6.5vw, 7rem);
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+    display: block;
+}
+.prj-title-amp {
+    color: #1976d2;
+    font-weight: 300;
+}
+
+/* Sub */
+.prj-hero-sub {
+    color: rgba(255,255,255,0.45);
+    font-size: 1rem;
     line-height: 1.6;
+    max-width: 480px;
+    border-left: 2px solid rgba(25,118,210,0.5);
+    padding-left: 1rem;
 }
 
 /* Filters */
@@ -168,45 +212,106 @@
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* Клиенты */
-.prj-clients {
-    background: #fff;
-    padding: 70px 2rem;
-    border-top: 1px solid #e8ecf0;
+/* Нам доверяют */
+.prj-trust {
+    background: linear-gradient(180deg, #060d1a 0%, #0c1a30 100%);
+    padding: 90px 2rem 80px;
+    position: relative;
+    overflow: hidden;
 }
-.prj-clients-inner { max-width: 1100px; margin: 0 auto; }
-.prj-clients-head { text-align: center; margin-bottom: 48px; }
-.prj-clients-over {
-    font-family: var(--font-nav); font-size: 0.72rem; font-weight: 700;
-    letter-spacing: 0.18em; color: #1976d2; text-transform: uppercase;
-    margin-bottom: 0.75rem;
+.prj-trust::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(25,118,210,0.12) 0%, transparent 65%);
+    pointer-events: none;
 }
-.prj-clients-head h2 {
-    font-family: var(--font-nav); font-size: clamp(1.5rem, 3vw, 2.2rem);
-    font-weight: 800; color: #0d2137; letter-spacing: -0.02em;
+.prj-trust-inner { max-width: 1100px; margin: 0 auto; position: relative; z-index: 1; }
+
+/* Заголовок */
+.prj-trust-head { text-align: center; margin-bottom: 56px; }
+.prj-trust-over {
+    display: inline-block;
+    font-family: var(--font-nav); font-size: 0.7rem; font-weight: 700;
+    letter-spacing: 0.2em; color: #90caf9; text-transform: uppercase;
+    background: rgba(25,118,210,0.12);
+    border: 1px solid rgba(25,118,210,0.3);
+    border-radius: 50px; padding: 5px 14px;
+    margin-bottom: 1.2rem;
 }
-.prj-logos-grid {
+.prj-trust-title {
+    font-family: var(--font-nav); font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 800; color: #fff;
+    letter-spacing: -0.02em; margin-bottom: 0.8rem;
+}
+.prj-trust-sub {
+    color: rgba(255,255,255,0.4); font-size: 0.95rem;
+    max-width: 460px; margin: 0 auto; line-height: 1.6;
+}
+
+/* Логотипы */
+.prj-trust-logos {
     display: flex; flex-wrap: wrap;
     align-items: center; justify-content: center;
-    gap: 32px 48px;
+    gap: 16px; margin-bottom: 64px;
+    min-height: 80px;
 }
-.prj-logo-item {
+.prj-trust-logo {
     display: flex; align-items: center; justify-content: center;
-    padding: 16px 24px;
-    border: 1px solid #e8ecf0; border-radius: 12px;
-    transition: box-shadow 0.2s, border-color 0.2s;
+    padding: 18px 28px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    transition: background 0.25s, border-color 0.25s, transform 0.25s;
+    cursor: default;
 }
-.prj-logo-item:hover { border-color: #1976d2; box-shadow: 0 4px 16px rgba(25,118,210,0.1); }
-.prj-logo-item img {
-    height: 36px; width: auto; max-width: 140px;
+.prj-trust-logo:hover {
+    background: rgba(25,118,210,0.1);
+    border-color: rgba(25,118,210,0.4);
+    transform: translateY(-2px);
+}
+.prj-trust-logo img {
+    height: 38px; width: auto; max-width: 150px;
     object-fit: contain;
-    filter: grayscale(1) opacity(0.5);
+    filter: grayscale(1) brightness(2) opacity(0.45);
     transition: filter 0.25s;
 }
-.prj-logo-item:hover img { filter: grayscale(0) opacity(1); }
-.prj-logo-name {
+.prj-trust-logo:hover img { filter: grayscale(0) brightness(1) opacity(1); }
+.prj-trust-logo-name {
     font-family: var(--font-nav); font-size: 0.85rem; font-weight: 700;
-    color: #9aa4b2; letter-spacing: 0.04em;
+    color: rgba(255,255,255,0.4); letter-spacing: 0.06em;
+    transition: color 0.2s;
+}
+.prj-trust-logo:hover .prj-trust-logo-name { color: #fff; }
+.prj-trust-empty {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 12px; color: rgba(255,255,255,0.2);
+    padding: 32px;
+}
+.prj-trust-empty svg { width: 36px; height: 36px; opacity: 0.4; }
+.prj-trust-empty p { font-size: 0.88rem; text-align: center; }
+
+/* Статистика */
+.prj-trust-stats {
+    display: flex; align-items: center; justify-content: center;
+    gap: 0; flex-wrap: wrap;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    padding-top: 48px;
+}
+.prj-stat { text-align: center; padding: 0 48px; }
+.prj-stat-num {
+    display: block;
+    font-family: var(--font-nav); font-size: clamp(2rem, 4vw, 2.8rem);
+    font-weight: 800; color: #1976d2; letter-spacing: -0.03em;
+    line-height: 1;
+}
+.prj-stat-label {
+    display: block;
+    font-size: 0.8rem; color: rgba(255,255,255,0.4);
+    margin-top: 6px; letter-spacing: 0.02em;
+}
+.prj-stat-divider {
+    width: 1px; height: 48px;
+    background: rgba(255,255,255,0.1);
 }
 
 /* Модал проекта */

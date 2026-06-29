@@ -826,6 +826,37 @@
   </div>
 </div>
 
+<!-- ===== МОДАЛ ПРАВ ДОСТУПА ===== -->
+<div id="perms-modal" class="modal-backdrop" onclick="backdropClick(event, 'perms-modal')">
+  <div class="modal-card modal-card--perms">
+    <button class="modal-close" onclick="closePermsModal()">&times;</button>
+    <div class="modal-header">
+      <div class="modal-icon" style="background:rgba(25,118,210,0.1)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#1976d2" stroke-width="2">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        </svg>
+      </div>
+      <h2 class="modal-title">Права доступа</h2>
+      <p class="modal-sub" id="perms-modal-sub">Управление разрешениями пользователя</p>
+    </div>
+    <input type="hidden" id="perms-uid">
+    <input type="hidden" id="perms-urole">
+
+    <!-- Сотрудник -->
+    <div id="perms-employee-wrap">
+      <div class="perms-grid" id="perms-grid-employee"></div>
+    </div>
+
+    <!-- Клиент -->
+    <div id="perms-client-wrap" hidden>
+      <div class="perms-grid" id="perms-grid-client"></div>
+    </div>
+
+    <p id="perms-error" class="modal-msg modal-msg--error" hidden></p>
+    <button type="button" class="modal-btn" id="perms-submit" onclick="handleSavePerms()">СОХРАНИТЬ ПРАВА</button>
+  </div>
+</div>
+
 <script src="assets/js/notifications.js"></script>
 <script src="assets/js/admin.js"></script>
 </body>

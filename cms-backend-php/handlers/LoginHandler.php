@@ -31,15 +31,17 @@ if (!$user || !password_verify($password, $user['password'])) {
 }
 
 $token = Auth::generateToken($user);
+$perms = ($user['permissions'] ?? null) ? (json_decode($user['permissions'], true) ?? null) : null;
 
 echo json_encode([
     'success' => true,
     'token'   => $token,
     'user'    => [
-        'id'        => $user['id'],
-        'username'  => $user['username'],
-        'full_name' => $user['full_name'] ?? '',
-        'email'     => $user['email'],
-        'role'      => $user['role'],
+        'id'          => $user['id'],
+        'username'    => $user['username'],
+        'full_name'   => $user['full_name'] ?? '',
+        'email'       => $user['email'],
+        'role'        => $user['role'],
+        'permissions' => $perms,
     ],
 ], JSON_UNESCAPED_UNICODE);

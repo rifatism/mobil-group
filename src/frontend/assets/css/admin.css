@@ -504,6 +504,7 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); min-
 
 /* ===== WIDE MODAL (for news) ===== */
 .modal-card--wide { max-width: 640px; }
+.modal-card--perms { max-width: 760px; }
 .modal-field textarea {
   padding: 0.7rem 0.9rem;
   border: 1.5px solid var(--border); border-radius: 8px;
@@ -847,3 +848,39 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); min-
   font-size: 0.72rem; color: var(--text-muted);
   margin-top: 0.4rem;
 }
+/* ===== КНОПКА ПРАВА ===== */
+.btn-perms {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 5px 10px; border-radius: 6px; border: 1.5px solid rgba(25,118,210,0.3);
+  background: rgba(25,118,210,0.07); color: #1565c0;
+  font-size: 0.78rem; font-weight: 600; cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.btn-perms svg { width: 13px; height: 13px; }
+.btn-perms:hover { background: rgba(25,118,210,0.14); border-color: #1976d2; }
+
+/* ===== МОДАЛ ПРАВ ДОСТУПА ===== */
+.perms-grid { display: flex; flex-direction: column; gap: 4px; margin-bottom: 1.5rem; }
+.perm-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 14px; border-radius: 10px;
+  background: #f7f9fc; border: 1px solid #e8ecf0;
+  gap: 1rem; transition: opacity 0.2s;
+}
+.perm-row-label {
+  font-size: 0.88rem; font-weight: 600; color: #2a3a4a;
+  display: flex; flex-direction: column; gap: 2px; flex: 1;
+}
+.perm-note { font-size: 0.72rem; font-weight: 400; color: #9aa4b2; }
+.perm-row-options { display: flex; gap: 6px; flex-shrink: 0; }
+.perm-opt {
+  display: flex; align-items: center;
+  padding: 5px 10px; border-radius: 50px; cursor: pointer;
+  font-size: 0.75rem; font-weight: 600;
+  border: 1.5px solid #d8e2ec; background: #fff; color: #6b7a8d;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+  user-select: none;
+}
+.perm-opt input[type="radio"] { display: none; }
+.perm-opt:hover { border-color: #1976d2; color: #1976d2; }
+.perm-opt--active { border-color: #1976d2 !important; background: rgba(25,118,210,0.09) !important; color: #1565c0 !important; }

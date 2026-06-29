@@ -16,8 +16,15 @@
   }
 
   // ── Форматирование времени ────────────────────────────────────────────────
+  // MySQL возвращает "YYYY-MM-DD HH:MM:SS" без timezone — добавляем Z чтобы JS парсил как UTC
+  function parseUTC(dt) {
+    if (!dt) return new Date(NaN);
+    const s = String(dt).trim();
+    return new Date(s.includes('T') || s.includes('Z') || s.includes('+') ? s : s.replace(' ', 'T') + 'Z');
+  }
+
   function formatTime(dt) {
-    const d = new Date(dt);
+    const d = parseUTC(dt);
     const now = new Date();
     const diff = Math.floor((now - d) / 1000);
     if (diff < 60) return 'только что';

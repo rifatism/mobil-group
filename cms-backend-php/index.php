@@ -29,7 +29,7 @@ if ($uri === '/api/users') {
     exit;
 }
 
-// Users — удаление /api/users/{id}
+// Users — редактирование / удаление / права /api/users/{id}
 if (preg_match('#^/api/users/(\d+)$#', $uri, $m)) {
     $GLOBALS['route_id'] = (int)$m[1];
     require_once __DIR__ . '/handlers/UserHandler.php';

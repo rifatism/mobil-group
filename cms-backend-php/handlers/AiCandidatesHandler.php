@@ -3,7 +3,8 @@ require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../middleware/Auth.php';
 
 $token = Auth::require();
-Auth::requireRole($token, 'admin');
+Auth::requireRole($token, 'admin', 'employee');
+Auth::requirePermission($token, 'candidates', ['add', 'view']);
 
 $db     = (new Database())->getConnection();
 $method = $_SERVER['REQUEST_METHOD'];

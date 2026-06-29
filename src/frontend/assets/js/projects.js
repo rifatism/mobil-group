@@ -108,15 +108,20 @@ function renderClientLogos() {
         }, []);
 
     const wrap = document.getElementById('prj-logos-grid');
-    const section = document.getElementById('prj-clients-section');
 
-    if (!clients.length) { section.style.display = 'none'; return; }
+    // Счётчики
+    const statP = document.getElementById('prj-stat-projects');
+    const statC = document.getElementById('prj-stat-clients');
+    if (statP) statP.textContent = allProjects.length || '—';
+    if (statC) statC.textContent = clients.length || '—';
+
+    if (!clients.length) return;
 
     wrap.innerHTML = clients.map(c =>
-        `<div class="prj-logo-item">
+        `<div class="prj-trust-logo">
             ${c.logo
-                ? `<img src="${escH(c.logo)}" alt="${escH(c.name)}">`
-                : `<span class="prj-logo-name">${escH(c.name)}</span>`}
+                ? `<img src="${escH(c.logo)}" alt="${escH(c.name)}" title="${escH(c.name)}">`
+                : `<span class="prj-trust-logo-name">${escH(c.name)}</span>`}
         </div>`
     ).join('');
 }

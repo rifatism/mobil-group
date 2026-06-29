@@ -311,6 +311,123 @@ function updateTreeStatuses() {
   document.getElementById('stat-total').textContent   = state.vehicles.length;
 }
 
+// ─── Панель датчиков ──────────────────────────────────────────────────────────
+const FUEL_KEYWORDS = ['топлив', 'fuel', 'дут', 'бак', 'tank', 'расход', 'consumption', 'уровень'];
+
+function isFuelSensor(name) {
+  const n = (name || '').toLowerCase();
+  return FUEL_KEYWORDS.some(k => n.includes(k));
+}
+
+function fmtSensorValue(val, unit) {
+  if (val == null) return '—';
+  const n = Number(val);
+  if (isNaN(n)) return String(val);
+  const str = Number.isInteger(n) ? String(n) : n.toFixed(1);
+  return unit ? `${str} ${unit}` : str;
+}
+
+async function loadVehicleSensors(vehicleId) {
+  const pane    = document.getElementById('vinfo-pane');
+  const loading = document.getElementById('vinfo-loading');
+  const sensEl  = document.getElementById('vinfo-sensors');
+
+  pane.hidden = false;
+  loading.hidden = false;
+  sensEl.hidden  = true;
+  sensEl.innerHTML = '';
+
+  setTimeout(() => state.map?.invalidateSize(), 50);
+
+  const data = await apiFetch(`${AG}/sensors?schemaId=${encodeURIComponent(state.schemaId)}&deviceId=${encodeURIComponent(vehicleId)}`);
+
+  loading.hidden = true;
+
+  if (!data?.success) {
+    sensEl.innerHTML = '<span class="vinfo-no-sensors">Не удалось загрузить данные датчиков</span>';
+    sensEl.hidden = false;
+    console.warn('[sensors] error:', data);
+    return;
+  }
+
+  // Логируем сырые данные для диагностики
+  console.debug('[sensors] raw:', data._raw_online);
+  console.debug('[sensors] fields:', data.fields);
+  console.debug('[sensors] sensors:', data.sensors);
+  console.debug('[sensors] params:', data.params);
+
+  const cards = [];
+  const pos = state.positions[vehicleId];
+
+  // Адрес / местоположение
+  const addr = pos?.address || pos?.currLocation || data.fields?.CurrLocation?.value || '';
+  if (addr) {
+    cards.push(`<div class="vinfo-address">📍 ${addr}</div>`);
+  }
+
+  // Собираем все датчики из sensors[] и fields{}
+  const allSensors = [];
+
+  // Из массива Sensors (GetOnlineInfo)
+  (data.sensors || []).forEach(s => {
+    if (s.value != null && s.name) {
+      allSensors.push({ name: s.name, value: s.value, unit: s.unit || '', isFuel: isFuelSensor(s.name) });
+    }
+  });
+
+  // Из fields (Final-объект)
+  Object.values(data.fields || {}).forEach(f => {
+    const already = allSensors.some(s => s.name === f.label);
+    if (!already && f.value != null && f.label !== 'Местоположение') {
+      allSensors.push({ name: f.label, value: f.value, unit: f.unit || '', isFuel: isFuelSensor(f.label) });
+    }
+  });
+
+  // Из позиции (то что уже есть в parsePositions)
+  if (pos?.consumption != null) {
+    const already = allSensors.some(s => isFuelSensor(s.name) && s.unit.includes('ч'));
+    if (!already) allSensors.push({ name: 'Расход топлива', value: pos.consumption, unit: 'л/ч', isFuel: true });
+  }
+  if (pos?.canOdometer != null) {
+    const already = allSensors.some(s => s.name.toLowerCase().includes('одометр'));
+    if (!already) allSensors.push({ name: 'Одометр', value: pos.canOdometer, unit: 'км', isFuel: false });
+  }
+
+  if (!allSensors.length && !addr) {
+    sensEl.innerHTML = '<span class="vinfo-no-sensors">Датчики не обнаружены. Данные: ' + JSON.stringify(data.fields) + '</span>';
+    sensEl.hidden = false;
+    return;
+  }
+
+  // Сортируем: топливо первым
+  allSensors.sort((a, b) => (b.isFuel ? 1 : 0) - (a.isFuel ? 1 : 0));
+
+  const sensorCards = allSensors.map(s => `
+    <div class="vinfo-sensor${s.isFuel ? ' vinfo-sensor--fuel' : ''}">
+      <span class="vinfo-sensor-label">${s.name}</span>
+      <span class="vinfo-sensor-value">${fmtSensorValue(s.value, '')}</span>
+      ${s.unit ? `<span class="vinfo-sensor-unit">${s.unit}</span>` : ''}
+    </div>`).join('');
+
+  sensEl.innerHTML = (addr ? `<div class="vinfo-address">📍 ${addr}</div>` : '') + `<div style="display:flex;flex-wrap:wrap;gap:8px">${sensorCards}</div>`;
+  sensEl.hidden = false;
+}
+
+function closeVehicleInfo() {
+  document.getElementById('vinfo-pane').hidden = true;
+  setTimeout(() => state.map?.invalidateSize(), 50);
+}
+
+function updateVinfoHeader(v) {
+  const pos = state.positions[v.ID];
+  const st  = vehicleStatus(pos);
+  const stLabel = st === 'moving' ? 'В движении' : st === 'parked' ? 'Стоянка' : 'Нет связи';
+  const reg = v._regNum ? ` · ${v._regNum}` : '';
+  document.getElementById('vinfo-dot').className   = `vinfo-dot ${st}`;
+  document.getElementById('vinfo-name').textContent = v.Name + reg;
+  document.getElementById('vinfo-status').textContent = stLabel;
+}
+
 // ─── Выбор транспортного средства ─────────────────────────────────────────────
 function selectVehicle(v, el) {
   if (state.selectedId === v.ID) return;
@@ -321,6 +438,9 @@ function selectVehicle(v, el) {
   el.classList.add('selected');
 
   document.getElementById('tb-vehicle-name').textContent = v.Name;
+
+  updateVinfoHeader(v);
+  loadVehicleSensors(v.ID);
 
   const pos = state.positions[v.ID];
   const lat = pos ? Number(pos.lat) : null;

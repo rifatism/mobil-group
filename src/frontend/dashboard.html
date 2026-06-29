@@ -113,6 +113,25 @@
       </div>
     </div>
 
+    <!-- ── VEHICLE INFO PANEL ── -->
+    <div class="vinfo-pane" id="vinfo-pane" hidden>
+      <div class="vinfo-header">
+        <div class="vinfo-title-wrap">
+          <span class="vinfo-dot" id="vinfo-dot"></span>
+          <span class="vinfo-name" id="vinfo-name">—</span>
+          <span class="vinfo-status" id="vinfo-status"></span>
+        </div>
+        <button class="vinfo-close" onclick="closeVehicleInfo()" title="Закрыть">✕</button>
+      </div>
+      <div class="vinfo-body" id="vinfo-body">
+        <div class="vinfo-loading" id="vinfo-loading">
+          <div class="sb-spinner"></div>
+          <span>Загрузка данных...</span>
+        </div>
+        <div class="vinfo-sensors" id="vinfo-sensors" hidden></div>
+      </div>
+    </div>
+
     <div class="split-container" id="split-container">
 
       <!-- ── MAP PANEL ── -->
@@ -128,6 +147,6 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="assets/js/notifications.js"></script>
-<script src="assets/js/dashboard.js?v=20260629"></script>
+<script src="assets/js/dashboard.js?v=20260629b"></script>
 </body>
 </html>

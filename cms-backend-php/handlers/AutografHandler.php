@@ -163,6 +163,93 @@ if ($sub === '/positions' && $method === 'GET') {
     exit;
 }
 
+// GET /api/autograf/sensors?schemaId=X&deviceId=Y — датчики конкретного ТС
+if ($sub === '/sensors' && $method === 'GET') {
+    $schemaId = $_GET['schemaId'] ?? '';
+    $deviceId = $_GET['deviceId'] ?? '';
+    if (!$schemaId || !$deviceId) {
+        http_response_code(400);
+        json_out(['success' => false, 'message' => 'schemaId and deviceId required']);
+        exit;
+    }
+    $sid = ag_session();
+    ag_get(ag_base() . '/SelectSchema?session=' . rawurlencode($sid) . '&schemaID=' . rawurlencode($schemaId));
+
+    // GetOnlineInfo для одного устройства — возвращает полный объект с датчиками
+    $urlOnline = ag_base() . '/GetOnlineInfo?session=' . rawurlencode($sid)
+               . '&schemaID=' . rawurlencode($schemaId)
+               . '&IDs='      . rawurlencode($deviceId);
+    $online = ag_req_retry($urlOnline);
+
+    // GetPremiumParams — дополнительные параметры (топливо, CAN-шина и т.д.)
+    $urlParams = ag_base() . '/GetPremiumParams?session=' . rawurlencode($sid)
+               . '&schemaID=' . rawurlencode($schemaId);
+    $params = ag_req($urlParams, [$deviceId]);
+
+    // Извлекаем данные устройства из ответа
+    $deviceData = null;
+    if (is_array($online)) {
+        // Ответ может быть массивом или словарём
+        if (isset($online[$deviceId])) {
+            $deviceData = $online[$deviceId];
+        } elseif (isset($online[0])) {
+            // Массив — ищем по ID
+            foreach ($online as $item) {
+                $id = $item['ID'] ?? $item['Id'] ?? $item['DeviceId'] ?? '';
+                if ((string)$id === (string)$deviceId) { $deviceData = $item; break; }
+            }
+            if (!$deviceData) $deviceData = $online[0];
+        } else {
+            $deviceData = $online;
+        }
+    }
+
+    $deviceParams = $params[$deviceId] ?? $params[0] ?? null;
+
+    // Парсим датчики из разных полей ответа
+    $sensors = [];
+    $fin = $deviceData['Final'] ?? $deviceData['final'] ?? [];
+
+    // Датчики из массива Sensors
+    $rawSensors = $deviceData['Sensors'] ?? $deviceData['sensors'] ?? [];
+    foreach ($rawSensors as $s) {
+        $sensors[] = [
+            'name'  => $s['Name']  ?? $s['name']  ?? '',
+            'value' => $s['Value'] ?? $s['value'] ?? $s['V'] ?? null,
+            'unit'  => $s['Unit']  ?? $s['unit']  ?? '',
+        ];
+    }
+
+    // Известные поля топлива из Final
+    $fuelFields = [
+        'FuelLevel'      => ['label' => 'Уровень топлива', 'unit' => 'л'],
+        'FuelLevel1'     => ['label' => 'Уровень топлива 1', 'unit' => 'л'],
+        'FuelLevel2'     => ['label' => 'Уровень топлива 2', 'unit' => 'л'],
+        'Consumption1'   => ['label' => 'Расход топлива', 'unit' => 'л/ч'],
+        'Consumption2'   => ['label' => 'Расход топлива 2', 'unit' => 'л/ч'],
+        'TotalFuel'      => ['label' => 'Всего топлива', 'unit' => 'л'],
+        'CANFuelLevel'   => ['label' => 'Топливо (CAN)', 'unit' => 'л'],
+        'CANTotalDistance' => ['label' => 'Одометр', 'unit' => 'км'],
+        'CurrLocation'   => ['label' => 'Местоположение', 'unit' => ''],
+    ];
+    $knownFields = [];
+    foreach ($fuelFields as $key => $meta) {
+        if (isset($fin[$key]) && $fin[$key] !== null && $fin[$key] !== '') {
+            $knownFields[$key] = ['label' => $meta['label'], 'value' => $fin[$key], 'unit' => $meta['unit']];
+        }
+    }
+
+    json_out([
+        'success'      => true,
+        'deviceId'     => $deviceId,
+        'sensors'      => $sensors,       // массив датчиков {name, value, unit}
+        'fields'       => $knownFields,   // известные поля из Final
+        'params'       => $deviceParams,  // PremiumParams
+        '_raw_online'  => $deviceData,    // сырые данные для диагностики
+    ]);
+    exit;
+}
+
 // GET /api/autograf/trips?schemaId=X&deviceId=Y&from=ISO&to=ISO&splitterIdx=N — поездки
 if ($sub === '/trips' && $method === 'GET') {
     $schemaId    = $_GET['schemaId']    ?? '';

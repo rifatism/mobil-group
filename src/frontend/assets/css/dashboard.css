@@ -606,6 +606,65 @@ html, body { height: 100%; overflow: hidden; font-family: 'Inter', system-ui, sa
 }
 
 /* Map pane */
+/* ─── Vehicle info panel ──────────────────────────────────────────────────── */
+.vinfo-pane {
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  max-height: 220px;
+  overflow-y: auto;
+}
+.vinfo-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  background: var(--card);
+  z-index: 1;
+}
+.vinfo-title-wrap { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.vinfo-dot {
+  width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+  background: var(--offline);
+}
+.vinfo-dot.moving  { background: var(--moving); }
+.vinfo-dot.parked  { background: var(--parked); }
+.vinfo-dot.offline { background: var(--offline); }
+.vinfo-name {
+  font-weight: 600; font-size: 13px; color: var(--text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.vinfo-status { font-size: 11px; color: var(--text-sec); white-space: nowrap; }
+.vinfo-close {
+  background: none; border: none; cursor: pointer; font-size: 16px;
+  color: var(--text-sec); padding: 2px 6px; border-radius: 4px; flex-shrink: 0;
+  line-height: 1;
+}
+.vinfo-close:hover { background: #f3f4f6; color: var(--text); }
+.vinfo-body { padding: 10px 16px 12px; }
+.vinfo-loading { display: flex; align-items: center; gap: 8px; color: var(--text-sec); font-size: 12px; }
+.vinfo-sensors {
+  display: flex; flex-wrap: wrap; gap: 8px;
+}
+.vinfo-sensor {
+  display: flex; flex-direction: column;
+  background: #f8fafc; border: 1px solid var(--border); border-radius: 8px;
+  padding: 8px 14px; min-width: 120px;
+}
+.vinfo-sensor--fuel { border-color: #bbdefb; background: #e3f2fd; }
+.vinfo-sensor-label { font-size: 11px; color: var(--text-sec); margin-bottom: 2px; }
+.vinfo-sensor-value { font-size: 16px; font-weight: 700; color: var(--text); }
+.vinfo-sensor-unit  { font-size: 11px; color: var(--text-sec); }
+.vinfo-sensor--fuel .vinfo-sensor-value { color: #1565c0; }
+.vinfo-no-sensors   { font-size: 12px; color: var(--text-sec); font-style: italic; }
+.vinfo-address {
+  font-size: 12px; color: var(--text-sec); margin-bottom: 8px;
+  display: flex; align-items: flex-start; gap: 4px;
+}
+
 .map-pane {
   flex: 1;
   min-height: 0;        /* critical: allows flex child to shrink below content size */

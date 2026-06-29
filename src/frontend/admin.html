@@ -42,6 +42,10 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         Кандидаты
       </a>
+      <a class="nav-item" data-section="settings" onclick="switchSection('settings', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z"/><circle cx="9" cy="13" r="1"/><circle cx="15" cy="13" r="1"/></svg>
+        AI
+      </a>
     </nav>
 
     <a class="sidebar-back" href="index.html">
@@ -304,7 +308,56 @@
         </div>
       </section>
 
+      <!-- ===== РАЗДЕЛ: НАСТРОЙКИ ===== -->
+      <section id="section-settings" class="content-section">
+        <div class="settings-page">
+
+          <!-- AI HR карточка -->
+          <div class="settings-card">
+            <div class="settings-card-icon settings-card-icon--ai">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z"/><circle cx="9" cy="13" r="1"/><circle cx="15" cy="13" r="1"/></svg>
+            </div>
+            <div class="settings-card-body">
+              <div class="settings-card-title">AI Ассистент <span class="badge-beta">бета</span></div>
+              <div class="settings-card-desc">Автоматический чат-бот для первичного интервью кандидатов на вакансии. Использует Groq AI (LLaMA). При отключении кандидаты не смогут начать диалог с ботом.</div>
+              <div class="settings-card-meta" id="ai-hr-meta">Загрузка...</div>
+            </div>
+            <div class="settings-card-action">
+              <label class="ai-switch" id="ai-hr-switch-wrap" title="Включить / Отключить AI HR" onclick="event.preventDefault(); toggleAiHr()">
+                <input type="checkbox" id="ai-hr-checkbox" disabled>
+                <span class="ai-switch-track">
+                  <span class="ai-switch-thumb"></span>
+                </span>
+                <span class="ai-switch-label" id="ai-hr-toggle-label">ВКЛ</span>
+              </label>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
     </main>
+  </div>
+</div>
+
+<!-- ===== МОДАЛ ПОДТВЕРЖДЕНИЯ AI HR ===== -->
+<div id="aihr-confirm-modal" class="modal-backdrop" onclick="backdropClick(event,'aihr-confirm-modal')">
+  <div class="modal-card modal-card--sm">
+    <button class="modal-close" onclick="closeModal('aihr-confirm-modal')">&times;</button>
+    <div class="modal-header">
+      <div class="modal-icon modal-icon--warn" id="aihr-modal-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      </div>
+      <h2 class="modal-title" id="aihr-modal-title">Включить AI HR-ассистент?</h2>
+      <p class="modal-sub" id="aihr-modal-sub">Бот начнёт автоматически общаться с кандидатами.</p>
+    </div>
+    <div id="aihr-warn-box" class="aihr-warn-box" hidden>
+      <strong>Внимание!</strong> AI HR будет вести диалоги от имени компании МобилСервис, собирать контактные данные кандидатов и передавать их в раздел «Кандидаты». Убедитесь что вакансии актуальны и бот настроен корректно.
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn modal-btn--ghost" onclick="closeModal('aihr-confirm-modal')">Отмена</button>
+      <button class="modal-btn" id="aihr-confirm-btn" onclick="aiHrConfirmStep()">Продолжить</button>
+    </div>
   </div>
 </div>
 

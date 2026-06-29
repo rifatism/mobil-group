@@ -181,10 +181,29 @@ if ($sub === '/sensors' && $method === 'GET') {
                . '&IDs='      . rawurlencode($deviceId);
     $online = ag_req_retry($urlOnline);
 
-    // GetPremiumParams — дополнительные параметры (топливо, CAN-шина и т.д.)
-    $urlParams = ag_base() . '/GetPremiumParams?session=' . rawurlencode($sid)
-               . '&schemaID=' . rawurlencode($schemaId);
-    $params = ag_req($urlParams, [$deviceId]);
+    // GetPremiumParams — пробуем без splitter и с каждым переданным splitter ID
+    $splitterIds = array_values(array_filter(explode(',', $_GET['splitterIds'] ?? '')));
+    $splitterIdsToTry = array_merge([''], $splitterIds); // '' = без splitter (первый попытка)
+    $params        = [];
+    $paramsRaw     = [];
+    $paramsSplitter = '';
+    foreach ($splitterIdsToTry as $splId) {
+        $urlP = ag_base() . '/GetPremiumParams?session=' . rawurlencode($sid)
+              . '&schemaID=' . rawurlencode($schemaId);
+        if ($splId !== '') $urlP .= '&tripSplitterID=' . rawurlencode($splId);
+        $pRaw = ag_req_retry($urlP, [$deviceId]);
+        $paramsRaw[$splId ?: 'no_splitter'] = $pRaw;
+        // Ищем данные устройства в ответе
+        $pDev = $pRaw[$deviceId] ?? $pRaw[(int)$deviceId]
+             ?? (count($pRaw) === 1 ? reset($pRaw) : null);
+        if ($pDev !== null && !empty($pDev)) {
+            $params = $pRaw;
+            $paramsSplitter = $splId;
+            break;
+        }
+    }
+    $deviceParams = $params[$deviceId] ?? $params[(int)$deviceId]
+                 ?? (count($params) === 1 ? reset($params) : null);
 
     // Извлекаем данные устройства из ответа
     $deviceData = null;
@@ -220,17 +239,30 @@ if ($sub === '/sensors' && $method === 'GET') {
         ];
     }
 
-    // Известные поля топлива из Final
+    // Все ненулевые поля из Final — отдаём целиком для диагностики
+    $allFinalFields = [];
+    foreach ($fin as $key => $val) {
+        if ($val !== null && $val !== '' && $val !== 0 && $val !== 0.0) {
+            $allFinalFields[$key] = $val;
+        }
+    }
+
+    // Известные поля топлива из Final (для удобного доступа в JS)
     $fuelFields = [
-        'FuelLevel'      => ['label' => 'Уровень топлива', 'unit' => 'л'],
-        'FuelLevel1'     => ['label' => 'Уровень топлива 1', 'unit' => 'л'],
-        'FuelLevel2'     => ['label' => 'Уровень топлива 2', 'unit' => 'л'],
-        'Consumption1'   => ['label' => 'Расход топлива', 'unit' => 'л/ч'],
-        'Consumption2'   => ['label' => 'Расход топлива 2', 'unit' => 'л/ч'],
-        'TotalFuel'      => ['label' => 'Всего топлива', 'unit' => 'л'],
-        'CANFuelLevel'   => ['label' => 'Топливо (CAN)', 'unit' => 'л'],
-        'CANTotalDistance' => ['label' => 'Одометр', 'unit' => 'км'],
-        'CurrLocation'   => ['label' => 'Местоположение', 'unit' => ''],
+        'FuelLevel'        => ['label' => 'Уровень топлива',   'unit' => 'л'],
+        'FuelLevel1'       => ['label' => 'Бак 1 (уровень)',   'unit' => 'л'],
+        'FuelLevel2'       => ['label' => 'Бак 2 (уровень)',   'unit' => 'л'],
+        'FuelLevel3'       => ['label' => 'Бак 3 (уровень)',   'unit' => 'л'],
+        'TotalFuelLevel'   => ['label' => 'Общий бак',         'unit' => 'л'],
+        'TotalFuel'        => ['label' => 'Всего топлива',     'unit' => 'л'],
+        'CANFuelLevel'     => ['label' => 'Топливо (CAN)',     'unit' => 'л'],
+        'FuelSensor'       => ['label' => 'ДУТ',               'unit' => 'л'],
+        'FuelSensor1'      => ['label' => 'ДУТ 1',             'unit' => 'л'],
+        'FuelSensor2'      => ['label' => 'ДУТ 2',             'unit' => 'л'],
+        'Consumption1'     => ['label' => 'Расход (л/100км)', 'unit' => 'л/100км'],
+        'Consumption2'     => ['label' => 'Расход 2',         'unit' => 'л/ч'],
+        'CANTotalDistance' => ['label' => 'Одометр',          'unit' => 'км'],
+        'CurrLocation'     => ['label' => 'Местоположение',   'unit' => ''],
     ];
     $knownFields = [];
     foreach ($fuelFields as $key => $meta) {
@@ -239,13 +271,88 @@ if ($sub === '/sensors' && $method === 'GET') {
         }
     }
 
+    // После ag_req_retry сессия могла обновиться — берём актуальную
+    $sid = ag_session();
+
+    // Стратегия получения топлива: GetTripItems (табличные данные в точках трека)
+    // и GetTrips (рейсы + стоянки, в отличие от GetTripsOnly)
+    $today    = date('Y-m-d');
+    $dateFrom1y = date('Y-m-d', strtotime('-365 days')) . 'T00:00:00';
+    $dateTo   = $today . 'T23:59:59';
+    $dateFromToday = $today . 'T00:00:00';
+    $lastTrip   = null;
+    $tripItems  = [];
+    $tripsDebug = ['device_id' => $deviceId];
+
+    // 1. GetTripItems за сегодня — значения ДУТ в каждой GPS-точке трека
+    $urlItems = ag_base() . '/GetTripItems?session=' . rawurlencode($sid)
+              . '&schemaID=' . rawurlencode($schemaId)
+              . '&IDs='      . rawurlencode($deviceId)
+              . '&SD='       . rawurlencode($dateFromToday)
+              . '&ED='       . rawurlencode($dateTo);
+    $itemsRaw = ag_req($urlItems);
+    $itemsDev = $itemsRaw[$deviceId] ?? $itemsRaw[(int)$deviceId]
+             ?? (count($itemsRaw) === 1 ? reset($itemsRaw) : null);
+    $tripItems = $itemsDev['Items'] ?? $itemsDev['Rows'] ?? $itemsDev['Data'] ?? [];
+    $tripsDebug['trip_items'] = count($tripItems);
+    $tripsDebug['items_raw_preview'] = mb_substr(json_encode($itemsRaw), 0, 400);
+
+    // 2. GetTrips (рейсы + отрезки, включая стоянки) — 1 год
+    $urlGetTrips = ag_base() . '/GetTrips?session=' . rawurlencode($sid)
+                 . '&schemaID='          . rawurlencode($schemaId)
+                 . '&IDs='               . rawurlencode($deviceId)
+                 . '&SD='                . rawurlencode($dateFrom1y)
+                 . '&ED='                . rawurlencode($dateTo)
+                 . '&tripSplitterIndex=0';
+    $getTripsRaw = ag_req($urlGetTrips);
+    $getTripsdev = $getTripsRaw[$deviceId] ?? $getTripsRaw[(int)$deviceId]
+                ?? (count($getTripsRaw) === 1 ? reset($getTripsRaw) : null);
+    $allSegments  = $getTripsdev['Trips'] ?? $getTripsdev['Segments'] ?? $getTripsdev['Items'] ?? [];
+    $tripsDebug['get_trips_count'] = count($allSegments);
+    $tripsDebug['get_trips_keys']  = $getTripsdev ? array_keys($getTripsdev) : [];
+
+    $getTripsTotal = $getTripsdev['Total'] ?? null;
+
+    if (!empty($allSegments)) {
+        $lastTrip = end($allSegments);
+    }
+
+    // 3. GetCountersValues — счётчики техконтроля (могут включать уровень топлива)
+    $urlCounters = ag_base() . '/GetCountersValues?session=' . rawurlencode($sid)
+                 . '&schemaID=' . rawurlencode($schemaId)
+                 . '&IDs='      . rawurlencode($deviceId);
+    $countersRaw = ag_req($urlCounters);
+    $countersDev = $countersRaw[$deviceId] ?? $countersRaw[(int)$deviceId]
+                ?? (count($countersRaw) === 1 ? reset($countersRaw) : null);
+    $tripsDebug['counters_raw']    = mb_substr(json_encode($countersRaw), 0, 300);
+    $tripsDebug['get_trips_total'] = $getTripsTotal;
+
+    // Все ключи верхнего уровня deviceData (для поиска скрытых полей с топливом)
+    $rawOnlineKeys = $deviceData ? array_keys($deviceData) : [];
+
+    // Все числовые поля верхнего уровня deviceData (не вложенные объекты)
+    $rawOnlineFlat = [];
+    foreach ($deviceData ?? [] as $k => $v) {
+        if (!is_array($v) && !is_object($v) && $v !== null && $v !== '') {
+            $rawOnlineFlat[$k] = $v;
+        }
+    }
+
     json_out([
-        'success'      => true,
-        'deviceId'     => $deviceId,
-        'sensors'      => $sensors,       // массив датчиков {name, value, unit}
-        'fields'       => $knownFields,   // известные поля из Final
-        'params'       => $deviceParams,  // PremiumParams
-        '_raw_online'  => $deviceData,    // сырые данные для диагностики
+        'success'           => true,
+        'deviceId'          => $deviceId,
+        'sensors'           => $sensors,
+        'fields'            => $knownFields,
+        'final_all'         => $allFinalFields,
+        'params'            => $deviceParams,
+        'params_splitter'   => $paramsSplitter,
+        'params_raw'        => $paramsRaw,
+        'last_trip'         => $lastTrip,
+        'trip_items'        => array_slice($tripItems, -3),  // последние 3 точки трека
+        '_trips_debug'      => $tripsDebug,
+        '_raw_online'       => $deviceData,
+        '_raw_online_keys'  => $rawOnlineKeys,
+        '_raw_online_flat'  => $rawOnlineFlat,
     ]);
     exit;
 }
@@ -315,6 +422,35 @@ if ($sub === '/params' && $method === 'GET') {
     if ($splitterId !== '') $url .= '&tripSplitterID=' . rawurlencode($splitterId);
     $data = ag_req($url, $ids);
     json_out(['success' => true, 'params' => $data]);
+    exit;
+}
+
+// GET /api/autograf/fuel-debug?schemaId=X&deviceId=Y — сырой ответ GetTripsOnly для диагностики
+if ($sub === '/fuel-debug' && $method === 'GET') {
+    $schemaId = $_GET['schemaId'] ?? '';
+    $deviceId = $_GET['deviceId'] ?? '';
+    $sid = ag_session();
+    ag_get(ag_base() . '/SelectSchema?session=' . rawurlencode($sid) . '&schemaID=' . rawurlencode($schemaId));
+    $dateFrom = date('Y-m-d', strtotime('-7 days')) . 'T00:00:00';
+    $dateTo   = date('Y-m-d') . 'T23:59:59';
+    $url = ag_base() . '/GetTripsOnly?session=' . rawurlencode($sid)
+         . '&schemaID=' . rawurlencode($schemaId)
+         . '&IDs='      . rawurlencode($deviceId)
+         . '&SD='       . rawurlencode($dateFrom)
+         . '&ED='       . rawurlencode($dateTo)
+         . '&tripSplitterIndex=0';
+    $raw = ag_req($url);
+    // Берём первый попавшийся ключ с данными
+    $devData = $raw[$deviceId] ?? $raw[(int)$deviceId] ?? (count($raw) === 1 ? reset($raw) : null);
+    $trips   = $devData['Trips'] ?? [];
+    $last    = !empty($trips) ? end($trips) : null;
+    json_out([
+        'total_trips'       => count($trips),
+        'last_trip_keys'    => $last ? array_keys($last) : [],
+        'last_trip'         => $last,
+        'raw_keys'          => array_keys($raw),
+        '_raw_full'         => $raw,
+    ]);
     exit;
 }
 

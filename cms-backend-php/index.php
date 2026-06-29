@@ -67,6 +67,28 @@ if ($uri === '/api/career-contact' && $method === 'POST') {
     exit;
 }
 
+// Настройки (только admin)
+if ($uri === '/api/settings') {
+    require_once __DIR__ . '/handlers/SettingsHandler.php';
+    exit;
+}
+
+// Публичный статус AI HR (без авторизации)
+if ($uri === '/api/ai-status' && $method === 'GET') {
+    try {
+        require_once __DIR__ . '/config/database.php';
+        $db  = (new Database())->getConnection();
+        $st  = $db->prepare("SELECT `value` FROM `settings` WHERE `key` = 'ai_hr_enabled'");
+        $st->execute();
+        $row = $st->fetch();
+        $enabled = ($row === false) ? true : ($row['value'] === '1' || $row['value'] === 'true');
+    } catch (\Throwable $e) {
+        $enabled = true;
+    }
+    echo json_encode(['enabled' => $enabled]);
+    exit;
+}
+
 // AI HR-чат (Groq)
 if ($uri === '/api/ai-chat' && $method === 'POST') {
     require_once __DIR__ . '/handlers/AiChatHandler.php';

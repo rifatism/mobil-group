@@ -83,9 +83,9 @@ function logout() {
 }
 
 // ===== SECTIONS =====
-const SECTION_TITLES  = { users: 'Пользователи', news: 'Статьи', projects: 'Проекты', vacancies: 'Вакансии', knowledge: 'База знаний', candidates: 'Кандидаты' };
-const ADD_HANDLERS    = { users: 'openAddUser()', news: 'openAddNews()', projects: 'openAddProject()', vacancies: 'openAddVac()', knowledge: '', candidates: '' };
-const ADD_BTN_LABELS  = { users: 'Добавить', news: 'Добавить статью', projects: 'Добавить проект', vacancies: 'Добавить вакансию', knowledge: '', candidates: '' };
+const SECTION_TITLES  = { users: 'Пользователи', news: 'Статьи', projects: 'Проекты', vacancies: 'Вакансии', knowledge: 'База знаний', candidates: 'Кандидаты', settings: 'AI' };
+const ADD_HANDLERS    = { users: 'openAddUser()', news: 'openAddNews()', projects: 'openAddProject()', vacancies: 'openAddVac()', knowledge: '', candidates: '', settings: '' };
+const ADD_BTN_LABELS  = { users: 'Добавить', news: 'Добавить статью', projects: 'Добавить проект', vacancies: 'Добавить вакансию', knowledge: '', candidates: '', settings: '' };
 
 function switchSection(name, el) {
   document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
@@ -103,6 +103,7 @@ function switchSection(name, el) {
   if (name === 'vacancies')  loadVacancies();
   if (name === 'knowledge')  loadKnowledgeSection();
   if (name === 'candidates') { loadAiCandidates(); loadFormCandidates(); }
+  if (name === 'settings')   loadSettings();
   // Закрыть сайдбар на мобильном
   const sidebar  = document.querySelector('.sidebar');
   const backdrop = document.getElementById('sidebar-backdrop');
@@ -2038,4 +2039,101 @@ async function handleSavePerms() {
     errEl.textContent = 'Ошибка: ' + err.message;
     errEl.hidden = false;
   } finally { btn.disabled = false; }
+}
+
+// ===== SETTINGS =====
+let _aiHrEnabled = true;
+let _aiHrConfirmStep = 0;
+
+async function loadSettings() {
+  try {
+    const res  = await fetch(API + '/api/settings', { headers: { Authorization: 'Bearer ' + token() } });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.message || 'ошибка сервера');
+    const s  = data.settings ?? {};
+    _aiHrEnabled = s.ai_hr_enabled === undefined ? true : (s.ai_hr_enabled === '1' || s.ai_hr_enabled === 'true');
+    renderAiHrToggle();
+  } catch (e) {
+    document.getElementById('ai-hr-meta').textContent = 'Ошибка: ' + e.message;
+  }
+}
+
+function renderAiHrToggle() {
+  const cb    = document.getElementById('ai-hr-checkbox');
+  const label = document.getElementById('ai-hr-toggle-label');
+  const meta  = document.getElementById('ai-hr-meta');
+  cb.disabled = false;
+  cb.checked  = _aiHrEnabled;
+  label.textContent = _aiHrEnabled ? 'ВКЛ' : 'ВЫКЛ';
+  if (_aiHrEnabled) {
+    meta.innerHTML = '<span style="color:#2e7d32">● Активен</span> — бот доступен кандидатам на странице карьеры';
+  } else {
+    meta.innerHTML = '<span style="color:#c62828">● Отключён</span> — кандидаты видят форму заявки вместо чат-бота';
+  }
+}
+
+function toggleAiHr() {
+  _aiHrConfirmStep = 0;
+  const title   = document.getElementById('aihr-modal-title');
+  const sub     = document.getElementById('aihr-modal-sub');
+  const warnBox = document.getElementById('aihr-warn-box');
+  const btn     = document.getElementById('aihr-confirm-btn');
+  const icon    = document.getElementById('aihr-modal-icon');
+
+  if (_aiHrEnabled) {
+    title.textContent = 'Отключить AI HR-ассистент?';
+    sub.textContent   = 'Кандидаты перестанут видеть чат-бот на странице вакансий.';
+    warnBox.hidden    = true;
+    btn.textContent   = 'Отключить';
+    btn.className     = 'modal-btn modal-btn--danger';
+    icon.className    = 'modal-icon modal-icon--danger';
+    _aiHrConfirmStep  = 2;
+  } else {
+    title.textContent = 'Включить AI HR-ассистент?';
+    sub.textContent   = 'Бот начнёт автоматически общаться с кандидатами от имени компании.';
+    warnBox.hidden    = true;
+    btn.textContent   = 'Продолжить';
+    btn.className     = 'modal-btn';
+    icon.className    = 'modal-icon modal-icon--warn';
+    _aiHrConfirmStep  = 1;
+  }
+  openModal('aihr-confirm-modal');
+}
+
+function aiHrConfirmStep() {
+  if (_aiHrConfirmStep === 1) {
+    // Шаг 2 — показываем предупреждение и меняем кнопку
+    document.getElementById('aihr-warn-box').hidden    = false;
+    document.getElementById('aihr-modal-title').textContent = 'Подтвердите включение';
+    document.getElementById('aihr-modal-sub').textContent   = 'Прочитайте предупреждение ниже перед включением.';
+    document.getElementById('aihr-confirm-btn').textContent = 'Да, включить бота';
+    document.getElementById('aihr-confirm-btn').className   = 'modal-btn';
+    _aiHrConfirmStep = 2;
+  } else if (_aiHrConfirmStep === 2) {
+    saveAiHrSetting(!_aiHrEnabled);
+    closeModal('aihr-confirm-modal');
+  }
+}
+
+async function saveAiHrSetting(enabled) {
+  const cb = document.getElementById('ai-hr-checkbox');
+  cb.disabled = true;
+  try {
+    const res = await fetch(API + '/api/settings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token() },
+      body: JSON.stringify({ key: 'ai_hr_enabled', value: enabled ? '1' : '0' })
+    });
+    const data = await res.json();
+    if (data.success) {
+      _aiHrEnabled = enabled;
+      renderAiHrToggle();
+    } else {
+      alert('Ошибка сохранения: ' + (data.message || 'неизвестная ошибка'));
+      cb.disabled = false;
+    }
+  } catch (e) {
+    alert('Ошибка соединения с сервером: ' + e.message);
+    cb.disabled = false;
+  }
 }

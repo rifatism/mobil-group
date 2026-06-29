@@ -9,6 +9,7 @@ let state = {
   schemaName:    '',
   groups:        [],
   vehicles:      [],
+  splitters:     [],
   positions:     {},
   selectedId:    null,
   selectedName:  '',
@@ -61,10 +62,10 @@ function fmtNum(v, dec = 1) {
 // ─── Инициализация карты ──────────────────────────────────────────────────────
 function initMap() {
   const container = document.getElementById('db-map');
-  state.map = L.map(container, { zoomControl: false }).setView([62, 70], 5);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© OpenStreetMap',
+  state.map = L.map(container, { zoomControl: false, attributionControl: false }).setView([62, 70], 5);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
     maxZoom: 19,
+    subdomains: 'abcd',
   }).addTo(state.map);
   L.control.zoom({ position: 'topright' }).addTo(state.map);
 }
@@ -312,10 +313,37 @@ function updateTreeStatuses() {
 }
 
 // ─── Панель датчиков ──────────────────────────────────────────────────────────
+
+// Маппинг полей Final-объекта AutoGRAF → читаемые названия
+// D1/D2/Sensor1 — дискретные/аналоговые входы (0 или 1), НЕ датчики топлива
+const FINAL_FIELD_MAP = {
+  'FuelLevel':     { label: 'Уровень топлива', unit: 'л',       isFuel: true  },
+  'FuelLevel1':    { label: 'Бак 1',           unit: 'л',       isFuel: true  },
+  'FuelLevel2':    { label: 'Бак 2',           unit: 'л',       isFuel: true  },
+  'FuelLevel3':    { label: 'Бак 3',           unit: 'л',       isFuel: true  },
+  'CANFuelLevel':  { label: 'Топливо (CAN)',   unit: 'л',       isFuel: true  },
+  'TotalFuelLevel':{ label: 'Общий бак',       unit: 'л',       isFuel: true  },
+  'TotalFuel':     { label: 'Всего топлива',   unit: 'л',       isFuel: true  },
+  'FuelSensor':    { label: 'ДУТ',             unit: 'л',       isFuel: true  },
+  'FuelSensor1':   { label: 'ДУТ 1',           unit: 'л',       isFuel: true  },
+  'FuelSensor2':   { label: 'ДУТ 2',           unit: 'л',       isFuel: true  },
+  'Consumption1':  { label: 'Расход',          unit: 'л/100км', isFuel: true  },
+  'Consumption2':  { label: 'Расход 2',        unit: 'л/ч',     isFuel: true  },
+  'CANTotalDistance':{ label: 'Одометр',       unit: 'км',      isFuel: false },
+  'AverageSpeed':  { label: 'Ср. скорость',    unit: 'км/ч',    isFuel: false },
+  'MaxSpeed':      { label: 'Макс. скорость',  unit: 'км/ч',    isFuel: false },
+  'Motion':        { label: 'Движение',        unit: 'мин',     isFuel: false },
+  'ParkCount':     { label: 'Стоянок',         unit: '',        isFuel: false },
+  'Power':         { label: 'Питание',         unit: 'В',       isFuel: false },
+  'Signal':        { label: 'Сигнал',          unit: '%',       isFuel: false },
+};
+
 const FUEL_KEYWORDS = ['топлив', 'fuel', 'дут', 'бак', 'tank', 'расход', 'consumption', 'уровень'];
 
 function isFuelSensor(name) {
-  const n = (name || '').toLowerCase();
+  const n = (name || '').toLowerCase().trim();
+  if (/^fuelsensor\d*$/.test(n)) return true;
+  if (/^fuellevel\d*$/.test(n)) return true;
   return FUEL_KEYWORDS.some(k => n.includes(k));
 }
 
@@ -339,7 +367,11 @@ async function loadVehicleSensors(vehicleId) {
 
   setTimeout(() => state.map?.invalidateSize(), 50);
 
-  const data = await apiFetch(`${AG}/sensors?schemaId=${encodeURIComponent(state.schemaId)}&deviceId=${encodeURIComponent(vehicleId)}`);
+  // Передаём все splitter ID через запятую — бэкенд попробует каждый в GetPremiumParams
+  const splitterIds = state.splitters.map(s => s.ID ?? s.Id ?? '').filter(Boolean).join(',');
+  const sensorsUrl  = `${AG}/sensors?schemaId=${encodeURIComponent(state.schemaId)}&deviceId=${encodeURIComponent(vehicleId)}`
+                    + (splitterIds ? `&splitterIds=${encodeURIComponent(splitterIds)}` : '');
+  const data = await apiFetch(sensorsUrl);
 
   loading.hidden = true;
 
@@ -350,42 +382,51 @@ async function loadVehicleSensors(vehicleId) {
     return;
   }
 
-  // Логируем сырые данные для диагностики
-  console.debug('[sensors] raw:', data._raw_online);
-  console.debug('[sensors] fields:', data.fields);
-  console.debug('[sensors] sensors:', data.sensors);
-  console.debug('[sensors] params:', data.params);
+  // Полный лог для диагностики
+  console.group('[sensors] ' + vehicleId);
+  console.debug('sensors[]:', data.sensors);
+  console.debug('fields{}:', data.fields);
+  console.debug('final_all:', data.final_all);
+  console.debug('params:', data.params);
+  console.debug('full raw:', data._raw_online);
+  console.groupEnd();
 
-  const cards = [];
   const pos = state.positions[vehicleId];
-
-  // Адрес / местоположение
-  const addr = pos?.address || pos?.currLocation || data.fields?.CurrLocation?.value || '';
-  if (addr) {
-    cards.push(`<div class="vinfo-address">📍 ${addr}</div>`);
-  }
-
-  // Собираем все датчики из sensors[] и fields{}
   const allSensors = [];
 
-  // Из массива Sensors (GetOnlineInfo)
+  // 1. Из массива sensors[] (GetOnlineInfo → Sensors)
   (data.sensors || []).forEach(s => {
     if (s.value != null && s.name) {
       allSensors.push({ name: s.name, value: s.value, unit: s.unit || '', isFuel: isFuelSensor(s.name) });
     }
   });
 
-  // Из fields (Final-объект)
+  // 2. Из fields{} (известные поля Final-объекта)
   Object.values(data.fields || {}).forEach(f => {
-    const already = allSensors.some(s => s.name === f.label);
-    if (!already && f.value != null && f.label !== 'Местоположение') {
-      allSensors.push({ name: f.label, value: f.value, unit: f.unit || '', isFuel: isFuelSensor(f.label) });
+    if (f.value != null && f.label && f.label !== 'Местоположение') {
+      const already = allSensors.some(s => s.name === f.label);
+      if (!already) allSensors.push({ name: f.label, value: f.value, unit: f.unit || '', isFuel: isFuelSensor(f.label) });
     }
   });
 
-  // Из позиции (то что уже есть в parsePositions)
+  // 3. Из params (GetPremiumParams) — объект или массив
+  const prm = data.params;
+  if (prm && typeof prm === 'object') {
+    const entries = Array.isArray(prm) ? prm : Object.entries(prm).map(([k, v]) => ({ name: k, value: v }));
+    entries.forEach(p => {
+      const name  = p.Name ?? p.name ?? p.n ?? String(p[0] ?? '');
+      const value = p.Value ?? p.value ?? p.v ?? p[1] ?? null;
+      const unit  = p.Unit ?? p.unit ?? '';
+      if (name && value != null && !isNaN(Number(value)) && Number(value) > 0) {
+        const already = allSensors.some(s => s.name === name);
+        if (!already) allSensors.push({ name, value: Number(value), unit, isFuel: isFuelSensor(name) });
+      }
+    });
+  }
+
+  // 4. Из позиции (уже в state.positions из GetOnlineInfoAll)
   if (pos?.consumption != null) {
-    const already = allSensors.some(s => isFuelSensor(s.name) && s.unit.includes('ч'));
+    const already = allSensors.some(s => s.unit.includes('ч') && isFuelSensor(s.name));
     if (!already) allSensors.push({ name: 'Расход топлива', value: pos.consumption, unit: 'л/ч', isFuel: true });
   }
   if (pos?.canOdometer != null) {
@@ -393,11 +434,91 @@ async function loadVehicleSensors(vehicleId) {
     if (!already) allSensors.push({ name: 'Одометр', value: pos.canOdometer, unit: 'км', isFuel: false });
   }
 
-  if (!allSensors.length && !addr) {
-    sensEl.innerHTML = '<span class="vinfo-no-sensors">Датчики не обнаружены. Данные: ' + JSON.stringify(data.fields) + '</span>';
-    sensEl.hidden = false;
-    return;
+  // 5. Из final_all — через FINAL_FIELD_MAP (содержит D1, Sensor1 и прочие реальные поля AutoGRAF)
+  const finAll = data.final_all ?? {};
+  Object.entries(finAll).forEach(([key, rawVal]) => {
+    const meta = FINAL_FIELD_MAP[key];
+    if (!meta) return;
+    if (rawVal == null || rawVal === '') return;
+    const val = Number(rawVal);
+    if (isNaN(val)) return;
+    if (val === 0 && meta.isFuel) return;
+    const already = allSensors.some(s => s.name === meta.label);
+    if (!already) allSensors.push({ name: meta.label, value: val, unit: meta.unit, isFuel: meta.isFuel });
+  });
+
+  // 6. Из последнего рейса (GetTripsOnly) — именно здесь AutoGRAF хранит уровни ДУТ
+  const lastTrip = data.last_trip ?? null;
+  if (lastTrip) {
+    console.debug('[sensors] last_trip raw:', lastTrip);
+    // Перебираем все числовые поля последнего рейса — ищем топливо
+    const tripFuelMap = {
+      // Стандартные поля рейсов AutoGRAF
+      'PF': 'Бак (нач.)',  'VF': 'Бак (кон.)',
+      'PF1':'Бак 1 (нач.)','VF1':'Бак 1 (кон.)',
+      'PF2':'Бак 2 (нач.)','VF2':'Бак 2 (кон.)',
+      'VE': 'Расход',      'VE1':'Расход 1',
+      'Fc': 'Расход (л/ч)','F1': 'ДУТ 1',  'F2':'ДУТ 2',
+      // Если есть Cols[] — AutoGRAF иногда складывает туда сенсоры
+    };
+    Object.entries(tripFuelMap).forEach(([key, label]) => {
+      const v = lastTrip[key];
+      if (v != null && !isNaN(Number(v)) && Number(v) > 0) {
+        const isFuel = !label.includes('Расход') || true;
+        const already = allSensors.some(s => s.name === label);
+        if (!already) allSensors.push({ name: label, value: Number(v), unit: label.includes('Расход') ? 'л' : 'л', isFuel: true });
+      }
+    });
+
+    // Если в поле Cols[] есть массив — AutoGRAF может хранить значения колонок по индексам
+    // Пробуем взять первые числа — обычно это уровни топлива
+    const cols = lastTrip.Cols ?? lastTrip.cols ?? [];
+    if (Array.isArray(cols) && cols.length) {
+      console.debug('[sensors] trip Cols[]:', cols);
+    }
+
+    // Ищем любые числовые поля из рейса которые похожи на топливо (значение > 10, < 1500)
+    Object.entries(lastTrip).forEach(([key, v]) => {
+      if (tripFuelMap[key]) return; // уже обработали
+      const n = Number(v);
+      if (!isNaN(n) && n > 10 && n < 1500 && key !== 'Duration' && key !== 'Mileage') {
+        if (isFuelSensor(key) || /^(pf|vf|fc|f\d)/i.test(key)) {
+          const already = allSensors.some(s => s.name === key);
+          if (!already) allSensors.push({ name: key, value: n, unit: 'л', isFuel: true });
+        }
+      }
+    });
   }
+
+  // Адрес/местоположение
+  const raw = data._raw_online ?? {};
+  const fin = raw.Final ?? raw.final ?? {};
+  const addr = pos?.currLocation || pos?.address || fin.CurrLocation || finAll.CurrLocation || '';
+
+  // Статус двигателя
+  const vehicleState = raw.State != null ? Number(raw.State) : null;
+  const vehicleSpeed = parseFloat(raw.Speed ?? 0) || parseFloat(pos?.speed ?? 0);
+  const powerVal     = finAll.Power != null ? Number(finAll.Power) : null;
+
+  let engineOn = null;
+  if (powerVal !== null) {
+    // Power доступен — самый точный признак зажигания
+    engineOn = powerVal > 0;
+  } else if (vehicleState !== null) {
+    // Нет Power — используем State (0=стоянка, 1=движение) и скорость
+    engineOn = vehicleState > 0 || vehicleSpeed > 0.5;
+  } else if (pos != null) {
+    // Fallback: статус из карты (уже рассчитан)
+    const vStat = vehicleStatus(pos);
+    if (vStat === 'moving') engineOn = true;
+    else if (vStat === 'parked') engineOn = false;
+  }
+
+  const engineHtml = engineOn !== null ? `
+    <div class="vinfo-engine${engineOn ? ' vinfo-engine--on' : ' vinfo-engine--off'}">
+      <span class="vinfo-engine-dot"></span>
+      Двигатель: <strong>${engineOn ? 'ВКЛ' : 'ВЫКЛ'}</strong>
+    </div>` : '';
 
   // Сортируем: топливо первым
   allSensors.sort((a, b) => (b.isFuel ? 1 : 0) - (a.isFuel ? 1 : 0));
@@ -405,11 +526,18 @@ async function loadVehicleSensors(vehicleId) {
   const sensorCards = allSensors.map(s => `
     <div class="vinfo-sensor${s.isFuel ? ' vinfo-sensor--fuel' : ''}">
       <span class="vinfo-sensor-label">${s.name}</span>
-      <span class="vinfo-sensor-value">${fmtSensorValue(s.value, '')}</span>
+      <span class="vinfo-sensor-value">${fmtNum(Number(s.value), s.unit === 'км' ? 0 : 1)}</span>
       ${s.unit ? `<span class="vinfo-sensor-unit">${s.unit}</span>` : ''}
     </div>`).join('');
 
-  sensEl.innerHTML = (addr ? `<div class="vinfo-address">📍 ${addr}</div>` : '') + `<div style="display:flex;flex-wrap:wrap;gap:8px">${sensorCards}</div>`;
+  const noDataMsg = !allSensors.length
+    ? `<span class="vinfo-no-sensors">Нет данных датчиков</span>`
+    : '';
+
+  sensEl.innerHTML =
+    (addr ? `<div class="vinfo-address">📍 ${addr}</div>` : '') +
+    engineHtml +
+    (allSensors.length ? `<div style="display:flex;flex-wrap:wrap;gap:8px">${sensorCards}</div>` : noDataMsg);
   sensEl.hidden = false;
 }
 
@@ -515,8 +643,9 @@ async function loadVehicles() {
     return;
   }
 
-  state.groups   = data.groups   || [];
-  state.vehicles = data.vehicles || [];
+  state.groups    = data.groups    || [];
+  state.vehicles  = data.vehicles  || [];
+  state.splitters = data.splitters || [];
   console.log(`[vehicles] schema=${state.schemaId} groups=${state.groups.length} vehicles=${state.vehicles.length}`);
 
   try {

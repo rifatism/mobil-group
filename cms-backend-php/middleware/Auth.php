@@ -47,4 +47,38 @@ class Auth {
             exit;
         }
     }
+
+    // Получить permissions пользователя из БД
+    public static function getPermissions(object $token): array {
+        if ($token->role === 'admin') return [];
+        try {
+            $db   = (new Database())->getConnection();
+            $stmt = $db->prepare("SELECT permissions FROM users WHERE id = ?");
+            $stmt->execute([$token->uid]);
+            $row = $stmt->fetch();
+            return ($row && $row['permissions']) ? (json_decode($row['permissions'], true) ?? []) : [];
+        } catch (\Exception $e) {
+            return [];
+        }
+    }
+
+    // Проверить разрешение; admin всегда проходит; иначе 403
+    // $allowedLevels — массив допустимых значений, например ['add', 'view']
+    public static function requirePermission(object $token, string $key, array $allowedLevels): void {
+        if ($token->role === 'admin') return;
+        $perms = self::getPermissions($token);
+        $level = $perms[$key] ?? 'deny';
+        if (!in_array($level, $allowedLevels, true)) {
+            http_response_code(403);
+            echo json_encode(['success' => false, 'message' => 'Нет доступа к этому разделу'], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+    }
+
+    // Проверка без выхода — возвращает true/false
+    public static function hasPermission(object $token, string $key, array $allowedLevels): bool {
+        if ($token->role === 'admin') return true;
+        $perms = self::getPermissions($token);
+        return in_array($perms[$key] ?? 'deny', $allowedLevels, true);
+    }
 }

@@ -175,11 +175,18 @@ function clearSession() {
 
 const ROLE_LABELS = { admin: 'Администратор', employee: 'Сотрудник', client: 'Клиент' };
 
+function hasAnyPermission(user) {
+  if (user.role === 'admin') return true;
+  if (user.role !== 'employee') return false;
+  const perms = user.permissions || {};
+  return Object.values(perms).some(v => v !== 'deny');
+}
+
 function applySession(user) {
   const label = document.getElementById('btn-login-label');
   if (label) label.textContent = (user.full_name || user.username).toUpperCase();
   const adminLink = document.getElementById('cd-admin-link');
-  if (adminLink) adminLink.style.display = user.role === 'admin' ? '' : 'none';
+  if (adminLink) adminLink.style.display = hasAnyPermission(user) ? '' : 'none';
   const kbLink = document.getElementById('cd-knowledge-link');
   if (kbLink) kbLink.style.display = ['admin','employee'].includes(user.role) ? '' : 'none';
   const kbNav = document.getElementById('nav-knowledge-item');
@@ -483,7 +490,7 @@ function updateMobNav(user) {
     if (loginLink) loginLink.style.display = 'none';
 
     menu.innerHTML = `
-      ${user.role === 'admin' ? `<a href="admin.html">
+      ${hasAnyPermission(user) ? `<a href="admin.html">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
         Панель администратора</a>` : ''}
       <a href="profile.html">
@@ -527,3 +534,26 @@ const _origReset = typeof resetNavbar  === 'function' ? resetNavbar  : null;
 document.addEventListener('click', e => {
   if (e.target.classList.contains('mob-nav-backdrop')) toggleMobNav();
 });
+
+// Переключение языка: переходим на -en.html / обратно
+function toggleServicePanel(id) {
+  const panel = document.getElementById('panel-' + id);
+  if (!panel) return;
+  const isOpen = panel.classList.contains('active');
+  document.querySelectorAll('.cat-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.cat-item').forEach(c => c.classList.remove('cat-active'));
+  if (!isOpen) {
+    panel.classList.add('active');
+    document.getElementById('service-' + id).classList.add('cat-active');
+    setTimeout(() => panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50);
+  }
+}
+
+function toggleLang() {
+  const page = location.pathname.split('/').pop() || 'index.html';
+  if (page.endsWith('-en.html')) {
+    location.href = page.replace('-en.html', '.html');
+  } else {
+    location.href = page.replace('.html', '-en.html');
+  }
+}

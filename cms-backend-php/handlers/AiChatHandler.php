@@ -8,6 +8,23 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
+// Проверяем включён ли AI HR в настройках
+require_once __DIR__ . '/../config/database.php';
+try {
+    $db = (new Database())->getConnection();
+    $st = $db->prepare("SELECT `value` FROM `settings` WHERE `key` = 'ai_hr_enabled'");
+    $st->execute();
+    $row = $st->fetch();
+    $aiEnabled = ($row === false) ? true : ($row['value'] === '1' || $row['value'] === 'true');
+} catch (\Throwable $e) {
+    $aiEnabled = true; // если таблицы нет — по умолчанию включён
+}
+if (!$aiEnabled) {
+    http_response_code(503);
+    echo json_encode(['success' => false, 'message' => 'AI HR-ассистент временно отключён', 'disabled' => true], JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
 $data    = json_decode(file_get_contents('php://input'), true) ?? [];
 $message = trim($data['message'] ?? '');
 $history = is_array($data['history'] ?? null) ? $data['history'] : [];

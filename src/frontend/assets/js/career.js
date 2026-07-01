@@ -1,5 +1,11 @@
 const CR_API = 'http://localhost:8000';
 
+// Статус AI HR-ассистента — промис, await-им при каждом клике
+const _aiStatusPromise = fetch(CR_API + '/api/ai-status')
+  .then(r => r.json())
+  .then(d => d.enabled !== false)
+  .catch(() => true);
+
 // Навбар всегда белый на этой странице
 (function () {
   const nav = document.querySelector('.navbar');
@@ -111,13 +117,26 @@ function closeVacancyBtn() {
 }
 
 function scrollToApply() {
+  const vacancy = currentModalVacancy;
   closeVacancyBtn();
-  // Открываем AI-чат вместо прокрутки к форме
-  setTimeout(() => {
-    if (currentModalVacancy && typeof openAiChat === 'function') {
-      openAiChat(currentModalVacancy);
-    }
-  }, 280);
+  _aiStatusPromise.then(aiEnabled => {
+    setTimeout(() => {
+      if (aiEnabled && vacancy && typeof openAiChat === 'function') {
+        openAiChat(vacancy);
+      } else {
+        const applySection = document.getElementById('cr-apply');
+        if (applySection) applySection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        if (vacancy) {
+          const sel = document.getElementById('cr-vacancy');
+          if (sel) {
+            for (const opt of sel.options) {
+              if (opt.value == vacancy.id) { sel.value = opt.value; break; }
+            }
+          }
+        }
+      }
+    }, 280);
+  });
 }
 
 const COMPANY_PHONE     = '+7 (3452) 68-90-90';

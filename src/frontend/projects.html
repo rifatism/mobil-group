@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png" href="assets/images/icon.png">
-    <title>Статьи | МобилСервис</title>
+    <title>Проекты | МобилСервис</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/style.css">
-    <link rel="stylesheet" href="assets/css/news.css">
+    <link rel="stylesheet" href="assets/css/projects.css">
 </head>
 <body>
 
@@ -28,8 +28,8 @@
                 <a href="index.html#service-satellite" class="nav-drop-item">Спутниковая связь</a>
             </div>
         </li>
-        <li><a href="projects.html">ПРОЕКТЫ</a></li>
-        <li><a href="news.html" class="active">СТАТЬИ</a></li>
+        <li><a href="projects.html" class="active">ПРОЕКТЫ</a></li>
+        <li><a href="news.html">СТАТЬИ</a></li>
         <li><a href="career.html">КАРЬЕРА</a></li>
         <li id="nav-knowledge-item" style="display:none"><a href="knowledge.html">БАЗА ЗНАНИЙ</a></li>
     </ul>
@@ -38,10 +38,7 @@
         <a href="index.html#contact" class="btn-contacts">КОНТАКТЫ</a>
         <div id="client-dropdown-wrap" style="position:relative">
             <button id="btn-login-open" class="btn-login" onclick="loginBtnClick()">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="8" r="4"/>
-                    <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
-                </svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
                 <span id="btn-login-label">ВОЙТИ</span>
             </button>
             <div id="client-dropdown" class="client-dropdown">
@@ -95,8 +92,8 @@
                     <li><a href="index.html#service-satellite">Спутниковая связь</a></li>
                 </ul>
             </li>
-            <li><a href="projects.html">ПРОЕКТЫ</a></li>
-            <li><a href="news.html" class="mob-active">СТАТЬИ</a></li>
+            <li><a href="projects.html" class="mob-active">ПРОЕКТЫ</a></li>
+            <li><a href="news.html">СТАТЬИ</a></li>
             <li><a href="career.html">КАРЬЕРА</a></li>
             <li id="mob-knowledge-item" style="display:none"><a href="knowledge.html" class="mob-kb-link">БАЗА ЗНАНИЙ</a></li>
             <li><a href="index.html#contact">КОНТАКТЫ</a></li>
@@ -116,24 +113,70 @@
     </div>
 </div>
 
-
-<!-- PAGE HEADER -->
-<div class="np-header-top">
-    <div class="np-header">
-        <h1 class="np-page-title">Актуальные<br>статьи</h1>
-        <div class="np-filters">
-            <button class="np-filter-btn active" data-filter="all">ВСЕ</button>
-            <button class="np-filter-btn" data-filter="archive">АРХИВ</button>
+<!-- HERO -->
+<section class="prj-hero">
+    <div class="prj-hero-bg"></div>
+    <div class="prj-hero-content">
+        <div class="prj-hero-badge">
+            <span class="prj-hero-dot"></span> МобилСервис — Портфолио
         </div>
+        <h1 class="prj-hero-title">
+            <span class="prj-title-line1">Реализованные</span>
+            <span class="prj-title-line2">работы<span class="prj-title-amp"> &amp; </span>кейсы</span>
+        </h1>
+        <p class="prj-hero-sub">Реальные задачи клиентов — эффективные решения МобилСервис.</p>
+    </div>
+</section>
+
+<!-- ФИЛЬТРЫ -->
+<div class="prj-filters">
+    <div class="prj-filter-inner" id="prj-filter-wrap">
+        <button class="prj-cat-btn active">Все проекты</button>
     </div>
 </div>
 
-<!-- NEWS LIST -->
-<section class="np-list">
-    <div id="np-grid">
-        <div class="np-loading">
-            <span class="np-spinner"></span>
-            <p>Загрузка статей...</p>
+<!-- СЕТКА ПРОЕКТОВ -->
+<section class="prj-grid-section">
+    <div class="prj-grid-inner">
+        <div class="prj-grid" id="prj-grid">
+            <div class="prj-loading"><span class="prj-spinner"></span> Загрузка проектов...</div>
+        </div>
+    </div>
+</section>
+
+<!-- НАМ ДОВЕРЯЮТ -->
+<section class="prj-trust" id="prj-clients-section">
+    <div class="prj-trust-inner">
+        <div class="prj-trust-head">
+            <span class="prj-trust-over">Партнёры</span>
+            <h2 class="prj-trust-title">Нам доверяют</h2>
+            <p class="prj-trust-sub">Компании нефтегазовой, строительной и транспортной отраслей выбирают МобилСервис</p>
+        </div>
+        <div class="prj-trust-logos" id="prj-logos-grid">
+            <div class="prj-trust-empty">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+                    <rect x="3" y="7" width="18" height="13" rx="2"/>
+                    <path d="M16 7V5a2 2 0 0 0-4 0v2"/>
+                    <path d="M8 7V5a2 2 0 0 0-4 0v2"/>
+                </svg>
+                <p>Логотипы клиентов появятся здесь после добавления проектов</p>
+            </div>
+        </div>
+        <div class="prj-trust-stats">
+            <div class="prj-stat">
+                <span class="prj-stat-num" id="prj-stat-projects">—</span>
+                <span class="prj-stat-label">выполненных проектов</span>
+            </div>
+            <div class="prj-stat-divider"></div>
+            <div class="prj-stat">
+                <span class="prj-stat-num" id="prj-stat-clients">—</span>
+                <span class="prj-stat-label">компаний-клиентов</span>
+            </div>
+            <div class="prj-stat-divider"></div>
+            <div class="prj-stat">
+                <span class="prj-stat-num">с 1998</span>
+                <span class="prj-stat-label">года на рынке</span>
+            </div>
         </div>
     </div>
 </section>
@@ -143,76 +186,61 @@
     <div class="footer-grid">
         <div class="f-col">
             <h4 class="f-heading">Навигация</h4>
-            <p class="f-sub">Разделы</p>
             <ul class="f-list">
                 <li><a href="index.html">Главная</a></li>
                 <li><a href="about.html">О компании</a></li>
                 <li><a href="#">Услуги</a></li>
-                <li><a href="#">Клиенты</a></li>
+                <li><a href="projects.html">Проекты</a></li>
                 <li><a href="news.html">Статьи</a></li>
-                <li><a href="#">Контакты</a></li>
+                <li><a href="career.html">Карьера</a></li>
             </ul>
         </div>
         <div class="f-col f-col-wide">
             <h4 class="f-heading">Услуги</h4>
-            <p class="f-sub">Мониторинг и телематика</p>
             <ul class="f-list">
                 <li><a href="#">Мониторинг транспорта GPS/ГЛОНАСС</a></li>
+                <li><a href="#">Тахография и карты водителей</a></li>
                 <li><a href="#">Видеоаналитика в транспорте</a></li>
+                <li><a href="#">Спутниковая связь Iridium</a></li>
+                <li><a href="#">Спутниковый интернет VSAT</a></li>
                 <li><a href="#">Резервные каналы связи GSM</a></li>
             </ul>
         </div>
         <div class="f-col">
-            <p class="f-sub" style="margin-top:2rem">Тахография и связь</p>
-            <ul class="f-list">
-                <li><a href="#">Тахографы и карты водителей</a></li>
-                <li><a href="#">Мобильная спутниковая связь Iridium</a></li>
-                <li><a href="#">Спутниковый интернет VSAT</a></li>
-                <li><a href="#">Отопители для транспорта</a></li>
-            </ul>
-        </div>
-        <div class="f-col">
-            <p class="f-sub" style="margin-top:2rem">Клиенты</p>
-            <ul class="f-list">
-                <li><a href="#">Топливно-энергетические компании</a></li>
-                <li><a href="#">Транспортные компании</a></li>
-                <li><a href="#">Строительные компании</a></li>
-                <li><a href="#">Малая авиация</a></li>
-                <li><a href="#">Сельхозпредприятия</a></li>
-            </ul>
-        </div>
-        <div class="f-col">
             <h4 class="f-heading">Контакты</h4>
-            <p class="f-sub">Телефон</p>
-            <p class="f-contact">+7 (3452) 68-90-90</p>
-            <p class="f-sub">Электронная почта</p>
-            <p class="f-contact">ms@r72.ru</p>
-            <p class="f-sub">Адрес</p>
-            <p class="f-contact">Тюмень,<br>ул. 50 лет Октября 29</p>
-            <p class="f-sub">График работы</p>
-            <p class="f-contact">пн-пт 09:00–18:00</p>
+            <ul class="f-list">
+                <li><a href="tel:+73452689090">+7 (3452) 68-90-90</a></li>
+                <li><a href="mailto:ms@r72.ru">ms@r72.ru</a></li>
+                <li><span style="color:rgba(255,255,255,0.45)">ул. 50 лет Октября, 29<br>Тюмень, Россия</span></li>
+                <li><span style="color:rgba(255,255,255,0.45)">пн–пт 09:00–18:00</span></li>
+            </ul>
         </div>
     </div>
     <div class="footer-bottom">
-        <p class="f-copy">© МобилСервис 2026. Все права защищены.</p>
+        <p class="f-copy">© МобилСервис 2026. Все права защищены. &nbsp;·&nbsp; <a href="privacy.html" style="color:rgba(255,255,255,0.35);text-decoration:none;">Политика конфиденциальности</a></p>
         <p class="f-dev">Тюмень, с 1998 года</p>
     </div>
     <div class="footer-watermark">МОБИЛСЕРВИС</div>
 </footer>
 
-<!-- МОДАЛ ПРОСМОТРА СТАТЬИ -->
-<div id="np-modal" class="np-modal-backdrop" onclick="closeNewsView(event)">
-    <div class="np-modal-card">
-        <button class="np-modal-close" onclick="closeNewsViewBtn()">&times;</button>
-        <div id="np-modal-img-wrap" class="np-modal-img-wrap"></div>
-        <div class="np-modal-body">
-            <span id="np-modal-date" class="np-modal-date"></span>
-            <h2 id="np-modal-title" class="np-modal-title"></h2>
-            <div id="np-modal-content" class="np-modal-content"></div>
+<!-- МОДАЛ ПРОЕКТА -->
+<div id="prj-modal" class="prj-modal-backdrop">
+    <div class="prj-modal-card">
+        <div class="prj-modal-img-wrap" id="prj-modal-img-wrap"></div>
+        <div class="prj-modal-body">
+            <div class="prj-modal-meta">
+                <span class="prj-modal-cat" id="prj-modal-cat"></span>
+                <span class="prj-modal-year" id="prj-modal-year"></span>
+                <span class="prj-modal-client" id="prj-modal-client"></span>
+            </div>
+            <h2 class="prj-modal-title" id="prj-modal-title"></h2>
+            <div class="prj-modal-content" id="prj-modal-content"></div>
         </div>
+        <button class="prj-modal-close" onclick="closeProjectModal()">×</button>
     </div>
 </div>
 
+<!-- LOGIN MODAL -->
 <div id="login-modal" class="modal-backdrop">
   <div class="modal-card">
     <button class="modal-close" onclick="closeLoginModal()">&times;</button>
@@ -242,10 +270,11 @@
 </div>
 
 <script src="assets/js/script.js?v=3"></script>
-<script src="assets/js/news.js"></script>
+<script src="assets/js/projects.js"></script>
 <script src="assets/js/cookies.js"></script>
 </body>
 </html>
+
 
 
 

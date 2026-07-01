@@ -12,9 +12,15 @@ if (!in_array($role, ['admin', 'employee'], true)) {
     echo json_encode(['success' => false, 'message' => 'Нет доступа'], JSON_UNESCAPED_UNICODE);
     exit;
 }
-
 $db     = (new Database())->getConnection();
 $method = $_SERVER['REQUEST_METHOD'];
+
+// view — только чтение и скачивание; add — полный доступ
+if ($method === 'GET' || ($GLOBALS['knowledge_action'] ?? '') === 'download') {
+    Auth::requirePermission($token, 'knowledge', ['add', 'view']);
+} else {
+    Auth::requirePermission($token, 'knowledge', ['add']);
+}
 $subId  = (int)($GLOBALS['knowledge_file_id'] ?? 0);
 $action = $GLOBALS['knowledge_action'] ?? '';
 $base   = '/var/www/html/uploads/knowledge/';

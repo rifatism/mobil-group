@@ -29,7 +29,7 @@ if ($uri === '/api/users') {
     exit;
 }
 
-// Users — удаление /api/users/{id}
+// Users — редактирование / удаление / права /api/users/{id}
 if (preg_match('#^/api/users/(\d+)$#', $uri, $m)) {
     $GLOBALS['route_id'] = (int)$m[1];
     require_once __DIR__ . '/handlers/UserHandler.php';
@@ -64,6 +64,28 @@ if ($uri === '/api/contact' && $method === 'POST') {
 // Карьерный запрос (заявка на вакансию)
 if ($uri === '/api/career-contact' && $method === 'POST') {
     require_once __DIR__ . '/handlers/CareerContactHandler.php';
+    exit;
+}
+
+// Настройки (только admin)
+if ($uri === '/api/settings') {
+    require_once __DIR__ . '/handlers/SettingsHandler.php';
+    exit;
+}
+
+// Публичный статус AI HR (без авторизации)
+if ($uri === '/api/ai-status' && $method === 'GET') {
+    try {
+        require_once __DIR__ . '/config/database.php';
+        $db  = (new Database())->getConnection();
+        $st  = $db->prepare("SELECT `value` FROM `settings` WHERE `key` = 'ai_hr_enabled'");
+        $st->execute();
+        $row = $st->fetch();
+        $enabled = ($row === false) ? true : ($row['value'] === '1' || $row['value'] === 'true');
+    } catch (\Throwable $e) {
+        $enabled = true;
+    }
+    echo json_encode(['enabled' => $enabled]);
     exit;
 }
 
@@ -199,6 +221,18 @@ if (preg_match('#^/api/knowledge/tests/(\d+)$#', $uri, $m)) {
     exit;
 }
 // ─── End Knowledge Base ───────────────────────────────────────────────────
+
+// Проекты — список / создание
+if ($uri === '/api/projects') {
+    require_once __DIR__ . '/handlers/ProjectsHandler.php';
+    exit;
+}
+// Проекты — одна запись / редактирование / удаление
+if (preg_match('#^/api/projects/(\d+)$#', $uri, $m)) {
+    $GLOBALS['project_id'] = (int)$m[1];
+    require_once __DIR__ . '/handlers/ProjectsHandler.php';
+    exit;
+}
 
 // Прокси AutoGRAF — /api/autograf/*
 if (str_starts_with($uri, '/api/autograf/')) {

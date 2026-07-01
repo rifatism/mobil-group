@@ -1,10 +1,10 @@
 ﻿<!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png" href="assets/images/icon.png">
-    <title>Карьера | МобилСервис</title>
+    <title>Career | MobilService</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/style.css">
@@ -15,35 +15,35 @@
 
 <!-- NAVBAR -->
 <nav class="navbar scrolled">
-    <a href="index.html" class="logo">
+    <a href="index-en.html" class="logo">
         <img src="assets/images/logo.png" alt="МобилСервис" class="logo-img">
     </a>
     <ul class="nav-links">
-        <li><a href="index.html">ГЛАВНАЯ</a></li>
-        <li><a href="about.html">О КОМПАНИИ</a></li>
+        <li><a href="index-en.html">HOME</a></li>
+        <li><a href="about-en.html">ABOUT</a></li>
         <li class="nav-has-drop">
             <a href="index.html#services" class="nav-drop-trigger">УСЛУГИ <span class="arrow">▾</span></a>
             <div class="nav-dropdown">
-                <a href="index.html#service-monitoring" class="nav-drop-item">Мониторинг транспорта</a>
-                <a href="index.html#service-tachograph" class="nav-drop-item">Тахография</a>
-                <a href="index.html#service-satellite" class="nav-drop-item">Спутниковая связь</a>
+                <a href="index.html#service-monitoring" class="nav-drop-item">Fleet Monitoring</a>
+                <a href="index.html#service-tachograph" class="nav-drop-item">Tachography</a>
+                <a href="index.html#service-satellite" class="nav-drop-item">Satellite Communications</a>
             </div>
         </li>
-        <li><a href="projects.html">ПРОЕКТЫ</a></li>
-        <li><a href="news.html">СТАТЬИ</a></li>
-        <li><a href="career.html" class="active">КАРЬЕРА</a></li>
+        <li><a href="projects-en.html">PROJECTS</a></li>
+        <li><a href="news-en.html">ARTICLES</a></li>
+        <li><a href="career-en.html" class="active">CAREER</a></li>
         <li id="nav-knowledge-item" style="display:none"><a href="knowledge.html">БАЗА ЗНАНИЙ</a></li>
     </ul>
     <div class="nav-right">
-        <button class="lang-selector" onclick="toggleLang()">RU <span class="arrow">▾</span></button>
-        <a href="index.html#contact" class="btn-contacts">КОНТАКТЫ</a>
+        <button class="lang-selector" onclick="toggleLang()">EN <span class="arrow">▾</span></button>
+        <a href="index-en.html#contact" class="btn-contacts">CONTACTS</a>
         <div id="client-dropdown-wrap" style="position:relative">
             <button id="btn-login-open" class="btn-login" onclick="loginBtnClick()">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="12" cy="8" r="4"/>
                     <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
                 </svg>
-                <span id="btn-login-label">ВОЙТИ</span>
+                <span id="btn-login-label">SIGN IN</span>
             </button>
             <div id="client-dropdown" class="client-dropdown">
                 <a id="cd-admin-link" class="cd-item cd-item--admin" href="admin.html" style="display:none">
@@ -84,35 +84,35 @@
             <button class="mob-nav-close" onclick="toggleMobNav()">×</button>
         </div>
         <ul class="mob-nav-links">
-            <li><a href="index.html">ГЛАВНАЯ</a></li>
-            <li><a href="about.html">О КОМПАНИИ</a></li>
+            <li><a href="index-en.html">HOME</a></li>
+            <li><a href="about-en.html">ABOUT</a></li>
             <li>
                 <button class="mob-drop-trigger" onclick="toggleMobDrop(this)">
-                    УСЛУГИ <span class="mob-drop-chevron">▾</span>
+                    SERVICES <span class="mob-drop-chevron">▾</span>
                 </button>
                 <ul class="mob-sub">
-                    <li><a href="index.html#service-monitoring">Мониторинг транспорта</a></li>
-                    <li><a href="index.html#service-tachograph">Тахография</a></li>
-                    <li><a href="index.html#service-satellite">Спутниковая связь</a></li>
+                    <li><a href="index.html#service-monitoring">Fleet Monitoring</a></li>
+                    <li><a href="index.html#service-tachograph">Tachography</a></li>
+                    <li><a href="index.html#service-satellite">Satellite Communications</a></li>
                 </ul>
             </li>
-            <li><a href="projects.html">ПРОЕКТЫ</a></li>
-            <li><a href="news.html">СТАТЬИ</a></li>
-            <li><a href="career.html" class="mob-active">КАРЬЕРА</a></li>
-            <li id="mob-knowledge-item" style="display:none"><a href="knowledge.html" class="mob-kb-link">БАЗА ЗНАНИЙ</a></li>
-            <li><a href="index.html#contact">КОНТАКТЫ</a></li>
+            <li><a href="projects-en.html">PROJECTS</a></li>
+            <li><a href="news-en.html">ARTICLES</a></li>
+            <li><a href="career-en.html" class="mob-active">CAREER</a></li>
+            <li id="mob-knowledge-item" style="display:none"><a href="knowledge.html" class="mob-kb-link">KNOWLEDGE BASE</a></li>
+            <li><a href="index-en.html#contact">КОНТАКТЫ</a></li>
         </ul>
         <div class="mob-user-section">
             <button class="mob-user-trigger" onclick="toggleMobUser(this)">
                 <div class="mob-u-avatar" id="mob-u-avatar">?</div>
                 <div class="mob-u-info">
-                    <div class="mob-u-name" id="mob-u-name">Войти</div>
-                    <div class="mob-u-label" id="mob-u-label">Личный кабинет</div>
+                    <div class="mob-u-name" id="mob-u-name">Sign in</div>
+                    <div class="mob-u-label" id="mob-u-label">Personal Account</div>
                 </div>
                 <span class="mob-u-chevron">▾</span>
             </button>
             <div class="mob-user-menu" id="mob-user-menu"></div>
-            <a href="#" onclick="loginBtnClick();toggleMobNav();return false;" class="mob-login-link" id="mob-login-link">ВОЙТИ</a>
+            <a href="#" onclick="loginBtnClick();toggleMobNav();return false;" class="mob-login-link" id="mob-login-link">SIGN IN</a>
         </div>
     </div>
 </div>
@@ -124,16 +124,16 @@
         <div class="cr-hero-overlay"></div>
     </div>
     <div class="cr-hero-content">
-        <h1 class="cr-hero-title">Работа, которая<br>имеет <span class="t-accent">значение</span></h1>
-        <p class="cr-hero-sub">Мы создаём профессиональную, слаженную рабочую среду — основу нашего успеха. Присоединяйтесь к команде из 30 специалистов в Тюмени.</p>
+        <h1 class="cr-hero-title">Work that<br>truly <span class="t-accent">matters</span></h1>
+        <p class="cr-hero-sub">We build a professional, well-coordinated work environment — the foundation of our success. Join a team of 30 specialists in Tyumen.</p>
         <a href="#cr-vacancies" class="cr-hero-btn">
-            <span>Смотреть вакансии</span>
+            <span>View vacancies</span>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
         </a>
     </div>
     <div class="cr-hero-scroll">
         <div class="cr-scroll-line"></div>
-        <span>прокрутите</span>
+        <span>scroll</span>
     </div>
 </section>
 
@@ -141,20 +141,20 @@
 <section class="cr-infographic section-dark">
     <div class="cr-infographic-grid">
         <div class="cr-info-item reveal">
-            <span class="cr-info-num" data-target="26">0</span><span class="cr-info-suffix">лет</span>
-            <span class="cr-info-label">на рынке телематики</span>
+            <span class="cr-info-num" data-target="26">0</span><span class="cr-info-suffix">yrs</span>
+            <span class="cr-info-label">in the telematics market</span>
         </div>
         <div class="cr-info-item reveal">
             <span class="cr-info-num" data-target="30">0</span><span class="cr-info-suffix">+</span>
-            <span class="cr-info-label">специалистов в команде</span>
+            <span class="cr-info-label">specialists in the team</span>
         </div>
         <div class="cr-info-item reveal">
             <span class="cr-info-num" data-target="2500">0</span><span class="cr-info-suffix">+</span>
-            <span class="cr-info-label">реализованных проектов</span>
+            <span class="cr-info-label">completed projects</span>
         </div>
         <div class="cr-info-item reveal">
-            <span class="cr-info-num" data-target="12">0</span><span class="cr-info-suffix">лет</span>
-            <span class="cr-info-label">средний стаж сотрудника</span>
+            <span class="cr-info-num" data-target="12">0</span><span class="cr-info-suffix">yrs</span>
+            <span class="cr-info-label">average employee tenure</span>
         </div>
     </div>
 </section>
@@ -162,10 +162,10 @@
 <!-- ===== КОМАНДА ===== -->
 <section class="cr-team section-white">
     <div class="cr-section-header">
-        <p class="cr-overline">Наша команда</p>
-        <h2 class="sec-title">Люди, которые<br>делают <span class="t-accent">МобилСервис</span></h2>
+        <p class="cr-overline">Our team</p>
+        <h2 class="sec-title">The people who<br>make <span class="t-accent">MobilService</span></h2>
         <div class="cr-g-line"></div>
-        <p class="sec-desc cr-desc-narrow">Нас объединяет любовь к технологиям и желание делать транспорт в России безопаснее и эффективнее.</p>
+        <p class="sec-desc cr-desc-narrow">We are united by a passion for technology and the desire to make transport in Russia safer and more efficient.</p>
     </div>
     <div class="cr-team-grid">
         <div class="cr-team-card reveal">
@@ -175,8 +175,8 @@
             </div>
             <div class="cr-team-body">
                 <h4 class="cr-team-name">Александр Петров</h4>
-                <p class="cr-team-role">Генеральный директор</p>
-                <p class="cr-team-exp">В компании с 1998 года</p>
+                <p class="cr-team-role">Chief Executive Officer</p>
+                <p class="cr-team-exp">With the company since 1998</p>
             </div>
         </div>
         <div class="cr-team-card reveal" style="margin-top:60px">
@@ -186,8 +186,8 @@
             </div>
             <div class="cr-team-body">
                 <h4 class="cr-team-name">Елена Соколова</h4>
-                <p class="cr-team-role">Технический директор</p>
-                <p class="cr-team-exp">В компании 14 лет</p>
+                <p class="cr-team-role">Chief Technical Officer</p>
+                <p class="cr-team-exp">14 years with the company</p>
             </div>
         </div>
         <div class="cr-team-card reveal">
@@ -197,8 +197,8 @@
             </div>
             <div class="cr-team-body">
                 <h4 class="cr-team-name">Дмитрий Кузнецов</h4>
-                <p class="cr-team-role">Ведущий инженер</p>
-                <p class="cr-team-exp">В компании 9 лет</p>
+                <p class="cr-team-role">Lead Engineer</p>
+                <p class="cr-team-exp">9 years with the company</p>
             </div>
         </div>
         <div class="cr-team-card reveal" style="margin-top:60px">
@@ -208,8 +208,8 @@
             </div>
             <div class="cr-team-body">
                 <h4 class="cr-team-name">Мария Иванова</h4>
-                <p class="cr-team-role">Менеджер по работе с клиентами</p>
-                <p class="cr-team-exp">В компании 7 лет</p>
+                <p class="cr-team-role">Client Relations Manager</p>
+                <p class="cr-team-exp">7 years with the company</p>
             </div>
         </div>
     </div>
@@ -220,7 +220,7 @@
     <div class="cr-quote-inner">
         <div class="cr-quote-mark">"</div>
         <blockquote class="cr-quote-text">
-            МобилСервис — это не просто работа. Здесь ты видишь реальный результат своего труда: техника не ломается на трассе, водители добираются домой в безопасности, а компании экономят миллионы. Это мотивирует каждый день.
+            MobilService is not just a job. Here you see the real result of your work: equipment doesn't break down on the road, drivers get home safely, and companies save millions. That's what motivates you every day.
         </blockquote>
         <div class="cr-quote-author">
             <div class="cr-quote-avatar">
@@ -228,7 +228,7 @@
             </div>
             <div>
                 <p class="cr-quote-name">Дмитрий Кузнецов</p>
-                <p class="cr-quote-role">Ведущий инженер · 9 лет в компании</p>
+                <p class="cr-quote-role">Lead Engineer · 9 years with the company</p>
             </div>
         </div>
     </div>
@@ -237,25 +237,25 @@
 <!-- ===== МИССИЯ ===== -->
 <section class="cr-mission section-white">
     <div class="cr-section-header">
-        <p class="cr-overline">Наши цели</p>
-        <h2 class="sec-title">Миссия <span class="t-accent">компании</span></h2>
+        <p class="cr-overline">Our goals</p>
+        <h2 class="sec-title">Company <span class="t-accent">mission</span></h2>
         <div class="cr-g-line"></div>
     </div>
     <div class="cr-mission-grid">
         <div class="cr-mission-card reveal">
             <div class="cr-mission-num">01</div>
-            <h4>Развитие клиентов</h4>
-            <p>Развиваемся сами и способствуем развитию клиентов за счёт автоматизации и цифровизации их внутренних процессов.</p>
+            <h4>Client development</h4>
+            <p>We develop ourselves and foster client growth through automation and digitalisation of their internal processes.</p>
         </div>
         <div class="cr-mission-card reveal">
             <div class="cr-mission-num">02</div>
-            <h4>Инновационные решения</h4>
-            <p>Создаём инновационные решения, упрощающие рабочие процессы и способствующие достижению успеха клиентов на рынке.</p>
+            <h4>Innovative solutions</h4>
+            <p>We create innovative solutions that simplify workflows and help clients succeed in the market.</p>
         </div>
         <div class="cr-mission-card reveal">
             <div class="cr-mission-num">03</div>
-            <h4>Автоматизация и цифровизация</h4>
-            <p>Автоматизация и цифровизация — ключевые инструменты роста, направленные на долгосрочное сотрудничество.</p>
+            <h4>Automation and digitalisation</h4>
+            <p>Automation and digitalisation are key growth tools aimed at long-term cooperation.</p>
         </div>
     </div>
 </section>
@@ -263,10 +263,10 @@
 <!-- ===== ЦЕННОСТИ ===== -->
 <section class="cr-values" style="background:#f4f6f8">
     <div class="cr-section-header">
-        <p class="cr-overline">Наши принципы</p>
-        <h2 class="sec-title">Ценности <span class="t-accent">компании</span></h2>
+        <p class="cr-overline">Our principles</p>
+        <h2 class="sec-title">Company <span class="t-accent">values</span></h2>
         <div class="cr-g-line"></div>
-        <p class="sec-desc cr-desc-narrow">В основе — крепкие взаимоотношения с людьми, основанные на взаимном уважении и поддержке.</p>
+        <p class="sec-desc cr-desc-narrow">At the core — strong relationships built on mutual respect and support.</p>
     </div>
     <div class="cr-values-grid">
         <div class="cr-val-card reveal">
@@ -274,8 +274,8 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
             </div>
             <div class="cr-val-body">
-                <h4>Командный дух и уважение</h4>
-                <p>Крепкие взаимоотношения, основанные на взаимном уважении и поддержке — как внутри команды, так и с клиентами.</p>
+                <h4>Team spirit and respect</h4>
+                <p>Strong relationships based on mutual respect and support — both within the team and with clients.</p>
             </div>
         </div>
         <div class="cr-val-card reveal">
@@ -283,8 +283,8 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
             </div>
             <div class="cr-val-body">
-                <h4>Амбициозность и инновационность</h4>
-                <p>Стремление к постоянному развитию и высоким стандартам работы, поиск новых идей и технологий.</p>
+                <h4>Ambition and innovation</h4>
+                <p>A drive for continuous development and high work standards, searching for new ideas and technologies.</p>
             </div>
         </div>
         <div class="cr-val-card reveal">
@@ -292,8 +292,8 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
             </div>
             <div class="cr-val-body">
-                <h4>Ответственность и честность</h4>
-                <p>Ключевые принципы взаимодействия внутри коллектива. Мы выполняем обещания и несём ответственность за результат.</p>
+                <h4>Responsibility and integrity</h4>
+                <p>Key principles of team interaction. We keep our promises and take responsibility for results.</p>
             </div>
         </div>
         <div class="cr-val-card reveal">
@@ -301,8 +301,8 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
             </div>
             <div class="cr-val-body">
-                <h4>Эффективность и результат</h4>
-                <p>Максимальная отдача через оптимизацию процессов. Мы ценим рабочее время и стремимся к высоким стандартам.</p>
+                <h4>Efficiency and results</h4>
+                <p>Maximum output through process optimisation. We value working time and strive for high standards.</p>
             </div>
         </div>
     </div>
@@ -314,8 +314,8 @@
         <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=1920&q=80" alt="Офис МобилСервис">
         <div class="cr-office-overlay">
             <div class="cr-office-text">
-                <p class="cr-overline" style="color:rgba(255,255,255,0.6)">Тюмень, ул. 50 лет Октября 29</p>
-                <h3 class="cr-office-title">Современный офис<br>в центре города</h3>
+                <p class="cr-overline" style="color:rgba(255,255,255,0.6)">Tyumen, 50 Let Oktyabrya St., 29</p>
+                <h3 class="cr-office-title">Modern office<br>in the city centre</h3>
             </div>
         </div>
     </div>
@@ -324,10 +324,10 @@
 <!-- ===== ПОЧЕМУ МЫ ===== -->
 <section class="cr-why section-white">
     <div class="cr-section-header">
-        <p class="cr-overline">Работа у нас</p>
-        <h2 class="sec-title">Почему <span class="t-accent">МобилСервис</span></h2>
+        <p class="cr-overline">Working with us</p>
+        <h2 class="sec-title">Why <span class="t-accent">MobilService</span></h2>
         <div class="cr-g-line"></div>
-        <p class="sec-desc cr-desc-narrow">Компания с 1998 года, которая ценит каждого сотрудника и создаёт условия для профессионального роста.</p>
+        <p class="sec-desc cr-desc-narrow">A company since 1998 that values every employee and creates conditions for professional growth.</p>
     </div>
     <div class="cr-why-grid">
         <div class="cr-why-card reveal">
@@ -335,32 +335,32 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
             </div>
             <div class="cr-why-num">25+</div>
-            <h4>Лет стабильности</h4>
-            <p>Надёжная компания с опытом и репутацией, которая не исчезнет завтра.</p>
+            <h4>Years of stability</h4>
+            <p>A reliable company with experience and reputation that won't disappear tomorrow.</p>
         </div>
         <div class="cr-why-card reveal">
             <div class="cr-why-icon">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
             </div>
-            <div class="cr-why-num">Рост</div>
-            <h4>Обучение и развитие</h4>
-            <p>Обмен опытом, наставничество, участие в корпоративных проектах и отраслевых мероприятиях.</p>
+            <div class="cr-why-num">Growth</div>
+            <h4>Training and development</h4>
+            <p>Knowledge sharing, mentoring, participation in corporate projects and industry events.</p>
         </div>
         <div class="cr-why-card reveal">
             <div class="cr-why-icon">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
             </div>
             <div class="cr-why-num">Tech</div>
-            <h4>Современные технологии</h4>
-            <p>GPS/ГЛОНАСС, видеоаналитика, спутниковая связь Iridium, VSAT — работа с передовым оборудованием.</p>
+            <h4>Modern technologies</h4>
+            <p>GPS/GLONASS, video analytics, Iridium satellite communications, VSAT — working with cutting-edge equipment.</p>
         </div>
         <div class="cr-why-card reveal">
             <div class="cr-why-icon">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
             </div>
-            <div class="cr-why-num">Команда</div>
-            <h4>Дружный коллектив</h4>
-            <p>Команда профессионалов, которые помогут, поддержат и разделят радость от общих достижений.</p>
+            <div class="cr-why-num">Team</div>
+            <h4>Friendly team</h4>
+            <p>A team of professionals who will help, support and share the joy of shared achievements.</p>
         </div>
     </div>
 </section>
@@ -368,59 +368,59 @@
 <!-- ===== ВАКАНСИИ ===== -->
 <section class="cr-vacancies" id="cr-vacancies" style="background:#f4f6f8">
     <div class="cr-section-header">
-        <p class="cr-overline">Присоединяйтесь к команде</p>
-        <h2 class="sec-title">Открытые <span class="t-accent">вакансии</span></h2>
+        <p class="cr-overline">Join the team</p>
+        <h2 class="sec-title">Open <span class="t-accent">vacancies</span></h2>
         <div class="cr-g-line"></div>
-        <p class="sec-desc cr-desc-narrow">Выберите подходящую вакансию и оставьте отклик — мы свяжемся с вами в ближайшее время.</p>
+        <p class="sec-desc cr-desc-narrow">Choose a suitable vacancy and submit your application — we will contact you shortly.</p>
     </div>
     <div id="cr-vac-grid" class="cr-vac-grid">
-        <div class="cr-vac-empty"><p>Загрузка вакансий...</p></div>
+        <div class="cr-vac-empty"><p>Loading vacancies...</p></div>
     </div>
 </section>
 
 <!-- ===== ФОРМА ОТКЛИКА ===== -->
 <section class="cr-apply section-dark" id="cr-apply">
     <div class="cr-section-header cr-section-header--light">
-        <p class="cr-overline" style="color:rgba(255,255,255,0.5)">Форма обратной связи</p>
-        <h2 class="sec-title" style="color:#fff">Оставить <span class="t-accent">отклик</span></h2>
+        <p class="cr-overline" style="color:rgba(255,255,255,0.5)">Application form</p>
+        <h2 class="sec-title" style="color:#fff">Submit an <span class="t-accent">application</span></h2>
         <div class="cr-g-line"></div>
-        <p class="sec-desc" style="color:rgba(255,255,255,0.55)">Не нашли подходящую вакансию? Отправьте отклик — мы рассмотрим вашу кандидатуру при появлении новых позиций.</p>
+        <p class="sec-desc" style="color:rgba(255,255,255,0.55)">Didn't find a suitable vacancy? Send an application — we will consider your candidacy when new positions open.</p>
     </div>
     <div class="cr-apply-wrap">
         <form id="cr-form" class="cr-form">
             <div class="cr-form-row">
                 <div class="cr-field">
-                    <label>ФИО <span style="color:#ef5350">*</span></label>
-                    <input id="cr-fullname" type="text" placeholder="Иванов Иван Иванович" required>
+                    <label>Full name <span style="color:#ef5350">*</span></label>
+                    <input id="cr-fullname" type="text" placeholder="John Smith" required>
                 </div>
                 <div class="cr-field">
-                    <label>Электронная почта <span style="color:#ef5350">*</span></label>
+                    <label>Email address <span style="color:#ef5350">*</span></label>
                     <input id="cr-email" type="email" placeholder="email@example.com" required>
                 </div>
             </div>
             <div class="cr-form-row">
                 <div class="cr-field">
-                    <label>Телефон</label>
+                    <label>Phone</label>
                     <input id="cr-phone" type="tel" placeholder="+7 (___) ___-__-__">
                 </div>
                 <div class="cr-field">
-                    <label>Вакансия</label>
+                    <label>Vacancy</label>
                     <select id="cr-position">
-                        <option value="">— Выберите вакансию —</option>
+                        <option value="">— Select a vacancy —</option>
                     </select>
                 </div>
             </div>
             <div class="cr-field">
-                <label>Сопроводительное письмо</label>
-                <textarea id="cr-message" placeholder="Расскажите о себе, опыте работы и почему хотите работать в МобилСервис..."></textarea>
+                <label>Cover letter</label>
+                <textarea id="cr-message" placeholder="Tell us about yourself, your work experience and why you want to work at MobilService..."></textarea>
             </div>
             <div class="cr-field">
-                <label>Резюме <span class="cr-file-hint">(PDF, DOC, DOCX — до 5 МБ)</span></label>
+                <label>CV / Resume <span class="cr-file-hint">(PDF, DOC, DOCX — up to 5 MB)</span></label>
                 <div class="cr-file-wrap" id="cr-file-wrap">
                     <input type="file" id="cr-resume" accept=".pdf,.doc,.docx" class="cr-file-input">
                     <label for="cr-resume" class="cr-file-label" id="cr-file-label">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                        <span id="cr-file-name">Прикрепить резюме</span>
+                        <span id="cr-file-name">Attach CV</span>
                     </label>
                     <button type="button" class="cr-file-clear" id="cr-file-clear" hidden onclick="clearResume()">✕</button>
                 </div>
@@ -428,10 +428,10 @@
             </div>
             <label class="cr-consent-row">
                 <input type="checkbox" id="cr-consent" required>
-                <span>Я согласен(а) на обработку персональных данных в соответствии с политикой конфиденциальности компании МобилСервис.</span>
+                <span>I consent to the processing of my personal data in accordance with MobilService's privacy policy.</span>
             </label>
             <div id="cr-status" class="cr-status"></div>
-            <button type="submit" id="cr-submit" class="cr-submit-btn">ОТПРАВИТЬ ОТКЛИК</button>
+            <button type="submit" id="cr-submit" class="cr-submit-btn">SUBMIT APPLICATION</button>
         </form>
     </div>
 </section>
@@ -440,52 +440,52 @@
 <footer class="footer">
     <div class="footer-grid">
         <div class="f-col">
-            <h4 class="f-heading">Навигация</h4>
-            <p class="f-sub">Разделы</p>
+            <h4 class="f-heading">Navigation</h4>
+            <p class="f-sub">Sections</p>
             <ul class="f-list">
-                <li><a href="index.html">Главная</a></li>
-                <li><a href="about.html">О компании</a></li>
-                <li><a href="#">Услуги</a></li>
-                <li><a href="projects.html">ПРОЕКТЫ</a></li>
-                <li><a href="news.html">Статьи</a></li>
-                <li><a href="career.html">Карьера</a></li>
+                <li><a href="index-en.html">Home</a></li>
+                <li><a href="about-en.html">About</a></li>
+                <li><a href="#">Services</a></li>
+                <li><a href="projects-en.html">PROJECTS</a></li>
+                <li><a href="news-en.html">Articles</a></li>
+                <li><a href="career-en.html">Career</a></li>
             </ul>
         </div>
         <div class="f-col f-col-wide">
-            <h4 class="f-heading">Услуги</h4>
-            <p class="f-sub">Мониторинг и телематика</p>
+            <h4 class="f-heading">Services</h4>
+            <p class="f-sub">Monitoring &amp; Telematics</p>
             <ul class="f-list">
-                <li><a href="#">Мониторинг транспорта GPS/ГЛОНАСС</a></li>
-                <li><a href="#">Видеоаналитика в транспорте</a></li>
-                <li><a href="#">Резервные каналы связи GSM</a></li>
+                <li><a href="#">GPS/GLONASS Fleet Monitoring</a></li>
+                <li><a href="#">In-Vehicle Video Analytics</a></li>
+                <li><a href="#">GSM Backup Communication Channels</a></li>
             </ul>
         </div>
         <div class="f-col">
-            <p class="f-sub" style="margin-top:2rem">Тахография и связь</p>
+            <p class="f-sub" style="margin-top:2rem">Tachography &amp; Communications</p>
             <ul class="f-list">
                 <li><a href="#">Тахографы и карты водителей</a></li>
                 <li><a href="#">Мобильная спутниковая связь Iridium</a></li>
-                <li><a href="#">Спутниковый интернет VSAT</a></li>
+                <li><a href="#">VSAT Satellite Internet</a></li>
                 <li><a href="#">Отопители для транспорта</a></li>
             </ul>
         </div>
         <div class="f-col">
-            <h4 class="f-heading">Контакты</h4>
-            <p class="f-sub">Телефон</p>
+            <h4 class="f-heading">Contacts</h4>
+            <p class="f-sub">Phone</p>
             <p class="f-contact">+7 (3452) 68-90-90</p>
-            <p class="f-sub">Электронная почта</p>
+            <p class="f-sub">Email</p>
             <p class="f-contact">ms@r72.ru</p>
-            <p class="f-sub">Адрес</p>
-            <p class="f-contact">Тюмень,<br>ул. 50 лет Октября 29</p>
-            <p class="f-sub">График работы</p>
-            <p class="f-contact">пн-пт 09:00–18:00</p>
+            <p class="f-sub">Address</p>
+            <p class="f-contact">Tyumen,<br>50 Let Oktyabrya St., 29</p>
+            <p class="f-sub">Working hours</p>
+            <p class="f-contact">Mon–Fri 09:00–18:00</p>
         </div>
     </div>
     <div class="footer-bottom">
-        <p class="f-copy">© МобилСервис 2026. Все права защищены.</p>
-        <p class="f-dev">Тюмень, с 1998 года</p>
+        <p class="f-copy">© MobilService 2026. All rights reserved.</p>
+        <p class="f-dev">Tyumen, since 1998</p>
     </div>
-    <div class="footer-watermark">МОБИЛСЕРВИС</div>
+    <div class="footer-watermark">MOBILSERVICE</div>
 </footer>
 
 <!-- ===== AI CHAT WIDGET ===== -->
@@ -544,24 +544,24 @@
     <button class="modal-close" onclick="closeLoginModal()">&times;</button>
     <div class="modal-header">
       <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-      <h2 class="modal-title">Вход в систему</h2>
-      <p class="modal-sub">МобилСервис — личный кабинет</p>
+      <h2 class="modal-title">Sign In</h2>
+      <p class="modal-sub">MobilService — personal account</p>
     </div>
     <form id="login-form" class="modal-form" onsubmit="handleLogin(event)">
       <div class="modal-field">
-        <label>Логин или E-mail</label>
-        <input id="login-username" type="text" placeholder="Введите логин" autocomplete="username" required>
+        <label>Username or E-mail</label>
+        <input id="login-username" type="text" placeholder="Enter username" autocomplete="username" required>
       </div>
       <div class="modal-field">
-        <label>Пароль</label>
-        <input id="login-password" type="password" placeholder="Введите пароль" autocomplete="current-password" required>
+        <label>Password</label>
+        <input id="login-password" type="password" placeholder="Enter password" autocomplete="current-password" required>
       </div>
       <p id="login-error" class="modal-error" hidden></p>
-      <button type="submit" id="login-submit" class="modal-btn">ВОЙТИ</button>
-      <button type="button" id="btn-forgot" class="modal-forgot" onclick="toggleForgotPassword()">Забыли пароль?</button>
+      <button type="submit" id="login-submit" class="modal-btn">SIGN IN</button>
+      <button type="button" id="btn-forgot" class="modal-forgot" onclick="toggleForgotPassword()">Forgot password?</button>
       <div id="forgot-info" class="modal-forgot-info" hidden>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13.6 19.79 19.79 0 0 1 1.61 5.08 2 2 0 0 1 3.59 3h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 10.6a16 16 0 0 0 6 6l.94-.94a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 17.92z"/></svg>
-        <span>Позвоните нам: <a href="tel:+73452689090" class="forgot-phone">+7 (3452) 68-90-90</a><br><span class="forgot-hours">пн–пт, 09:00–18:00</span></span>
+        <span>Call us: <a href="tel:+73452689090" class="forgot-phone">+7 (3452) 68-90-90</a><br><span class="forgot-hours">Mon–Fri, 09:00–18:00</span></span>
       </div>
     </form>
   </div>
@@ -608,6 +608,8 @@
 <script src="assets/js/cookies.js"></script>
 </body>
 </html>
+
+
 
 
 

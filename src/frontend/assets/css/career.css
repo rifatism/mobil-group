@@ -738,14 +738,20 @@
     .cr-team-card:nth-child(4) { margin-top: 0 !important; }
 }
 @media (max-width: 768px) {
-    .cr-hero-title { font-size: 2.4rem; }
-    .cr-section-header { padding: 4rem 1.5rem 2.5rem; }
+    /* Hero */
+    .cr-hero-content { padding: calc(var(--nav-h) + 2rem) 1.5rem 2rem; }
+    .cr-hero-title { font-size: clamp(2rem, 7vw, 2.8rem); max-width: 100%; overflow-wrap: break-word; }
+    .cr-hero-sub { font-size: 0.9rem; max-width: 100%; line-height: 1.65; }
+    .cr-hero-scroll { display: none; }
+    /* Sections */
+    .cr-section-header { padding: 3rem 1.5rem 2rem; }
     .cr-mission-grid, .cr-values-grid, .cr-why-grid, .cr-team-grid { grid-template-columns: 1fr; padding: 0 1.5rem; }
     .cr-infographic-grid { grid-template-columns: repeat(2, 1fr); }
-    .cr-quote { padding: 4rem 1.5rem; }
+    .cr-info-item { padding: 2.5rem 1.5rem; }
+    .cr-quote { padding: 3rem 1.5rem; }
     .cr-apply-wrap, .cr-vac-grid { padding: 0 1.5rem; }
     .cr-form-row { grid-template-columns: 1fr; }
     .cr-modal-card { padding: 2rem 1.5rem; }
     .cr-modal-btns { flex-direction: column; }
-    .cr-office-strip { height: 280px; }
+    .cr-office-strip { height: 240px; }
 }

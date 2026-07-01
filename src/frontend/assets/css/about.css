@@ -284,6 +284,37 @@
 .ab-geo-map svg { display: block; width: 100%; height: auto; }
 .ab-geo-overlay { position: absolute; inset: 0; }
 
+/* Метки городов на карте */
+.ab-map-pin {
+    position: absolute;
+    transform: translate(-50%, -100%);
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    cursor: default;
+}
+.ab-pin-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: #1976d2;
+    border: 2px solid #fff;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.35);
+    display: block;
+}
+.ab-pin-dot--main {
+    width: 14px; height: 14px;
+    background: #e53935;
+}
+.ab-pin-label {
+    background: rgba(255,255,255,0.92);
+    color: #0d2137;
+    font-size: 0.62rem;
+    font-weight: 700;
+    font-family: var(--font-nav);
+    padding: 2px 5px;
+    border-radius: 4px;
+    white-space: nowrap;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.18);
+    letter-spacing: 0.02em;
+}
+
 .ab-geo-pin { position: absolute; display: flex; flex-direction: column; align-items: center; gap: 4px; }
 .ab-pin-dot {
     width: 12px; height: 12px; border-radius: 50%; background: var(--green);
@@ -399,16 +430,34 @@
     .ab-infograph-inner, .ab-geo-inner, .ab-intro-inner, .ab-cta-inner { grid-template-columns: 1fr !important; gap: 3rem; }
 }
 @media (max-width: 768px) {
-    .ab-hero-title { font-size: 2.6rem; }
+    /* Hero */
+    .ab-hero { clip-path: none; min-height: 380px; }
+    .ab-hero-content { padding: 0 1.5rem 2.5rem; }
+    .ab-hero-title { font-size: clamp(1.9rem, 7vw, 2.4rem); word-break: break-word; overflow-wrap: break-word; }
+    .ab-hero-sub { font-size: 0.88rem; }
+    .ab-hero-year { display: none; }
+    /* Sections */
     .ab-stats-inner { grid-template-columns: repeat(2,1fr); }
     .ab-feat-grid { grid-template-columns: 1fr; }
     .ab-feat:nth-child(3) { display: block; }
+    .ab-feat { height: 400px; }
     .ab-feat-offset { margin-top: 0; }
     .ab-values-grid { grid-template-columns: 1fr; }
+    .ab-value { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .ab-value:last-child { border-bottom: none; }
     .ab-htl-items { grid-template-columns: repeat(2,1fr); }
     .ab-intro-inner, .ab-history-header, .ab-dir-header, .ab-mission-inner,
     .ab-cta-inner, .ab-infograph-inner, .ab-geo-inner, .ab-htl, .ab-stats-inner,
     .ab-history-header { padding-left: 1.5rem; padding-right: 1.5rem; }
-    .ab-feat-grid { padding: 0 1.5rem; }
+    .ab-intro-img-wrap img { height: 280px; }
+    .ab-feat-grid { padding: 0 1.5rem 3rem; }
     .ab-htl-line { display: none; }
+    .ab-intro { padding: 3rem 0; }
+    .ab-stats { padding: 3rem 0; }
+    .ab-history { padding: 3rem 0 4rem; }
+    .ab-geo { padding: 3rem 0; }
+    .ab-mission { padding: 3rem 0; }
+    .ab-cta { padding: 3rem 0 4rem; }
+    .ab-infograph { padding: 3rem 0; }
+    .ab-directions { padding-bottom: 0; }
 }

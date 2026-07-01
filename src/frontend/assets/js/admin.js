@@ -10,19 +10,36 @@ document.addEventListener('DOMContentLoaded', () => {
   const token = localStorage.getItem('cms_token');
   const user  = getUser();
 
-  if (!token || !user || user.role !== 'admin') {
+  if (!token || !user || (user.role !== 'admin' && user.role !== 'employee')) {
     window.location.replace('index.html');
     return;
   }
 
   fillUserMenu(user);
-  loadUsers();
 
   // Закрыть меню при клике снаружи
   document.addEventListener('click', e => {
     const menu = document.getElementById('user-menu');
     if (!menu.contains(e.target)) menu.classList.remove('open');
   });
+
+  // Сотрудник — всегда грузим свежие права из БД (могли измениться после логина)
+  if (user.role === 'employee') {
+    fetch(`${API}/api/profile`, { headers: { Authorization: 'Bearer ' + localStorage.getItem('cms_token') } })
+      .then(r => r.json())
+      .then(data => {
+        const fresh = (data.success && data.user)
+          ? { ...user, permissions: data.user.permissions }
+          : user;
+        localStorage.setItem('cms_user', JSON.stringify(fresh));
+        applyUserPermissions(fresh);
+        startFirstSection(fresh);
+      })
+      .catch(() => { applyUserPermissions(user); startFirstSection(user); });
+  } else {
+    applyUserPermissions(user);
+    startFirstSection(user);
+  }
 });
 
 function getUser() {
@@ -66,9 +83,9 @@ function logout() {
 }
 
 // ===== SECTIONS =====
-const SECTION_TITLES  = { users: 'Пользователи', news: 'Статьи', vacancies: 'Вакансии', knowledge: 'База знаний', candidates: 'Кандидаты' };
-const ADD_HANDLERS    = { users: 'openAddUser()', news: 'openAddNews()', vacancies: 'openAddVac()', knowledge: '', candidates: '' };
-const ADD_BTN_LABELS  = { users: 'Добавить', news: 'Добавить статью', vacancies: 'Добавить вакансию', knowledge: '', candidates: '' };
+const SECTION_TITLES  = { users: 'Пользователи', news: 'Статьи', projects: 'Проекты', vacancies: 'Вакансии', knowledge: 'База знаний', candidates: 'Кандидаты', settings: 'AI' };
+const ADD_HANDLERS    = { users: 'openAddUser()', news: 'openAddNews()', projects: 'openAddProject()', vacancies: 'openAddVac()', knowledge: '', candidates: '', settings: '' };
+const ADD_BTN_LABELS  = { users: 'Добавить', news: 'Добавить статью', projects: 'Добавить проект', vacancies: 'Добавить вакансию', knowledge: '', candidates: '', settings: '' };
 
 function switchSection(name, el) {
   document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
@@ -82,9 +99,11 @@ function switchSection(name, el) {
   const labelEl = addBtn.querySelector('.add-btn-label');
   if (labelEl) labelEl.textContent = ADD_BTN_LABELS[name] || 'Добавить';
   if (name === 'news')       loadNews();
+  if (name === 'projects')   loadProjects();
   if (name === 'vacancies')  loadVacancies();
   if (name === 'knowledge')  loadKnowledgeSection();
   if (name === 'candidates') { loadAiCandidates(); loadFormCandidates(); }
+  if (name === 'settings')   loadSettings();
   // Закрыть сайдбар на мобильном
   const sidebar  = document.querySelector('.sidebar');
   const backdrop = document.getElementById('sidebar-backdrop');
@@ -166,16 +185,21 @@ function renderTable() {
       ? `<span class="client-type-badge">${CLIENT_TYPE_LABELS[u.client_type] || u.client_type}</span>`
       : '';
 
+    const isAdmin = getUser()?.role === 'admin';
     const actions = u.role !== 'admin' ? `
       <div style="display:flex;gap:0.4rem;justify-content:flex-end">
+        ${isAdmin ? `<button class="btn-perms" onclick="openPermsModal(${u.id})" title="Права доступа">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Права
+        </button>` : ''}
         <button class="btn-edit-user" onclick="openEditUser(${u.id})">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
           Изменить
         </button>
-        <button class="btn-delete" onclick="confirmDelete(${u.id}, '${esc(u.username)}')">
+        ${isAdmin ? `<button class="btn-delete" onclick="confirmDelete(${u.id}, '${esc(u.username)}')">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
           Удалить
-        </button>
+        </button>` : ''}
       </div>` : '';
 
     return `<tr>
@@ -857,8 +881,15 @@ function esc(s) {
     .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
+// MySQL возвращает "YYYY-MM-DD HH:MM:SS" без timezone — добавляем Z чтобы парсилось как UTC
+function parseUTC(str) {
+  if (!str) return new Date(NaN);
+  const s = String(str).trim();
+  return new Date(s.includes('T') || s.includes('Z') || s.includes('+') ? s : s.replace(' ', 'T') + 'Z');
+}
+
 function fmtDate(str) {
-  const d = new Date(str);
+  const d = parseUTC(str);
   return isNaN(d) ? str : d.toLocaleDateString('ru-RU', { day:'2-digit', month:'2-digit', year:'numeric' });
 }
 
@@ -1501,7 +1532,7 @@ async function loadAiCandidates() {
     const list  = data.candidates || [];
     if (!list.length) { wrap.innerHTML = '<div style="padding:2rem;text-align:center;color:#888">Пока нет одобренных кандидатов от AI</div>'; return; }
     wrap.innerHTML = list.map(c => {
-      const date       = new Date(c.created_at).toLocaleString('ru-RU');
+      const date       = parseUTC(c.created_at).toLocaleString('ru-RU');
       const transcript = (c.transcript || '').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
       const badge      = '<span style="background:#1976d2;color:#fff;font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px">&#x1F916; Рекомендован ИИ</span>'
                        + '<span style="color:#888;font-size:12px">' + date + '</span>';
@@ -1534,7 +1565,7 @@ async function loadFormCandidates() {
     const list  = data.candidates || [];
     if (!list.length) { wrap.innerHTML = '<div style="padding:2rem;text-align:center;color:#888">Заявок с формы пока нет</div>'; return; }
     wrap.innerHTML = list.map(c => {
-      const date   = new Date(c.created_at).toLocaleString('ru-RU');
+      const date   = parseUTC(c.created_at).toLocaleString('ru-RU');
       const badge  = '<span style="background:#388e3c;color:#fff;font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px">&#128203; Форма заявок</span>'
                    + '<span style="color:#888;font-size:12px">' + date + '</span>';
       const resumeBtn = c.resume_path
@@ -1593,4 +1624,516 @@ async function deleteFormCandidate(id, btn) {
 
 function escH(s) {
   return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ===================================================================
+// ===== ПРОЕКТЫ =====================================================
+// ===================================================================
+let allProjects  = [];
+let projFilter   = 'all';
+
+async function loadProjects() {
+  const grid = document.getElementById('proj-grid');
+  grid.innerHTML = '<div class="table-loader"><span class="loader"></span></div>';
+  try {
+    const res  = await fetch(API + '/api/projects?all=1', { headers: { Authorization: 'Bearer ' + token() } });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.message);
+    allProjects = data.projects;
+    updateProjCounts();
+    renderProjGrid();
+  } catch (err) {
+    grid.innerHTML = `<div class="admin-news-empty">Ошибка загрузки: ${esc(err.message)}</div>`;
+  }
+}
+
+function updateProjCounts() {
+  let pub = 0, draft = 0;
+  allProjects.forEach(p => { p.published ? pub++ : draft++; });
+  document.getElementById('pc-all').textContent   = allProjects.length;
+  document.getElementById('pc-pub').textContent   = pub;
+  document.getElementById('pc-draft').textContent = draft;
+}
+
+function setProjFilter(val, el) {
+  projFilter = val;
+  document.querySelectorAll('#section-projects .filter-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  renderProjGrid();
+}
+
+function renderProjGrid() {
+  const q = (document.getElementById('proj-search').value || '').toLowerCase().trim();
+  const filtered = allProjects.filter(p => {
+    const matchPub = projFilter === 'all' || String(p.published) === projFilter;
+    const matchQ   = !q || p.title.toLowerCase().includes(q);
+    return matchPub && matchQ;
+  });
+  const grid = document.getElementById('proj-grid');
+  if (!filtered.length) {
+    grid.innerHTML = '<div class="admin-news-empty">Проектов не найдено</div>';
+    return;
+  }
+  grid.innerHTML = filtered.map(p => {
+    const imgBlock = p.image
+      ? `<img src="${esc(p.image)}" alt="${esc(p.title)}" onerror="this.style.display='none'">`
+      : `<div class="anc-img-placeholder"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg></div>`;
+    const pubBadge = p.published
+      ? '<span class="anc-badge anc-badge--pub">Опубликован</span>'
+      : '<span class="anc-badge anc-badge--draft">Черновик</span>';
+    const catTag = p.category ? `<span class="anc-badge" style="background:#e8f0f8;color:#1976d2">${esc(p.category)}</span>` : '';
+    return `<div class="anc-card">
+      <div class="anc-img">${imgBlock}</div>
+      <div class="anc-body">
+        <div class="anc-meta">${pubBadge}${catTag}<span class="anc-date">${p.year || ''}</span></div>
+        <h3 class="anc-title">${esc(p.title)}</h3>
+        ${p.client_name ? `<p class="anc-excerpt">Клиент: ${esc(p.client_name)}</p>` : ''}
+        ${p.description ? `<p class="anc-excerpt">${esc(p.description)}</p>` : ''}
+      </div>
+      <div class="anc-actions">
+        ${!p.published ? `<button class="anc-btn anc-btn--pub" onclick="publishProject(${p.id})" title="Опубликовать">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+          Опубликовать
+        </button>` : ''}
+        <button class="anc-btn anc-btn--edit" onclick="openEditProject(${p.id})">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          Редактировать
+        </button>
+        <button class="anc-btn anc-btn--del" onclick="confirmDeleteProject(${p.id}, '${esc(p.title)}')" title="Удалить проект">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function publishProject(id) {
+  const p = allProjects.find(x => x.id === id);
+  if (!p) return;
+  try {
+    const res = await fetch(`${API}/api/projects/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token() },
+      body: JSON.stringify({ ...p, published: 1 }),
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.message);
+    await loadProjects();
+  } catch (err) {
+    alert('Ошибка: ' + err.message);
+  }
+}
+
+function openAddProject() {
+  document.getElementById('proj-modal-title').textContent = 'Добавить проект';
+  document.getElementById('proj-form').reset();
+  document.getElementById('pm-id').value    = '';
+  document.getElementById('pm-image').value = '';
+  document.getElementById('pm-year').value  = new Date().getFullYear();
+  document.getElementById('proj-modal-error').hidden = true;
+  setProjImgPreview('');
+  openModal('proj-modal');
+}
+
+function openEditProject(id) {
+  const p = allProjects.find(x => x.id === id);
+  if (!p) return;
+  document.getElementById('proj-modal-title').textContent = 'Редактировать проект';
+  document.getElementById('pm-id').value          = p.id;
+  document.getElementById('pm-title').value       = p.title       || '';
+  document.getElementById('pm-description').value = p.description || '';
+  document.getElementById('pm-content').value     = p.content     || '';
+  document.getElementById('pm-image').value       = p.image       || '';
+  document.getElementById('pm-client-name').value = p.client_name || '';
+  document.getElementById('pm-client-logo').value = p.client_logo || '';
+  document.getElementById('pm-category').value    = p.category    || '';
+  document.getElementById('pm-year').value        = p.year        || '';
+  document.getElementById('pm-published').checked = !!p.published;
+  document.getElementById('proj-modal-error').hidden = true;
+  setProjImgPreview(p.image || '');
+  openModal('proj-modal');
+}
+
+function closeProjModal() { closeModal('proj-modal'); }
+
+function setProjImgPreview(url) {
+  const preview     = document.getElementById('proj-img-preview');
+  const previewImg  = document.getElementById('proj-img-preview-img');
+  const placeholder = document.getElementById('proj-img-placeholder');
+  if (url) {
+    previewImg.src     = url;
+    preview.hidden     = false;
+    placeholder.hidden = true;
+  } else {
+    preview.hidden     = true;
+    placeholder.hidden = false;
+  }
+}
+
+function removeProjImg(e) {
+  e.stopPropagation();
+  document.getElementById('pm-image').value = '';
+  setProjImgPreview('');
+}
+
+async function handleProjFileSelect(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const status = document.getElementById('pm-upload-status');
+  status.textContent = 'Загрузка...';
+  status.hidden = false;
+  try {
+    const fd = new FormData();
+    fd.append('file', file);
+    const res  = await fetch(API + '/api/upload', { method: 'POST', headers: { Authorization: 'Bearer ' + token() }, body: fd });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.message || 'Ошибка загрузки');
+    document.getElementById('pm-image').value = data.url;
+    setProjImgPreview(data.url);
+    status.hidden = true;
+  } catch (err) {
+    status.textContent = 'Ошибка: ' + err.message;
+  }
+  input.value = '';
+}
+
+async function handleSaveProject(e) {
+  e.preventDefault();
+  const errEl = document.getElementById('proj-modal-error');
+  const btn   = document.getElementById('proj-modal-submit');
+  errEl.hidden = true;
+  const id   = document.getElementById('pm-id').value;
+  const body = {
+    title:       document.getElementById('pm-title').value.trim(),
+    description: document.getElementById('pm-description').value.trim(),
+    content:     document.getElementById('pm-content').value.trim(),
+    image:       document.getElementById('pm-image').value.trim(),
+    client_name: document.getElementById('pm-client-name').value.trim(),
+    client_logo: document.getElementById('pm-client-logo').value.trim(),
+    category:    document.getElementById('pm-category').value,
+    year:        parseInt(document.getElementById('pm-year').value) || new Date().getFullYear(),
+    published:   document.getElementById('pm-published').checked ? 1 : 0,
+  };
+  if (!body.title) { errEl.textContent = 'Введите название проекта'; errEl.hidden = false; return; }
+  btn.disabled = true;
+  try {
+    const url = id ? `${API}/api/projects/${id}` : `${API}/api/projects`;
+    const res  = await fetch(url, {
+      method: id ? 'PUT' : 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token() },
+      body: JSON.stringify(body),
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.message);
+    closeModal('proj-modal');
+    await loadProjects();
+  } catch (err) {
+    errEl.textContent = err.message;
+    errEl.hidden = false;
+  } finally { btn.disabled = false; }
+}
+
+async function confirmDeleteProject(id, title) {
+  document.getElementById('confirm-modal-title').textContent   = 'Удалить проект?';
+  document.getElementById('confirm-modal-message').textContent = `Проект "${title}" будет удалён. Это действие нельзя отменить.`;
+  deleteTarget = { type: 'project', id };
+  document.getElementById('confirm-ok').onclick = doDeleteProject;
+  openModal('confirm-modal');
+}
+
+async function doDeleteProject() {
+  if (!deleteTarget) return;
+  const { id } = deleteTarget;
+  const btn = document.getElementById('confirm-ok');
+  btn.disabled = true; btn.textContent = 'Удаление...';
+  try {
+    await fetch(`${API}/api/projects/${id}`, {
+      method: 'DELETE',
+      headers: { Authorization: 'Bearer ' + token() }
+    });
+    closeModal('confirm-modal');
+    deleteTarget = null;
+    await loadProjects();
+  } catch { alert('Ошибка соединения.'); }
+  finally { btn.disabled = false; btn.textContent = 'Удалить'; }
+}
+
+
+// ===== PERMISSIONS SYSTEM =====
+
+// Определения прав для сотрудника
+const EMPLOYEE_PERM_DEFS = [
+  { key: 'users',         label: 'Управление пользователями', options: [
+    { val: 'deny', label: 'Запрет' }, { val: 'view', label: 'Просмотр' }, { val: 'add', label: 'Полный доступ' }
+  ]},
+  { key: 'profile_edit',  label: 'Редактирование профилей', note: 'Только если "Пользователи" ≠ Запрет', options: [
+    { val: 'deny', label: 'Запрет' }, { val: 'view', label: 'Просмотр' }, { val: 'add', label: 'Редактирование' }
+  ]},
+  { key: 'articles',      label: 'Статьи', options: [
+    { val: 'deny', label: 'Запрет' }, { val: 'add', label: 'Управление' }
+  ]},
+  { key: 'vacancies',     label: 'Вакансии', options: [
+    { val: 'deny', label: 'Запрет' }, { val: 'add', label: 'Управление' }
+  ]},
+  { key: 'knowledge',     label: 'База знаний', options: [
+    { val: 'deny', label: 'Запрет' }, { val: 'view', label: 'Просмотр' }, { val: 'add', label: 'Управление' }
+  ]},
+  { key: 'projects',      label: 'Проекты', options: [
+    { val: 'deny', label: 'Запрет' }, { val: 'add', label: 'Управление' }
+  ]},
+  { key: 'candidates',    label: 'Кандидаты', options: [
+    { val: 'deny', label: 'Запрет' }, { val: 'view', label: 'Просмотр' }, { val: 'add', label: 'Управление' }
+  ]},
+  { key: 'notifications', label: 'Уведомления', options: [
+    { val: 'deny', label: 'Запрет' }, { val: 'add', label: 'Управление' }
+  ]},
+  { key: 'reports',       label: 'Отчёты и аналитика', options: [
+    { val: 'deny', label: 'Запрет' }, { val: 'view', label: 'Просмотр' }
+  ]},
+];
+
+// Определения прав для клиента
+const CLIENT_PERM_DEFS = [
+  { key: 'dashboard', label: 'Доступ к дашборду', options: [
+    { val: 'deny', label: 'Запрет' }, { val: 'geoscan', label: 'Геоскан (личный кабинет)' }
+  ]},
+];
+
+// Запустить первый доступный раздел после применения прав
+function startFirstSection(user) {
+  if (user.role === 'admin' || (user.permissions && Object.values(user.permissions).some(v => v !== 'deny'))) {
+    // Ищем первый видимый nav-item
+    const firstVisible = document.querySelector('.sidebar .nav-item:not([style*="display: none"]):not([style*="display:none"])');
+    if (firstVisible) {
+      const sec = firstVisible.dataset.section;
+      if (sec && sec !== 'users') { switchSection(sec, firstVisible); return; }
+    }
+  }
+  loadUsers();
+}
+
+// Применить права текущего пользователя (сотрудника) — скрыть недоступные разделы
+function applyUserPermissions(user) {
+  if (user.role === 'admin') return;
+  const perms = user.permissions || {};
+
+  const sectionPermMap = {
+    users:      perms.users      ?? 'deny',
+    news:       perms.articles   ?? 'deny',
+    projects:   perms.projects   ?? 'deny',
+    vacancies:  perms.vacancies  ?? 'deny',
+    knowledge:  perms.knowledge  ?? 'deny',
+    candidates: perms.candidates ?? 'deny',
+  };
+
+  Object.entries(sectionPermMap).forEach(([section, level]) => {
+    if (level === 'deny') {
+      const navEl = document.querySelector(`.nav-item[data-section="${section}"]`);
+      if (navEl) navEl.style.display = 'none';
+    }
+  });
+
+  // Скрыть кнопки добавления там где только просмотр
+  if (perms.users === 'view') {
+    const addBtn = document.getElementById('section-add-btn');
+    // Будет скрыта в switchSection если нужно
+  }
+}
+
+// ===== ПЕРМА МОДАЛ =====
+let permsCurrentUser = null;
+
+function openPermsModal(id) {
+  const u = allUsers.find(x => x.id === id);
+  if (!u) return;
+  permsCurrentUser = u;
+  document.getElementById('perms-uid').value    = u.id;
+  document.getElementById('perms-urole').value  = u.role;
+  document.getElementById('perms-modal-sub').textContent =
+    `${u.full_name || u.username} · ${ROLE_LABELS[u.role] || u.role}`;
+  document.getElementById('perms-error').hidden = true;
+
+  const isEmployee = u.role === 'employee';
+  document.getElementById('perms-employee-wrap').hidden = !isEmployee;
+  document.getElementById('perms-client-wrap').hidden   =  isEmployee;
+
+  const defs = isEmployee ? EMPLOYEE_PERM_DEFS : CLIENT_PERM_DEFS;
+  const gridId = isEmployee ? 'perms-grid-employee' : 'perms-grid-client';
+  const perms  = u.permissions || {};
+
+  document.getElementById(gridId).innerHTML = defs.map(def => {
+    const current = perms[def.key] ?? def.options[0].val;
+    return `<div class="perm-row" id="perm-row-${def.key}">
+      <div class="perm-row-label">
+        ${def.label}
+        ${def.note ? `<span class="perm-note">${def.note}</span>` : ''}
+      </div>
+      <div class="perm-row-options" role="group">
+        ${def.options.map(opt => `
+          <label class="perm-opt${current === opt.val ? ' perm-opt--active' : ''}">
+            <input type="radio" name="perm_${def.key}" value="${opt.val}"
+                   ${current === opt.val ? 'checked' : ''}
+                   onchange="onPermRadioChange(this, '${def.key}')">
+            ${opt.label}
+          </label>
+        `).join('')}
+      </div>
+    </div>`;
+  }).join('');
+
+  updatePermDependencies();
+  openModal('perms-modal');
+}
+
+function closePermsModal() { closeModal('perms-modal'); }
+
+function onPermRadioChange(input, key) {
+  const row = input.closest('.perm-row-options');
+  row.querySelectorAll('.perm-opt').forEach(l => l.classList.remove('perm-opt--active'));
+  input.closest('.perm-opt').classList.add('perm-opt--active');
+  if (key === 'users') updatePermDependencies();
+}
+
+function updatePermDependencies() {
+  const usersVal = document.querySelector('input[name="perm_users"]:checked')?.value;
+  const profileRow = document.getElementById('perm-row-profile_edit');
+  if (profileRow) {
+    const disabled = !usersVal || usersVal === 'deny';
+    profileRow.style.opacity = disabled ? '0.4' : '1';
+    profileRow.querySelectorAll('input').forEach(i => i.disabled = disabled);
+    if (disabled) {
+      const deny = profileRow.querySelector('input[value="deny"]');
+      if (deny) { deny.checked = true; deny.closest('.perm-opt') && profileRow.querySelectorAll('.perm-opt').forEach(l => { l.classList.toggle('perm-opt--active', l.querySelector('input')?.value === 'deny'); }); }
+    }
+  }
+}
+
+async function handleSavePerms() {
+  const uid   = document.getElementById('perms-uid').value;
+  const role  = document.getElementById('perms-urole').value;
+  const errEl = document.getElementById('perms-error');
+  const btn   = document.getElementById('perms-submit');
+  errEl.hidden = true;
+  btn.disabled = true;
+
+  const defs  = role === 'client' ? CLIENT_PERM_DEFS : EMPLOYEE_PERM_DEFS;
+  const perms = {};
+  defs.forEach(def => {
+    const checked = document.querySelector(`input[name="perm_${def.key}"]:checked`);
+    perms[def.key] = checked ? checked.value : def.options[0].val;
+  });
+
+  try {
+    const res  = await fetch(`${API}/api/users/${uid}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token() },
+      body: JSON.stringify({ permissions: perms }),
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.message);
+    // Обновить локально
+    const u = allUsers.find(x => x.id === +uid);
+    if (u) u.permissions = perms;
+    closePermsModal();
+  } catch (err) {
+    errEl.textContent = 'Ошибка: ' + err.message;
+    errEl.hidden = false;
+  } finally { btn.disabled = false; }
+}
+
+// ===== SETTINGS =====
+let _aiHrEnabled = true;
+let _aiHrConfirmStep = 0;
+
+async function loadSettings() {
+  try {
+    const res  = await fetch(API + '/api/settings', { headers: { Authorization: 'Bearer ' + token() } });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.message || 'ошибка сервера');
+    const s  = data.settings ?? {};
+    _aiHrEnabled = s.ai_hr_enabled === undefined ? true : (s.ai_hr_enabled === '1' || s.ai_hr_enabled === 'true');
+    renderAiHrToggle();
+  } catch (e) {
+    document.getElementById('ai-hr-meta').textContent = 'Ошибка: ' + e.message;
+  }
+}
+
+function renderAiHrToggle() {
+  const cb    = document.getElementById('ai-hr-checkbox');
+  const label = document.getElementById('ai-hr-toggle-label');
+  const meta  = document.getElementById('ai-hr-meta');
+  cb.disabled = false;
+  cb.checked  = _aiHrEnabled;
+  label.textContent = _aiHrEnabled ? 'ВКЛ' : 'ВЫКЛ';
+  if (_aiHrEnabled) {
+    meta.innerHTML = '<span style="color:#2e7d32">● Активен</span> — бот доступен кандидатам на странице карьеры';
+  } else {
+    meta.innerHTML = '<span style="color:#c62828">● Отключён</span> — кандидаты видят форму заявки вместо чат-бота';
+  }
+}
+
+function toggleAiHr() {
+  _aiHrConfirmStep = 0;
+  const title   = document.getElementById('aihr-modal-title');
+  const sub     = document.getElementById('aihr-modal-sub');
+  const warnBox = document.getElementById('aihr-warn-box');
+  const btn     = document.getElementById('aihr-confirm-btn');
+  const icon    = document.getElementById('aihr-modal-icon');
+
+  if (_aiHrEnabled) {
+    title.textContent = 'Отключить AI HR-ассистент?';
+    sub.textContent   = 'Кандидаты перестанут видеть чат-бот на странице вакансий.';
+    warnBox.hidden    = true;
+    btn.textContent   = 'Отключить';
+    btn.className     = 'modal-btn modal-btn--danger';
+    icon.className    = 'modal-icon modal-icon--danger';
+    _aiHrConfirmStep  = 2;
+  } else {
+    title.textContent = 'Включить AI HR-ассистент?';
+    sub.textContent   = 'Бот начнёт автоматически общаться с кандидатами от имени компании.';
+    warnBox.hidden    = true;
+    btn.textContent   = 'Продолжить';
+    btn.className     = 'modal-btn';
+    icon.className    = 'modal-icon modal-icon--warn';
+    _aiHrConfirmStep  = 1;
+  }
+  openModal('aihr-confirm-modal');
+}
+
+function aiHrConfirmStep() {
+  if (_aiHrConfirmStep === 1) {
+    // Шаг 2 — показываем предупреждение и меняем кнопку
+    document.getElementById('aihr-warn-box').hidden    = false;
+    document.getElementById('aihr-modal-title').textContent = 'Подтвердите включение';
+    document.getElementById('aihr-modal-sub').textContent   = 'Прочитайте предупреждение ниже перед включением.';
+    document.getElementById('aihr-confirm-btn').textContent = 'Да, включить бота';
+    document.getElementById('aihr-confirm-btn').className   = 'modal-btn';
+    _aiHrConfirmStep = 2;
+  } else if (_aiHrConfirmStep === 2) {
+    saveAiHrSetting(!_aiHrEnabled);
+    closeModal('aihr-confirm-modal');
+  }
+}
+
+async function saveAiHrSetting(enabled) {
+  const cb = document.getElementById('ai-hr-checkbox');
+  cb.disabled = true;
+  try {
+    const res = await fetch(API + '/api/settings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token() },
+      body: JSON.stringify({ key: 'ai_hr_enabled', value: enabled ? '1' : '0' })
+    });
+    const data = await res.json();
+    if (data.success) {
+      _aiHrEnabled = enabled;
+      renderAiHrToggle();
+    } else {
+      alert('Ошибка сохранения: ' + (data.message || 'неизвестная ошибка'));
+      cb.disabled = false;
+    }
+  } catch (e) {
+    alert('Ошибка соединения с сервером: ' + e.message);
+    cb.disabled = false;
+  }
 }

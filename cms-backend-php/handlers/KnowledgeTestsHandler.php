@@ -12,9 +12,18 @@ if (!in_array($role, ['admin', 'employee'], true)) {
     echo json_encode(['success' => false, 'message' => 'Нет доступа'], JSON_UNESCAPED_UNICODE);
     exit;
 }
-
 $db     = (new Database())->getConnection();
 $method = $_SERVER['REQUEST_METHOD'];
+
+// Сотрудники всегда могут: видеть назначенные им тесты, проходить их, смотреть результаты.
+// Права knowledge нужны только для управления: создание, редактирование, назначение, удаление.
+$action_check = $GLOBALS['knowledge_action'] ?? '';
+$isManageAction = $action_check === 'assign'
+    || ($method !== 'GET' && !in_array($action_check, ['submit', 'results'], true));
+if ($role !== 'admin' && $isManageAction) {
+    Auth::requirePermission($token, 'knowledge', ['add']);
+}
+// GET-запросы (список назначенных тестов, прохождение, результаты) — доступны всем сотрудникам без проверки прав knowledge.
 $testId = (int)($GLOBALS['knowledge_test_id'] ?? 0);
 $action = $GLOBALS['knowledge_action'] ?? '';
 

@@ -85,6 +85,22 @@ CREATE TABLE IF NOT EXISTS ai_candidates (
     created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE IF NOT EXISTS projects (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(200) NOT NULL,
+    slug VARCHAR(250) UNIQUE,
+    description VARCHAR(400) DEFAULT '',
+    content TEXT DEFAULT '',
+    image VARCHAR(255) DEFAULT '',
+    client_name VARCHAR(150) DEFAULT '',
+    client_logo VARCHAR(255) DEFAULT '',
+    category VARCHAR(100) DEFAULT '',
+    year INT DEFAULT 0,
+    published BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
 -- Администратор по умолчанию (пароль: admin123)
 INSERT IGNORE INTO users (username, full_name, email, password, role)
 VALUES ('admin', 'Администратор', 'admin@mobilservice.ru',

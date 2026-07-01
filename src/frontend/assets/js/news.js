@@ -1,4 +1,4 @@
-const NP_API = 'http://localhost:8000';
+const NP_API = 'https://mobil-service.site/backend';
 
 // Навбар всегда тёмный на странице новостей
 (function () {
@@ -156,3 +156,4 @@ document.addEventListener('keydown', e => {
 });
 
 loadPublicNews(false);
+

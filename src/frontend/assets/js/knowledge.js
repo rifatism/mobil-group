@@ -1,4 +1,4 @@
-const KB_API = 'http://localhost:8000';
+const KB_API = 'https://mobil-service.site/backend';
 
 // ─── AUTH ────────────────────────────────────────────────────────────────────
 function kbToken() { return localStorage.getItem('cms_token'); }
@@ -649,3 +649,4 @@ async function handleKbUpload(e) {
 function escH(s) {
   return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
+

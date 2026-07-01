@@ -1,4 +1,4 @@
-const API = 'https://mobil-service.site/backend';
+const API = 'http://localhost:8000';
 const ROLE_LABELS = { admin: 'Администратор', employee: 'Сотрудник', client: 'Клиент' };
 
 let allUsers    = [];
@@ -2137,4 +2137,5 @@ async function saveAiHrSetting(enabled) {
     cb.disabled = false;
   }
 }
+
 

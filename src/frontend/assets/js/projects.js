@@ -1,4 +1,4 @@
-const PRJ_API = 'https://mobil-service.site/backend';
+const PRJ_API = 'http://localhost:8000';
 
 let allProjects = [];
 let activeCategory = 'all';
@@ -161,4 +161,5 @@ document.getElementById('prj-modal').addEventListener('click', e => {
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeProjectModal(); });
 
 loadProjects();
+
 

@@ -134,7 +134,7 @@ document.querySelectorAll('.feat-card').forEach(card => {
 });
 
 // ===== AUTH =====
-const API_BASE = 'https://mobil-service.site/backend';
+const API_BASE = 'http://localhost:8000';
 
 // --- Утилиты модалов ---
 function openModal(id) {
@@ -557,4 +557,5 @@ function toggleLang() {
     location.href = page.replace('.html', '-en.html');
   }
 }
+
 

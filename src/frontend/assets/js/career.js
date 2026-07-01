@@ -1,4 +1,4 @@
-const CR_API = 'https://mobil-service.site/backend';
+const CR_API = 'http://localhost:8000';
 
 // Статус AI HR-ассистента — промис, await-им при каждом клике
 const _aiStatusPromise = fetch(CR_API + '/api/ai-status')
@@ -250,4 +250,5 @@ document.addEventListener('DOMContentLoaded', () => {
     wrap.classList.add('has-file');
   });
 });
+
 

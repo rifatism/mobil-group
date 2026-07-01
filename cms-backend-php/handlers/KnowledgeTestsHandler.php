@@ -30,23 +30,23 @@ $action = $GLOBALS['knowledge_action'] ?? '';
 // Миграция: добавляем новые колонки если их нет
 try { $db->exec("ALTER TABLE knowledge_tests ADD COLUMN max_attempts INT NULL DEFAULT NULL"); } catch (\Exception $e) {}
 try { $db->exec("ALTER TABLE knowledge_tests ADD COLUMN passing_score INT NOT NULL DEFAULT 60"); } catch (\Exception $e) {}
-try { $db->exec("ALTER TABLE knowledge_results ADD COLUMN passed TINYINT(1) NULL DEFAULT NULL"); } catch (\Exception $e) {}
-try { $db->exec("ALTER TABLE knowledge_results ADD COLUMN attempt_count INT NOT NULL DEFAULT 1"); } catch (\Exception $e) {}
+try { $db->exec("ALTER TABLE knowledge_test_results ADD COLUMN passed TINYINT(1) NULL DEFAULT NULL"); } catch (\Exception $e) {}
+try { $db->exec("ALTER TABLE knowledge_test_results ADD COLUMN attempt_count INT NOT NULL DEFAULT 1"); } catch (\Exception $e) {}
 
 // ─── GET /api/knowledge/tests — список тестов ──────────────────────────────
 if ($method === 'GET' && !$testId && $action !== 'my') {
     if ($role === 'admin') {
-        $stmt = $db->query("SELECT kt.*, u.full_name AS creator, (SELECT COUNT(*) FROM knowledge_assignments ka WHERE ka.test_id = kt.id) AS assign_count FROM knowledge_tests kt LEFT JOIN users u ON u.id = kt.created_by ORDER BY kt.created_at DESC");
+        $stmt = $db->query("SELECT kt.*, u.full_name AS creator, (SELECT COUNT(*) FROM knowledge_test_assignments ka WHERE ka.test_id = kt.id) AS assign_count FROM knowledge_tests kt LEFT JOIN users u ON u.id = kt.created_by ORDER BY kt.created_at DESC");
         $tests = $stmt->fetchAll();
     } else {
         // Сотрудник: тесты назначенные ему или всем
         $stmt = $db->prepare("
             SELECT kt.*, ka.due_date, ka.assigned_at,
-                   (SELECT completed_at FROM knowledge_results kr WHERE kr.test_id=kt.id AND kr.user_id=?) AS completed_at,
-                   (SELECT score FROM knowledge_results kr WHERE kr.test_id=kt.id AND kr.user_id=?) AS my_score,
-                   (SELECT total FROM knowledge_results kr WHERE kr.test_id=kt.id AND kr.user_id=?) AS my_total
+                   (SELECT completed_at FROM knowledge_test_results kr WHERE kr.test_id=kt.id AND kr.user_id=?) AS completed_at,
+                   (SELECT score FROM knowledge_test_results kr WHERE kr.test_id=kt.id AND kr.user_id=?) AS my_score,
+                   (SELECT total FROM knowledge_test_results kr WHERE kr.test_id=kt.id AND kr.user_id=?) AS my_total
             FROM knowledge_tests kt
-            JOIN knowledge_assignments ka ON ka.test_id = kt.id AND (ka.user_id = ? OR ka.user_id = 0)
+            JOIN knowledge_test_assignments ka ON ka.test_id = kt.id AND (ka.user_id = ? OR ka.user_id = 0)
             ORDER BY ka.assigned_at DESC
         ");
         $stmt->execute([$uid, $uid, $uid, $uid]);
@@ -69,7 +69,7 @@ if ($method === 'GET' && !$testId && $action !== 'my') {
 if ($method === 'GET' && $testId && $action !== 'assign') {
     // Проверить что назначен (employee) или admin
     if ($role === 'employee') {
-        $chk = $db->prepare("SELECT id FROM knowledge_assignments WHERE test_id=? AND (user_id=? OR user_id=0)");
+        $chk = $db->prepare("SELECT id FROM knowledge_test_assignments WHERE test_id=? AND (user_id=? OR user_id=0)");
         $chk->execute([$testId, $uid]);
         if (!$chk->fetch()) { http_response_code(403); echo json_encode(['success'=>false,'message'=>'Тест не назначен'],JSON_UNESCAPED_UNICODE); exit; }
     }
@@ -144,9 +144,9 @@ if ($method === 'GET' && $testId && $action === 'assign') {
         SELECT ka.id, ka.user_id, ka.due_date, ka.assigned_at,
                u.full_name, u.username,
                kr.score, kr.passed, kr.completed_at AS submitted_at, kr.attempt_count
-        FROM knowledge_assignments ka
+        FROM knowledge_test_assignments ka
         LEFT JOIN users u ON u.id = ka.user_id
-        LEFT JOIN knowledge_results kr ON kr.test_id = ka.test_id AND kr.user_id = ka.user_id
+        LEFT JOIN knowledge_test_results kr ON kr.test_id = ka.test_id AND kr.user_id = ka.user_id
         WHERE ka.test_id = ?
         ORDER BY ka.assigned_at DESC
     ");
@@ -184,14 +184,14 @@ if ($method === 'POST' && $testId && $action === 'assign') {
 
     if ($target === 'all') {
         try {
-            $ins = $db->prepare("INSERT IGNORE INTO knowledge_assignments (test_id, user_id, assigned_by, due_date) VALUES (?, 0, ?, ?)");
+            $ins = $db->prepare("INSERT IGNORE INTO knowledge_test_assignments (test_id, user_id, assigned_by, due_date) VALUES (?, 0, ?, ?)");
             $ins->execute([$testId, $uid, $due_date ?: null]);
         } catch (\Exception $e) {}
         notifyRole($db, 'employee', 'test_assigned', 'Новый тест', "\u{AB}" . $testTitle . "\u{BB}", 'knowledge.html', 0);
     } else {
         $userId = (int)$target;
         if (!$userId) { http_response_code(400); echo json_encode(['success'=>false,'message'=>'Неверный пользователь'],JSON_UNESCAPED_UNICODE); exit; }
-        $ins = $db->prepare("INSERT IGNORE INTO knowledge_assignments (test_id, user_id, assigned_by, due_date) VALUES (?, ?, ?, ?)");
+        $ins = $db->prepare("INSERT IGNORE INTO knowledge_test_assignments (test_id, user_id, assigned_by, due_date) VALUES (?, ?, ?, ?)");
         $ins->execute([$testId, $userId, $uid, $due_date ?: null]);
         notifyUser($db, $userId, 'test_assigned', 'Новый тест', "\u{AB}" . $testTitle . "\u{BB}", 'knowledge.html');
     }
@@ -203,7 +203,7 @@ if ($method === 'POST' && $testId && $action === 'assign') {
 $assignId = (int)($GLOBALS['knowledge_assign_id'] ?? 0);
 if ($method === 'DELETE' && $testId && $action === 'assign' && $assignId) {
     if ($role !== 'admin') { http_response_code(403); echo json_encode(['success'=>false,'message'=>'Только администратор'],JSON_UNESCAPED_UNICODE); exit; }
-    $stmt = $db->prepare("DELETE FROM knowledge_assignments WHERE id = ? AND test_id = ?");
+    $stmt = $db->prepare("DELETE FROM knowledge_test_assignments WHERE id = ? AND test_id = ?");
     $stmt->execute([$assignId, $testId]);
     echo json_encode(['success' => true], JSON_UNESCAPED_UNICODE);
     exit;
@@ -213,8 +213,8 @@ if ($method === 'DELETE' && $testId && $action === 'assign' && $assignId) {
 if ($method === 'DELETE' && $testId) {
     if ($role !== 'admin') { http_response_code(403); echo json_encode(['success'=>false,'message'=>'Только администратор'],JSON_UNESCAPED_UNICODE); exit; }
 
-    $db->prepare("DELETE FROM knowledge_assignments WHERE test_id=?")->execute([$testId]);
-    $db->prepare("DELETE FROM knowledge_results WHERE test_id=?")->execute([$testId]);
+    $db->prepare("DELETE FROM knowledge_test_assignments WHERE test_id=?")->execute([$testId]);
+    $db->prepare("DELETE FROM knowledge_test_results WHERE test_id=?")->execute([$testId]);
     $db->prepare("DELETE FROM knowledge_tests WHERE id=?")->execute([$testId]);
     echo json_encode(['success' => true], JSON_UNESCAPED_UNICODE);
     exit;
@@ -231,7 +231,7 @@ if ($method === 'POST' && $action === 'submit') {
     if (!$testId) { http_response_code(400); echo json_encode(['success'=>false,'message'=>'Тест не указан'],JSON_UNESCAPED_UNICODE); exit; }
 
     // Проверить назначение
-    $chk = $db->prepare("SELECT id FROM knowledge_assignments WHERE test_id=? AND (user_id=? OR user_id=0)");
+    $chk = $db->prepare("SELECT id FROM knowledge_test_assignments WHERE test_id=? AND (user_id=? OR user_id=0)");
     $chk->execute([$testId, $uid]);
     if (!$chk->fetch()) { http_response_code(403); echo json_encode(['success'=>false,'message'=>'Тест не назначен'],JSON_UNESCAPED_UNICODE); exit; }
 
@@ -244,7 +244,7 @@ if ($method === 'POST' && $action === 'submit') {
     // Проверить количество попыток
     $maxAttempts = $t['max_attempts'] !== null ? (int)$t['max_attempts'] : null;
     if ($maxAttempts !== null) {
-        $cntStmt = $db->prepare("SELECT attempt_count FROM knowledge_results WHERE test_id=? AND user_id=?");
+        $cntStmt = $db->prepare("SELECT attempt_count FROM knowledge_test_results WHERE test_id=? AND user_id=?");
         $cntStmt->execute([$testId, $uid]);
         $existing = $cntStmt->fetch();
         $used = $existing ? (int)$existing['attempt_count'] : 0;
@@ -280,7 +280,7 @@ if ($method === 'POST' && $action === 'submit') {
 
     // Сохранить результат (обновить если уже есть, увеличить счётчик попыток)
     $ins = $db->prepare("
-        INSERT INTO knowledge_results (test_id, user_id, score, total, answers, passed, attempt_count, completed_at)
+        INSERT INTO knowledge_test_results (test_id, user_id, score, total, answers, passed, attempt_count, completed_at)
         VALUES (?,?,?,?,?,?,1,NOW())
         ON DUPLICATE KEY UPDATE
             score=VALUES(score), total=VALUES(total), answers=VALUES(answers),
@@ -318,9 +318,9 @@ if ($method === 'POST' && $action === 'submit') {
 // ─── GET /api/knowledge/results — результаты ──────────────────────────────
 if ($method === 'GET' && $action === 'results') {
     if ($role === 'admin') {
-        $stmt = $db->query("SELECT kr.*, kt.title AS test_title, u.full_name AS user_name, u.username FROM knowledge_results kr JOIN knowledge_tests kt ON kt.id=kr.test_id JOIN users u ON u.id=kr.user_id ORDER BY kr.completed_at DESC");
+        $stmt = $db->query("SELECT kr.*, kt.title AS test_title, u.full_name AS user_name, u.username FROM knowledge_test_results kr JOIN knowledge_tests kt ON kt.id=kr.test_id JOIN users u ON u.id=kr.user_id ORDER BY kr.completed_at DESC");
     } else {
-        $stmt = $db->prepare("SELECT kr.*, kt.title AS test_title FROM knowledge_results kr JOIN knowledge_tests kt ON kt.id=kr.test_id WHERE kr.user_id=? ORDER BY kr.completed_at DESC");
+        $stmt = $db->prepare("SELECT kr.*, kt.title AS test_title FROM knowledge_test_results kr JOIN knowledge_tests kt ON kt.id=kr.test_id WHERE kr.user_id=? ORDER BY kr.completed_at DESC");
         $stmt->execute([$uid]);
     }
     echo json_encode(['success' => true, 'results' => $stmt->fetchAll()], JSON_UNESCAPED_UNICODE);

@@ -22,6 +22,10 @@ $db->exec("CREATE TABLE IF NOT EXISTS projects (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 )");
+// Добавляем колонки если таблица уже существует со старой схемой
+try { $db->exec("ALTER TABLE projects ADD COLUMN client_name VARCHAR(150) DEFAULT ''"); } catch (\Exception $e) {}
+try { $db->exec("ALTER TABLE projects ADD COLUMN client_logo VARCHAR(255) DEFAULT ''"); } catch (\Exception $e) {}
+try { $db->exec("ALTER TABLE projects ADD COLUMN category VARCHAR(100) DEFAULT ''"); } catch (\Exception $e) {}
 
 if ($method === 'GET') {
     if ($id) {

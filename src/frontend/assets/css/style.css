@@ -585,16 +585,6 @@ body {
 
 /* ===== CAT ITEM — interactive panels ===== */
 .cat-item { cursor: pointer; }
-.cat-hint {
-  display: inline-block;
-  font-size: 0.74rem; color: rgba(255,255,255,0.6);
-  margin-top: 0.7rem; letter-spacing: 0.4px; font-weight: 500;
-  transition: color 0.2s;
-}
-.cat-hint-arrow { display: inline-block; transition: transform 0.3s; }
-.cat-item.cat-active .cat-hint { color: rgba(255,255,255,0.95); }
-.cat-item.cat-active .cat-hint-arrow { transform: rotate(180deg); }
-.cat-item:hover .cat-hint { color: rgba(255,255,255,0.85); }
 
 .cat-panels-wrap { background: var(--light); }
 .cat-panel {

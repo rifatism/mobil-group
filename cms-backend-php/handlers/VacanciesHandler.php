@@ -6,6 +6,10 @@ $db     = (new Database())->getConnection();
 $method = $_SERVER['REQUEST_METHOD'];
 $id     = (int)($GLOBALS['vacancy_id'] ?? 0);
 
+try { $db->exec("ALTER TABLE vacancies ADD COLUMN location VARCHAR(150) DEFAULT 'Тюмень'"); } catch (\Exception $e) {}
+try { $db->exec("ALTER TABLE vacancies ADD COLUMN requirements TEXT DEFAULT NULL"); } catch (\Exception $e) {}
+try { $db->exec("ALTER TABLE vacancies ADD COLUMN salary VARCHAR(100) DEFAULT ''"); } catch (\Exception $e) {}
+
 if ($method === 'GET') {
     if ($id) {
         $stmt = $db->prepare("SELECT * FROM vacancies WHERE id = ? AND published = 1");

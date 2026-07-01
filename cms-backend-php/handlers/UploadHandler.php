@@ -40,7 +40,7 @@ $ext  = match($mime) {
     'image/gif'  => 'gif',
 };
 $name = 'news_' . uniqid('', true) . '.' . $ext;
-$dir  = '/var/www/html/uploads/news/';
+$dir  = __DIR__ . '/../uploads/news/';
 
 if (!is_dir($dir)) {
     mkdir($dir, 0775, true);
@@ -54,6 +54,6 @@ if (!move_uploaded_file($file['tmp_name'], $dir . $name)) {
 
 $scheme  = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
 $host    = $_SERVER['HTTP_HOST'];
-$url     = "$scheme://$host/uploads/news/$name";
+$url     = "$scheme://$host/backend/uploads/news/$name";
 
 echo json_encode(['success' => true, 'url' => $url], JSON_UNESCAPED_UNICODE);

@@ -23,7 +23,7 @@ if ($method === 'GET' || ($GLOBALS['knowledge_action'] ?? '') === 'download') {
 }
 $subId  = (int)($GLOBALS['knowledge_file_id'] ?? 0);
 $action = $GLOBALS['knowledge_action'] ?? '';
-$base   = '/var/www/html/uploads/knowledge/';
+$base   = __DIR__ . '/../uploads/knowledge/';
 
 // ─── Вспомогательная функция: очистка и разрешение пути ──────────────────────────────────────────
 function kb_resolve(string $raw, string $base): ?string {

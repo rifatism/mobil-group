@@ -1,0 +1,727 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="assets/images/icon.png">
+    <title>MobilService | Fleet Monitoring and Satellite Communications</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+    <a href="#" class="logo">
+        <img src="assets/images/logo.png" alt="МобилСервис" class="logo-img">
+    </a>
+    <ul class="nav-links">
+        <li><a href="#" class="active">HOME</a></li>
+        <li><a href="about-en.html">ABOUT</a></li>
+        <li class="nav-has-drop">
+            <a href="#services" class="nav-drop-trigger"><span>SERVICES</span> <span class="arrow">▾</span></a>
+            <div class="nav-dropdown">
+                <a href="#service-monitoring" class="nav-drop-item">Fleet Monitoring</a>
+                <a href="#service-tachograph" class="nav-drop-item">Tachography</a>
+                <a href="#service-satellite" class="nav-drop-item">Satellite Communications</a>
+            </div>
+        </li>
+        <li><a href="projects-en.html">PROJECTS</a></li>
+        <li><a href="news-en.html">ARTICLES</a></li>
+        <li><a href="career-en.html">CAREER</a></li>
+        <li id="nav-knowledge-item" style="display:none"><a href="knowledge.html">БАЗА ЗНАНИЙ</a></li>
+    </ul>
+    <div class="nav-right">
+        <button class="lang-selector" onclick="toggleLang()">EN <span class="arrow">▾</span></button>
+        <a href="#contact" class="btn-contacts">CONTACTS</a>
+        <div id="client-dropdown-wrap" style="position:relative">
+            <button id="btn-login-open" class="btn-login" onclick="loginBtnClick()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="8" r="4"/>
+                    <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+                </svg>
+                <span id="btn-login-label">SIGN IN</span>
+            </button>
+            <div id="client-dropdown" class="client-dropdown">
+                <a id="cd-admin-link" class="cd-item cd-item--admin" href="admin.html" style="display:none">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    <span>Admin Panel</span>
+                </a>
+                <a class="cd-item" href="profile.html">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+                    <span>Profile</span>
+                </a>
+                <a class="cd-item" href="dashboard.html">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                    <span>Dashboard</span>
+                </a>
+                <a id="cd-knowledge-link" class="cd-item" href="knowledge.html" style="display:none">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                    <span>Knowledge Base</span>
+                </a>
+                <a class="cd-item cd-item--soon" href="#">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    <span>Support</span>
+                    <span class="cd-soon">Coming soon</span>
+                </a>
+                <div class="cd-divider"></div>
+                <button class="cd-item cd-item--logout" onclick="clientLogout()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                    <span>Log out</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    <button class="nav-burger" id="nav-burger" onclick="toggleMobNav()" aria-label="Меню">
+        <span></span><span></span><span></span>
+    </button>
+</nav>
+
+<!-- MOBILE NAV -->
+<div class="mob-nav" id="mob-nav">
+    <div class="mob-nav-backdrop" onclick="toggleMobNav()"></div>
+    <div class="mob-nav-panel">
+        <div class="mob-nav-head">
+            <img src="assets/images/logo.png" alt="МобилСервис">
+            <button class="mob-nav-close" onclick="toggleMobNav()">×</button>
+        </div>
+        <ul class="mob-nav-links">
+            <li><a href="index-en.html" class="mob-active">HOME</a></li>
+            <li><a href="about-en.html">ABOUT</a></li>
+            <li>
+                <button class="mob-drop-trigger" onclick="toggleMobDrop(this)">
+                    SERVICES <span class="mob-drop-chevron">▾</span>
+                </button>
+                <ul class="mob-sub">
+                    <li><a href="#service-monitoring">Fleet Monitoring</a></li>
+                    <li><a href="#service-tachograph">Tachography</a></li>
+                    <li><a href="#service-satellite">Satellite Communications</a></li>
+                </ul>
+            </li>
+            <li><a href="projects-en.html">PROJECTS</a></li>
+            <li><a href="news-en.html">ARTICLES</a></li>
+            <li><a href="career-en.html">CAREER</a></li>
+            <li id="mob-knowledge-item" style="display:none"><a href="knowledge.html" class="mob-kb-link">KNOWLEDGE BASE</a></li>
+            <li><a href="index-en.html#contact">CONTACTS</a></li>
+        </ul>
+        <div class="mob-user-section">
+            <button class="mob-user-trigger" onclick="toggleMobUser(this)">
+                <div class="mob-u-avatar" id="mob-u-avatar">?</div>
+                <div class="mob-u-info">
+                    <div class="mob-u-name" id="mob-u-name">Sign in</div>
+                    <div class="mob-u-label" id="mob-u-label">Personal Account</div>
+                </div>
+                <span class="mob-u-chevron">▾</span>
+            </button>
+            <div class="mob-user-menu" id="mob-user-menu"></div>
+            <a href="#" onclick="loginBtnClick();toggleMobNav();return false;" class="mob-login-link" id="mob-login-link">SIGN IN</a>
+        </div>
+    </div>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+    <div class="hero-slider">
+        <div class="hero-slide active">
+            <img src="https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=1920&q=80" alt="Мониторинг транспорта">
+        </div>
+        <div class="hero-slide">
+            <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1920&q=80" alt="Тахография">
+        </div>
+        <div class="hero-slide">
+            <img src="https://images.unsplash.com/photo-1476134397686-16d0f6fe4b36?w=1920&q=80" alt="Спутниковая связь">
+        </div>
+        <div class="hero-slide">
+            <img src="https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=1920&q=80" alt="Транспорт">
+        </div>
+    </div>
+
+    <div class="hero-content">
+        <div class="hero-text">
+            <h1 class="hero-title">
+                Fleet monitoring,<br>
+                tachography <span class="title-accent">and satellite communications</span>
+            </h1>
+            <p class="hero-subtitle">▶ &nbsp; <span>Comprehensive innovative solutions for your business since 1998</span></p>
+        </div>
+        <div class="hero-buttons">
+            <a href="about-en.html" class="btn btn-white">ABOUT US</a>
+            <a href="#services" class="btn btn-ghost"><span class="btn-circle"><img src="assets/images/arr.svg" alt="" class="btn-arr"></span> <span>OUR SERVICES</span></a>
+        </div>
+    </div>
+
+    <div class="info-card">
+        <div class="info-card-image">
+            <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=300&q=80" alt="МобилСервис">
+        </div>
+        <div class="info-card-content">
+            <span class="info-card-label">MobilService</span>
+            <h3 class="info-card-title">Fleet Control Technologies</h3>
+            <p class="info-card-text">Working with businesses of any size since 1998.</p>
+        </div>
+    </div>
+</section>
+
+<!-- ABOUT -->
+<section class="about section-white section-diag-top">
+    <div class="two-col-header">
+        <div class="col-left">
+            <h2 class="sec-title">A Technological Approach<br><span class="t-accent">to Fleet Management</span></h2>
+            <p class="sec-label">MobilService</p>
+        </div>
+        <div class="col-right">
+            <p class="sec-desc">We help transport companies comply with legislation, avoid fines <span class="t-accent">and optimise fleet operations</span> — from GPS/GLONASS monitoring and tachographs to Iridium satellite communications.</p>
+            <div class="g-line"></div>
+        </div>
+    </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features section-white">
+    <div class="features-grid">
+        <div class="feat-card feat-light">
+            <div class="feat-badge top-left"><span>1</span></div>
+            <div class="feat-img"><img src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=700&q=80" alt="Экономия"></div>
+            <div class="feat-body">
+                <p class="feat-label">Savings</p>
+                <h3 class="feat-title">We save our clients' money</h3>
+                <p class="feat-text">We reduce costs through fleet control systems: location monitoring, fuel consumption tracking and driving quality assessment.</p>
+            </div>
+        </div>
+        <div class="feat-card feat-dark feat-tall">
+            <div class="feat-badge bot-right"><span>2</span></div>
+            <div class="feat-img"><img src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=700&q=80" alt="Спутниковая связь"></div>
+            <div class="feat-body">
+                <p class="feat-label">Connectivity</p>
+                <h3 class="feat-title">We provide connectivity</h3>
+                <p class="feat-text">Stable communications in remote areas without GSM coverage or ground networks — via Iridium and VSAT satellite technologies.</p>
+            </div>
+        </div>
+        <div class="feat-card feat-light">
+            <div class="feat-badge top-left"><span>3</span></div>
+            <div class="feat-img"><img src="https://images.unsplash.com/photo-1518770660439-4636190af475?w=700&q=80" alt="Технологии"></div>
+            <div class="feat-body">
+                <p class="feat-label">Innovation</p>
+                <h3 class="feat-title">Advanced technologies</h3>
+                <p class="feat-text">Distributors and dealers of world-leading equipment manufacturers. We readily adapt solutions to each client's needs.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SERVICES / CATALOG -->
+<section class="catalog section-white" id="services">
+    <div class="two-col-header">
+        <div class="col-left">
+            <h2 class="sec-title">Areas of Activity<br><span class="t-accent">and Company Services</span></h2>
+            <p class="sec-label">Key Directions</p>
+        </div>
+        <div class="col-right">
+            <p class="sec-desc">We deliver end-to-end solutions, adapting technology to client needs — from fleet monitoring to satellite communications in remote areas.</p>
+            <div class="g-line"></div>
+        </div>
+    </div>
+    <div class="catalog-grid">
+        <div class="cat-item" id="service-monitoring" onclick="toggleServicePanel('monitoring')">
+            <img src="https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=700&q=80" alt="Мониторинг">
+            <div class="cat-overlay"></div>
+            <div class="cat-content">
+                <svg class="cat-icon" viewBox="0 0 52 52" fill="none">
+                    <circle cx="26" cy="26" r="10" stroke="white" stroke-width="2.5"/>
+                    <circle cx="26" cy="26" r="3" fill="white"/>
+                    <line x1="26" y1="4" x2="26" y2="16" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+                    <line x1="26" y1="36" x2="26" y2="48" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+                    <line x1="4" y1="26" x2="16" y2="26" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+                    <line x1="36" y1="26" x2="48" y2="26" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+                </svg>
+                <h3 class="cat-title">Fleet Monitoring</h3>
+                <p class="cat-sub">GPS/GLONASS</p>
+                <span class="cat-hint">Learn more <span class="cat-hint-arrow">▾</span></span>
+            </div>
+        </div>
+        <div class="cat-item" id="service-tachograph" onclick="toggleServicePanel('tachograph')">
+            <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=700&q=80" alt="Тахография">
+            <div class="cat-overlay"></div>
+            <div class="cat-content">
+                <svg class="cat-icon" viewBox="0 0 52 52" fill="none">
+                    <rect x="8" y="14" width="36" height="24" rx="4" stroke="white" stroke-width="2.5"/>
+                    <line x1="8" y1="24" x2="44" y2="24" stroke="white" stroke-width="2"/>
+                    <circle cx="36" cy="19" r="3" stroke="white" stroke-width="2"/>
+                    <line x1="14" y1="30" x2="28" y2="30" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                    <line x1="14" y1="34" x2="22" y2="34" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                <h3 class="cat-title">Tachography</h3>
+                <p class="cat-sub">Installation & Maintenance</p>
+                <span class="cat-hint">Learn more <span class="cat-hint-arrow">▾</span></span>
+            </div>
+        </div>
+        <div class="cat-item" id="service-satellite" onclick="toggleServicePanel('satellite')">
+            <img src="https://images.unsplash.com/photo-1476134397686-16d0f6fe4b36?w=700&q=80" alt="Спутниковая связь">
+            <div class="cat-overlay"></div>
+            <div class="cat-content">
+                <svg class="cat-icon" viewBox="0 0 52 52" fill="none">
+                    <circle cx="26" cy="36" r="6" stroke="white" stroke-width="2.5"/>
+                    <path d="M14 24 C14 17 32 10 38 18" stroke="white" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+                    <path d="M8 18 C8 8 40 4 44 16" stroke="white" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+                    <line x1="26" y1="30" x2="26" y2="16" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+                </svg>
+                <h3 class="cat-title">Satellite Communications</h3>
+                <p class="cat-sub">Iridium · VSAT · GSM</p>
+                <span class="cat-hint">Learn more <span class="cat-hint-arrow">▾</span></span>
+            </div>
+        </div>
+    </div>
+    <div class="cat-panels-wrap">
+        <div class="cat-panel" id="panel-monitoring">
+            <button class="cat-panel-close" onclick="toggleServicePanel('monitoring')">✕</button>
+            <div class="cat-panel-inner">
+                <div class="cat-panel-text">
+                    <h4 class="cat-panel-title">GPS/GLONASS Fleet Monitoring</h4>
+                    <p class="cat-panel-desc">Installation of certified satellite navigation equipment in compliance with Russian Government Decree No. 2216. Mandatory for passenger buses (M2, M3) and heavy goods vehicles (N2, N3) carrying hazardous cargo. Vehicle data is transmitted to the state JSC GLONASS monitoring system in real time.</p>
+                    <ul class="cat-panel-list">
+                        <li>Compliance with RF Decree No. 2216 and Ministry of Transport Order No. 440</li>
+                        <li>Data transfer to the state JSC GLONASS system</li>
+                        <li>Online tracking of route, speed, and events</li>
+                        <li>Fuel control and driver activity monitoring</li>
+                        <li>Fines for non-compliance: up to 500,000 RUB for legal entities</li>
+                    </ul>
+                </div>
+                <div class="cat-panel-extra">
+                    <h5 class="cat-panel-extra-title">Video Recorders & Video Analytics</h5>
+                    <p class="cat-panel-desc">Professional systems supporting up to 16 cameras with on-board AI analytics. Operating range −50…+70°C. Compliant with RF Decree No. 969 (certification from 01.09.2026).</p>
+                    <ul class="cat-panel-list">
+                        <li>ADAS: lane departure, dangerous proximity, pedestrian detection</li>
+                        <li>DSM: fatigue, distraction, and phone use monitoring</li>
+                        <li>Archive retention 3+ months (8 cameras, 2 TB HDD)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="cat-panel" id="panel-tachograph">
+            <button class="cat-panel-close" onclick="toggleServicePanel('tachograph')">✕</button>
+            <div class="cat-panel-inner">
+                <div class="cat-panel-text">
+                    <h4 class="cat-panel-title">Tachography</h4>
+                    <p class="cat-panel-desc">Installation, maintenance, and SKZI (cryptographic security module) replacement on Russian-standard tachographs. Processing of driver and enterprise cards. Required for trucks over 3.5 t (N2, N3) and buses with more than 8 seats (M2, M3). The SKZI module must be replaced every 3 years.</p>
+                    <ul class="cat-panel-list">
+                        <li>Russian tachographs with SKZI (SHTRIKH-TakhoRUS, ATOL Drive 5)</li>
+                        <li>SKZI module replacement every 3 years (from 34,500 RUB)</li>
+                        <li>Driver cards (5,200 RUB) and enterprise cards (6,200 RUB)</li>
+                        <li>Verification, calibration, and registration with Rosavtotrans</li>
+                        <li>Fines for missing tachograph: up to 50,000 RUB for legal entities</li>
+                    </ul>
+                </div>
+                <div class="cat-panel-extra">
+                    <h5 class="cat-panel-extra-title">About the SKZI Module</h5>
+                    <p class="cat-panel-desc">The cryptographic security module encrypts all driver activity and trip data in a tamper-proof format. After 3 years the module locks and must be replaced.</p>
+                    <ul class="cat-panel-list">
+                        <li>Expired SKZI = fine equal to missing tachograph</li>
+                        <li>Activation via the Rosavtotrans registry</li>
+                        <li>In-person appointment and original documents required</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="cat-panel" id="panel-satellite">
+            <button class="cat-panel-close" onclick="toggleServicePanel('satellite')">✕</button>
+            <div class="cat-panel-inner">
+                <div class="cat-panel-text">
+                    <h4 class="cat-panel-title">Satellite Communications Iridium / VSAT</h4>
+                    <p class="cat-panel-desc">Reliable connectivity in remote locations where GSM coverage is unavailable: oil fields, taiga, Siberia, and the Arctic. Iridium technology provides 100% global Earth coverage; VSAT delivers broadband corporate internet to isolated facilities.</p>
+                    <ul class="cat-panel-list">
+                        <li>Iridium — voice and data worldwide with 100% coverage</li>
+                        <li>VSAT — high-speed internet at remote facilities</li>
+                        <li>SOS signalling and emergency buttons for crews</li>
+                        <li>Applications: oil & gas, forestry, Arctic operations</li>
+                        <li>Integration with GPS/GLONASS fleet monitoring systems</li>
+                    </ul>
+                </div>
+                <div class="cat-panel-extra">
+                    <h5 class="cat-panel-extra-title">When It's Needed</h5>
+                    <p class="cat-panel-desc">Essential for enterprises operating beyond GSM coverage or requiring guaranteed connectivity independent of ground infrastructure.</p>
+                    <ul class="cat-panel-list">
+                        <li>Oil and gas fields in Siberia and the Arctic</li>
+                        <li>Forestry operations deep in the taiga</li>
+                        <li>Vehicles on routes beyond cellular network coverage</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- STATS -->
+<section class="production section-white">
+    <div class="two-col-header">
+        <div class="col-left">
+            <h2 class="sec-title">Experience that<br><span class="t-accent">works for your business</span></h2>
+            <p class="sec-label">Numbers and facts</p>
+        </div>
+        <div class="col-right">
+            <p class="sec-desc">Operating since 1998 — we know the market from the inside. We continuously develop and adopt new technologies so our clients always stay one step ahead of the competition.</p>
+            <div class="g-line"></div>
+        </div>
+    </div>
+    <div class="production-body">
+        <div class="stats-col">
+            <div class="stat-item">
+                <div class="stat-num">2500+</div>
+                <div class="stat-title t-accent">Major completed projects</div>
+                <p class="stat-desc">Delivery and implementation of monitoring, telematics and communications systems for enterprises across Russia.</p>
+            </div>
+            <div class="stat-item">
+                <div class="stat-num">26 <span class="stat-unit">years</span></div>
+                <div class="stat-title t-accent">In the telematics market</div>
+                <p class="stat-desc">Operating since 1998, we know the market from the inside and continuously develop to stay one step ahead.</p>
+            </div>
+            <div class="stat-item">
+                <div class="stat-num">3200 <span class="stat-unit">units</span></div>
+                <div class="stat-title t-accent">Vehicles under service</div>
+                <p class="stat-desc">We manage enterprise fleets in cities and remote areas across Russia.</p>
+            </div>
+        </div>
+        <div class="map-col">
+            <div style="position:relative;">
+                <img src="assets/images/map.png" alt="Карта России" class="map-img">
+                <div class="ab-map-pin" style="left:30%;top:calc(47% + 100px)"><span class="ab-pin-dot ab-pin-dot--main"></span><span class="ab-pin-label">Тюмень</span></div>
+                <div class="ab-map-pin" style="left:31%;top:calc(38% + 100px)"><span class="ab-pin-dot"></span><span class="ab-pin-label">Ханты-Мансийск</span></div>
+                <div class="ab-map-pin" style="left:33%;top:calc(37% + 100px)"><span class="ab-pin-dot"></span><span class="ab-pin-label">Сургут</span></div>
+                <div class="ab-map-pin" style="left:35%;top:calc(38% + 100px)"><span class="ab-pin-dot"></span><span class="ab-pin-label">Нижневартовск</span></div>
+                <div class="ab-map-pin" style="left:34%;top:calc(33% + 100px)"><span class="ab-pin-dot"></span><span class="ab-pin-label">Ноябрьск</span></div>
+                <div class="ab-map-pin" style="left:35%;top:calc(26% + 100px)"><span class="ab-pin-dot"></span><span class="ab-pin-label">Новый Уренгой</span></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- DARK SECTION -->
+<section class="eng-dark section-dark section-diag-top">
+    <div class="two-col-header">
+        <div class="col-left">
+            <h2 class="sec-title sec-title-light">Innovation and reliability<br><span class="t-accent">at every stage of cooperation</span></h2>
+            <p class="sec-label sec-label-light">A reliable technology partner</p>
+        </div>
+        <div class="col-right">
+            <p class="sec-desc sec-desc-light">We develop custom technical solutions, <span class="t-accent">support clients and conduct fleet audits</span> ensuring stable equipment operation under any conditions.</p>
+            <div class="g-line"></div>
+        </div>
+    </div>
+</section>
+
+<!-- STEPS -->
+<section class="steps section-dark">
+    <div class="steps-grid">
+        <div class="step-card">
+            <span class="step-num">01</span>
+            <img src="https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=1200&q=80" alt="" class="step-bg">
+            <div class="step-overlay"></div>
+            <div class="step-body">
+                <div class="step-info">
+                    <p class="step-label">GPS/GLONASS</p>
+                    <h3 class="step-title">Fleet Monitoring and Fleet Management</h3>
+                </div>
+                <div class="step-tags">
+                    <span class="tag">GPS/ГЛОНАСС</span>
+                    <span class="tag">Fuel Control</span>
+                    <span class="tag">Routes & Mileage</span>
+                    <span class="tag">Online Monitoring</span>
+                    <span class="tag">Fleet Audit</span>
+                    <span class="tag">Telematics</span>
+                </div>
+            </div>
+        </div>
+        <div class="step-card">
+            <span class="step-num">02</span>
+            <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1200&q=80" alt="" class="step-bg">
+            <div class="step-overlay"></div>
+            <div class="step-body">
+                <div class="step-info">
+                    <p class="step-label">Certification</p>
+                    <h3 class="step-title">Tachography and Driver Cards</h3>
+                </div>
+                <div class="step-tags">
+                    <span class="tag">Tachograph Installation</span>
+                    <span class="tag">Driver Cards</span>
+                    <span class="tag">Repair & Maintenance</span>
+                    <span class="tag">NKM Activation</span>
+                    <span class="tag">Calibration</span>
+                    <span class="tag">Regulation No. 440</span>
+                </div>
+            </div>
+        </div>
+        <div class="step-card">
+            <span class="step-num">03</span>
+            <img src="https://images.unsplash.com/photo-1516339901601-2e1b62dc0c45?w=1200&q=80" alt="Спутниковая связь" class="step-bg">
+            <div class="step-overlay"></div>
+            <div class="step-body">
+                <div class="step-info">
+                    <p class="step-label">Communications</p>
+                    <h3 class="step-title">Satellite Communications and Internet</h3>
+                </div>
+                <div class="step-tags">
+                    <span class="tag">Iridium</span>
+                    <span class="tag">VSAT Internet</span>
+                    <span class="tag">GSM Backup Channels</span>
+                    <span class="tag">Remote Areas</span>
+                    <span class="tag">Arctic Coverage</span>
+                    <span class="tag">Permanent Connection</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- COMPANY -->
+<section class="company section-white section-curve-tr">
+    <div class="two-col-header">
+        <div class="col-left">
+            <h2 class="sec-title"><span class="t-accent">Practical experience</span><br>and accountability for results</h2>
+        </div>
+        <div class="col-right">
+            <p class="sec-desc">MobilService specialises <span class="t-accent">in GPS/GLONASS monitoring, tachograph maintenance and Iridium satellite communications</span> for transport, oil &amp; gas and timber companies.</p>
+            <div class="g-line"></div>
+        </div>
+    </div>
+    <div class="company-divider"></div>
+    <div class="company-body">
+        <div class="company-text">
+            <p class="company-p"><strong class="t-accent">Our clients include Gazprom, Rosneft, Russian Railways, SDEK, Rostelecom</strong> — companies for whom reliable fleet control and regulatory compliance are critically important.</p>
+            <p class="company-p"><strong class="t-accent">We operate on the Wialon platform:</strong> real-time monitoring, fuel consumption control, route and driver behaviour analytics, video surveillance with AI analytics.</p>
+            <p class="company-p"><strong>Company mission:</strong> to help transport companies comply with legislation, avoid fines and optimise fleet operations.</p>
+        </div>
+        <div class="company-img">
+            <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&q=80" alt="Команда МобилСервис">
+        </div>
+    </div>
+    <div class="company-cards">
+        <div class="company-card">
+            <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=700&q=80" alt="">
+            <div class="company-card-ov"></div>
+            <div class="company-card-body">
+                <h3>We work under any conditions</h3>
+                <p>Equipment operates in cities as well as in remote and hard-to-reach areas — where there is no GSM coverage.</p>
+            </div>
+        </div>
+        <div class="company-card">
+            <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=700&q=80" alt="">
+            <div class="company-card-ov"></div>
+            <div class="company-card-body">
+                <h3>A comprehensive approach to tasks</h3>
+                <p>We select solutions tailored to each client's needs, adapt world-leading technologies and provide long-term support.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- NEWS -->
+<section class="news section-light">
+    <div class="two-col-header">
+        <div class="col-left">
+            <h2 class="sec-title">Stay up to date with the latest<br><span class="t-accent">MobilService articles</span></h2>
+            <p class="sec-label">News section</p>
+        </div>
+        <div class="col-right">
+            <p class="sec-desc">Company articles and updates on <span class="t-accent">products and technologies</span> in fleet monitoring, tachography and satellite communications.</p>
+            <div class="g-line"></div>
+        </div>
+    </div>
+    <div id="home-news-grid" class="news-grid"></div>
+    <div class="news-footer">
+        <a href="news-en.html" class="btn-all-news"><span>ALL ARTICLES</span> <span class="btn-arr-inline">→</span></a>
+    </div>
+</section>
+
+<!-- CONTACT -->
+<section class="contact section-dark" id="contact">
+    <div class="two-col-header">
+        <div class="col-left">
+            <h2 class="sec-title sec-title-light">Ready to answer your<br>questions <span class="t-accent">and suggestions</span></h2>
+            <p class="sec-label sec-label-light">Technical and commercial enquiries</p>
+        </div>
+        <div class="col-right">
+            <p class="sec-desc sec-desc-light">If you have questions about our services, <span class="t-accent">need a consultation</span> or want to connect a monitoring system — our specialists will contact you shortly.</p>
+            <div class="g-line"></div>
+        </div>
+    </div>
+    <div class="contact-body">
+        <div class="contact-form-wrap">
+            <h3 class="form-heading">Feedback</h3>
+            <form class="contact-form" id="contact-form" onsubmit="submitContactForm(event)">
+                <div class="form-row">
+                    <input type="text" id="cf-organization" placeholder="Organisation name">
+                    <input type="text" id="cf-contact" placeholder="Contact person">
+                </div>
+                <div class="form-row">
+                    <input type="email" id="cf-email" placeholder="Email address" required>
+                    <input type="tel" id="cf-phone" placeholder="+7 (___) ___-__-__">
+                </div>
+                <textarea id="cf-message" placeholder="Questions and suggestions" required></textarea>
+                <label class="check-label">
+                    <input type="checkbox" id="cf-consent">
+                    <span>I agree to the company policy and consent to the processing of my personal data</span>
+                </label>
+                <div id="cf-status" class="cf-status" hidden></div>
+                <button type="submit" id="cf-submit" class="btn-submit">SEND</button>
+            </form>
+        </div>
+        <div class="contact-map">
+            <iframe
+                src="https://yandex.ru/map-widget/v1/?ll=68.960910%2C57.148470&z=16&pt=68.960910%2C57.148470,pm2rdl~&text=%D0%A2%D1%8E%D0%BC%D0%B5%D0%BD%D1%8C%2C%20%D1%83%D0%BB.%2050%20%D0%BB%D0%B5%D1%82%20%D0%9E%D0%BA%D1%82%D1%8F%D0%B1%D1%80%D1%8F%2C%2029"
+                width="100%" height="100%"
+                frameborder="0" allowfullscreen
+                style="border:0; border-radius: 16px; display: block;">
+            </iframe>
+        </div>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+    <div class="footer-grid">
+        <div class="f-col">
+            <h4 class="f-heading">Navigation</h4>
+            <p class="f-sub">Sections</p>
+            <ul class="f-list">
+                <li><a href="#">Home</a></li>
+                <li><a href="#">About</a></li>
+                <li><a href="#">Services</a></li>
+                <li><a href="#">Clients</a></li>
+                <li><a href="#">Articles</a></li>
+                <li><a href="#">Contacts</a></li>
+            </ul>
+        </div>
+        <div class="f-col f-col-wide">
+            <h4 class="f-heading">Services</h4>
+            <p class="f-sub">Monitoring &amp; Telematics</p>
+            <ul class="f-list">
+                <li><a href="#">GPS/GLONASS Fleet Monitoring</a></li>
+                <li><a href="#">In-Vehicle Video Analytics</a></li>
+                <li><a href="#">GSM Backup Communication Channels</a></li>
+            </ul>
+        </div>
+        <div class="f-col">
+            <p class="f-sub" style="margin-top:2rem">Tachography &amp; Communications</p>
+            <ul class="f-list">
+                <li><a href="#">Tachographs &amp; Driver Cards</a></li>
+                <li><a href="#">Iridium Mobile Satellite Communications</a></li>
+                <li><a href="#">VSAT Satellite Internet</a></li>
+                <li><a href="#">Transport Heaters</a></li>
+            </ul>
+        </div>
+        <div class="f-col">
+            <p class="f-sub" style="margin-top:2rem">Clients</p>
+            <ul class="f-list">
+                <li><a href="#">Fuel &amp; Energy Companies</a></li>
+                <li><a href="#">Transport Companies</a></li>
+                <li><a href="#">Construction Companies</a></li>
+                <li><a href="#">General Aviation</a></li>
+                <li><a href="#">Agricultural Enterprises</a></li>
+            </ul>
+        </div>
+        <div class="f-col">
+            <h4 class="f-heading">Contacts</h4>
+            <p class="f-sub">Phone</p>
+            <p class="f-contact">+7 (3452) 68-90-90</p>
+            <p class="f-sub">Email</p>
+            <p class="f-contact">ms@r72.ru</p>
+            <p class="f-sub">Address</p>
+            <p class="f-contact">Tyumen,<br>50 Let Oktyabrya St., 29</p>
+            <p class="f-sub">Working hours</p>
+            <p class="f-contact">Mon–Fri 09:00–18:00</p>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <p class="f-copy">© MobilService 2026. All rights reserved.</p>
+        <p class="f-dev">Tyumen, since 1998</p>
+    </div>
+    <div class="footer-watermark">MOBILSERVICE</div>
+</footer>
+
+<!-- ===== МОДАЛ ВХОДА ===== -->
+<div id="login-modal" class="modal-backdrop">
+  <div class="modal-card">
+    <button class="modal-close" onclick="closeLoginModal()">&times;</button>
+    <div class="modal-header">
+      <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      <h2 class="modal-title">Sign In</h2>
+      <p class="modal-sub">MobilService — personal account</p>
+    </div>
+    <form id="login-form" class="modal-form" onsubmit="handleLogin(event)">
+      <div class="modal-field">
+        <label>Username or E-mail</label>
+        <input id="login-username" type="text" placeholder="Enter username" autocomplete="username" required>
+      </div>
+      <div class="modal-field">
+        <label>Password</label>
+        <input id="login-password" type="password" placeholder="Enter password" autocomplete="current-password" required>
+      </div>
+      <p id="login-error" class="modal-error" hidden></p>
+      <button type="submit" id="login-submit" class="modal-btn">SIGN IN</button>
+      <button type="button" id="btn-forgot" class="modal-forgot" onclick="toggleForgotPassword()">Forgot password?</button>
+      <div id="forgot-info" class="modal-forgot-info" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13.6 19.79 19.79 0 0 1 1.61 5.08 2 2 0 0 1 3.59 3h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 10.6a16 16 0 0 0 6 6l.94-.94a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 17.92z"/></svg>
+        <span>Call us: <a href="tel:+73452689090" class="forgot-phone">+7 (3452) 68-90-90</a><br><span class="forgot-hours">Mon–Fri, 09:00–18:00</span></span>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ===== МОДАЛ ДОБАВЛЕНИЯ ПОЛЬЗОВАТЕЛЯ (только admin) ===== -->
+<div id="adduser-modal" class="modal-backdrop">
+  <div class="modal-card">
+    <button class="modal-close" onclick="closeAddUser()">&times;</button>
+    <div class="modal-header">
+      <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M12 14c-4 0-7 2-7 5"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="16" y1="11" x2="22" y2="11"/></svg>
+      <h2 class="modal-title">Добавить пользователя</h2>
+      <p class="modal-sub">Сотрудник или клиент</p>
+    </div>
+    <form id="adduser-form" class="modal-form" onsubmit="handleAddUser(event)">
+      <div class="modal-row-2">
+        <div class="modal-field">
+          <label>Роль</label>
+          <select id="au-role" required>
+            <option value="employee">Сотрудник</option>
+            <option value="client">Клиент</option>
+          </select>
+        </div>
+        <div class="modal-field">
+          <label>Логин</label>
+          <input id="au-username" type="text" placeholder="username" required>
+        </div>
+      </div>
+      <div class="modal-field">
+        <label>Полное имя</label>
+        <input id="au-fullname" type="text" placeholder="Иванов Иван Иванович">
+      </div>
+      <div class="modal-row-2">
+        <div class="modal-field">
+          <label>E-mail</label>
+          <input id="au-email" type="email" placeholder="email@example.com" required>
+        </div>
+        <div class="modal-field">
+          <label>Телефон</label>
+          <input id="au-phone" type="tel" placeholder="+7 (___) ___-__-__">
+        </div>
+      </div>
+      <div class="modal-field">
+        <label>Password</label>
+        <input id="au-password" type="password" placeholder="Минимум 6 символов" required minlength="6">
+      </div>
+      <p id="adduser-error" class="modal-error" hidden></p>
+      <p id="adduser-success" class="modal-success" hidden></p>
+      <button type="submit" id="adduser-submit" class="modal-btn">СОЗДАТЬ</button>
+    </form>
+  </div>
+</div>
+
+<script src="assets/js/script.js?v=3"></script>
+<script src="assets/js/cookies.js"></script>
+</body>
+</html>
+
+
+
+
+
+

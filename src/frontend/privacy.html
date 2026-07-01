@@ -105,6 +105,11 @@
         @media (max-width: 640px) {
             .prv-card { padding: 28px 20px; }
         }
+        @media (max-width: 480px) {
+            .prv-hero { padding: 110px 1.5rem 48px; }
+            .prv-hero h1 { font-size: 1.6rem; word-break: break-word; overflow-wrap: break-word; }
+            .prv-body { padding: 40px 1rem 60px; }
+        }
     </style>
 </head>
 <body>
@@ -131,7 +136,7 @@
         <li id="nav-knowledge-item" style="display:none"><a href="knowledge.html">БАЗА ЗНАНИЙ</a></li>
     </ul>
     <div class="nav-right">
-        <div class="lang-selector">RU <span class="arrow">▾</span></div>
+        <button class="lang-selector" onclick="toggleLang()">RU <span class="arrow">▾</span></button>
         <a href="index.html#contact" class="btn-contacts">КОНТАКТЫ</a>
         <div id="client-dropdown-wrap" style="position:relative">
             <button id="btn-login-open" class="btn-login" onclick="loginBtnClick()">
@@ -370,3 +375,7 @@
 <script src="assets/js/cookies.js"></script>
 </body>
 </html>
+
+
+
+

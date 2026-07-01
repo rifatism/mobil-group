@@ -534,3 +534,26 @@ const _origReset = typeof resetNavbar  === 'function' ? resetNavbar  : null;
 document.addEventListener('click', e => {
   if (e.target.classList.contains('mob-nav-backdrop')) toggleMobNav();
 });
+
+// Переключение языка: переходим на -en.html / обратно
+function toggleServicePanel(id) {
+  const panel = document.getElementById('panel-' + id);
+  if (!panel) return;
+  const isOpen = panel.classList.contains('active');
+  document.querySelectorAll('.cat-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.cat-item').forEach(c => c.classList.remove('cat-active'));
+  if (!isOpen) {
+    panel.classList.add('active');
+    document.getElementById('service-' + id).classList.add('cat-active');
+    setTimeout(() => panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50);
+  }
+}
+
+function toggleLang() {
+  const page = location.pathname.split('/').pop() || 'index.html';
+  if (page.endsWith('-en.html')) {
+    location.href = page.replace('-en.html', '.html');
+  } else {
+    location.href = page.replace('.html', '-en.html');
+  }
+}

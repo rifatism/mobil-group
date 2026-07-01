@@ -1,10 +1,10 @@
 ﻿<!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png" href="assets/images/icon.png">
-    <title>Проекты | МобилСервис</title>
+    <title>Projects | MobilService</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/style.css">
@@ -14,32 +14,32 @@
 
 <!-- NAVBAR -->
 <nav class="navbar scrolled">
-    <a href="index.html" class="logo">
+    <a href="index-en.html" class="logo">
         <img src="assets/images/logo.png" alt="МобилСервис" class="logo-img">
     </a>
     <ul class="nav-links">
-        <li><a href="index.html">ГЛАВНАЯ</a></li>
-        <li><a href="about.html">О КОМПАНИИ</a></li>
+        <li><a href="index-en.html">HOME</a></li>
+        <li><a href="about-en.html">ABOUT</a></li>
         <li class="nav-has-drop">
             <a href="index.html#services" class="nav-drop-trigger">УСЛУГИ <span class="arrow">▾</span></a>
             <div class="nav-dropdown">
-                <a href="index.html#service-monitoring" class="nav-drop-item">Мониторинг транспорта</a>
-                <a href="index.html#service-tachograph" class="nav-drop-item">Тахография</a>
-                <a href="index.html#service-satellite" class="nav-drop-item">Спутниковая связь</a>
+                <a href="index.html#service-monitoring" class="nav-drop-item">Fleet Monitoring</a>
+                <a href="index.html#service-tachograph" class="nav-drop-item">Tachography</a>
+                <a href="index.html#service-satellite" class="nav-drop-item">Satellite Communications</a>
             </div>
         </li>
-        <li><a href="projects.html" class="active">ПРОЕКТЫ</a></li>
-        <li><a href="news.html">СТАТЬИ</a></li>
-        <li><a href="career.html">КАРЬЕРА</a></li>
+        <li><a href="projects-en.html" class="active">PROJECTS</a></li>
+        <li><a href="news-en.html">ARTICLES</a></li>
+        <li><a href="career-en.html">CAREER</a></li>
         <li id="nav-knowledge-item" style="display:none"><a href="knowledge.html">БАЗА ЗНАНИЙ</a></li>
     </ul>
     <div class="nav-right">
-        <button class="lang-selector" onclick="toggleLang()">RU <span class="arrow">▾</span></button>
-        <a href="index.html#contact" class="btn-contacts">КОНТАКТЫ</a>
+        <button class="lang-selector" onclick="toggleLang()">EN <span class="arrow">▾</span></button>
+        <a href="index-en.html#contact" class="btn-contacts">CONTACTS</a>
         <div id="client-dropdown-wrap" style="position:relative">
             <button id="btn-login-open" class="btn-login" onclick="loginBtnClick()">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-                <span id="btn-login-label">ВОЙТИ</span>
+                <span id="btn-login-label">SIGN IN</span>
             </button>
             <div id="client-dropdown" class="client-dropdown">
                 <a id="cd-admin-link" class="cd-item cd-item--admin" href="admin.html" style="display:none">
@@ -80,35 +80,35 @@
             <button class="mob-nav-close" onclick="toggleMobNav()">×</button>
         </div>
         <ul class="mob-nav-links">
-            <li><a href="index.html">ГЛАВНАЯ</a></li>
-            <li><a href="about.html">О КОМПАНИИ</a></li>
+            <li><a href="index-en.html">HOME</a></li>
+            <li><a href="about-en.html">ABOUT</a></li>
             <li>
                 <button class="mob-drop-trigger" onclick="toggleMobDrop(this)">
-                    УСЛУГИ <span class="mob-drop-chevron">▾</span>
+                    SERVICES <span class="mob-drop-chevron">▾</span>
                 </button>
                 <ul class="mob-sub">
-                    <li><a href="index.html#service-monitoring">Мониторинг транспорта</a></li>
-                    <li><a href="index.html#service-tachograph">Тахография</a></li>
-                    <li><a href="index.html#service-satellite">Спутниковая связь</a></li>
+                    <li><a href="index.html#service-monitoring">Fleet Monitoring</a></li>
+                    <li><a href="index.html#service-tachograph">Tachography</a></li>
+                    <li><a href="index.html#service-satellite">Satellite Communications</a></li>
                 </ul>
             </li>
-            <li><a href="projects.html" class="mob-active">ПРОЕКТЫ</a></li>
-            <li><a href="news.html">СТАТЬИ</a></li>
-            <li><a href="career.html">КАРЬЕРА</a></li>
-            <li id="mob-knowledge-item" style="display:none"><a href="knowledge.html" class="mob-kb-link">БАЗА ЗНАНИЙ</a></li>
-            <li><a href="index.html#contact">КОНТАКТЫ</a></li>
+            <li><a href="projects-en.html" class="mob-active">PROJECTS</a></li>
+            <li><a href="news-en.html">ARTICLES</a></li>
+            <li><a href="career-en.html">CAREER</a></li>
+            <li id="mob-knowledge-item" style="display:none"><a href="knowledge.html" class="mob-kb-link">KNOWLEDGE BASE</a></li>
+            <li><a href="index-en.html#contact">КОНТАКТЫ</a></li>
         </ul>
         <div class="mob-user-section">
             <button class="mob-user-trigger" onclick="toggleMobUser(this)">
                 <div class="mob-u-avatar" id="mob-u-avatar">?</div>
                 <div class="mob-u-info">
-                    <div class="mob-u-name" id="mob-u-name">Войти</div>
-                    <div class="mob-u-label" id="mob-u-label">Личный кабинет</div>
+                    <div class="mob-u-name" id="mob-u-name">Sign in</div>
+                    <div class="mob-u-label" id="mob-u-label">Personal Account</div>
                 </div>
                 <span class="mob-u-chevron">▾</span>
             </button>
             <div class="mob-user-menu" id="mob-user-menu"></div>
-            <a href="#" onclick="loginBtnClick();toggleMobNav();return false;" class="mob-login-link" id="mob-login-link">ВОЙТИ</a>
+            <a href="#" onclick="loginBtnClick();toggleMobNav();return false;" class="mob-login-link" id="mob-login-link">SIGN IN</a>
         </div>
     </div>
 </div>
@@ -118,20 +118,20 @@
     <div class="prj-hero-bg"></div>
     <div class="prj-hero-content">
         <div class="prj-hero-badge">
-            <span class="prj-hero-dot"></span> МобилСервис — Портфолио
+            <span class="prj-hero-dot"></span> MobilService — Portfolio
         </div>
         <h1 class="prj-hero-title">
-            <span class="prj-title-line1">Реализованные</span>
-            <span class="prj-title-line2">работы<span class="prj-title-amp"> &amp; </span>кейсы</span>
+            <span class="prj-title-line1">Completed</span>
+            <span class="prj-title-line2">works<span class="prj-title-amp"> &amp; </span>case studies</span>
         </h1>
-        <p class="prj-hero-sub">Реальные задачи клиентов — эффективные решения МобилСервис.</p>
+        <p class="prj-hero-sub">Real client challenges — effective MobilService solutions.</p>
     </div>
 </section>
 
 <!-- ФИЛЬТРЫ -->
 <div class="prj-filters">
     <div class="prj-filter-inner" id="prj-filter-wrap">
-        <button class="prj-cat-btn active">Все проекты</button>
+        <button class="prj-cat-btn active">All projects</button>
     </div>
 </div>
 
@@ -139,7 +139,7 @@
 <section class="prj-grid-section">
     <div class="prj-grid-inner">
         <div class="prj-grid" id="prj-grid">
-            <div class="prj-loading"><span class="prj-spinner"></span> Загрузка проектов...</div>
+            <div class="prj-loading"><span class="prj-spinner"></span> Loading projects...</div>
         </div>
     </div>
 </section>
@@ -148,9 +148,9 @@
 <section class="prj-trust" id="prj-clients-section">
     <div class="prj-trust-inner">
         <div class="prj-trust-head">
-            <span class="prj-trust-over">Партнёры</span>
-            <h2 class="prj-trust-title">Нам доверяют</h2>
-            <p class="prj-trust-sub">Компании нефтегазовой, строительной и транспортной отраслей выбирают МобилСервис</p>
+            <span class="prj-trust-over">Partners</span>
+            <h2 class="prj-trust-title">They trust us</h2>
+            <p class="prj-trust-sub">Companies in the oil &amp; gas, construction and transport sectors choose MobilService</p>
         </div>
         <div class="prj-trust-logos" id="prj-logos-grid">
             <div class="prj-trust-empty">
@@ -159,23 +159,23 @@
                     <path d="M16 7V5a2 2 0 0 0-4 0v2"/>
                     <path d="M8 7V5a2 2 0 0 0-4 0v2"/>
                 </svg>
-                <p>Логотипы клиентов появятся здесь после добавления проектов</p>
+                <p>Client logos will appear here once projects are added</p>
             </div>
         </div>
         <div class="prj-trust-stats">
             <div class="prj-stat">
                 <span class="prj-stat-num" id="prj-stat-projects">—</span>
-                <span class="prj-stat-label">выполненных проектов</span>
+                <span class="prj-stat-label">completed projects</span>
             </div>
             <div class="prj-stat-divider"></div>
             <div class="prj-stat">
                 <span class="prj-stat-num" id="prj-stat-clients">—</span>
-                <span class="prj-stat-label">компаний-клиентов</span>
+                <span class="prj-stat-label">client companies</span>
             </div>
             <div class="prj-stat-divider"></div>
             <div class="prj-stat">
-                <span class="prj-stat-num">с 1998</span>
-                <span class="prj-stat-label">года на рынке</span>
+                <span class="prj-stat-num">since 1998</span>
+                <span class="prj-stat-label">years in the market</span>
             </div>
         </div>
     </div>
@@ -185,42 +185,42 @@
 <footer class="footer">
     <div class="footer-grid">
         <div class="f-col">
-            <h4 class="f-heading">Навигация</h4>
+            <h4 class="f-heading">Navigation</h4>
             <ul class="f-list">
-                <li><a href="index.html">Главная</a></li>
-                <li><a href="about.html">О компании</a></li>
-                <li><a href="#">Услуги</a></li>
-                <li><a href="projects.html">Проекты</a></li>
-                <li><a href="news.html">Статьи</a></li>
-                <li><a href="career.html">Карьера</a></li>
+                <li><a href="index-en.html">Home</a></li>
+                <li><a href="about-en.html">About</a></li>
+                <li><a href="#">Services</a></li>
+                <li><a href="projects-en.html">Проекты</a></li>
+                <li><a href="news-en.html">Articles</a></li>
+                <li><a href="career-en.html">Career</a></li>
             </ul>
         </div>
         <div class="f-col f-col-wide">
-            <h4 class="f-heading">Услуги</h4>
+            <h4 class="f-heading">Services</h4>
             <ul class="f-list">
-                <li><a href="#">Мониторинг транспорта GPS/ГЛОНАСС</a></li>
-                <li><a href="#">Тахография и карты водителей</a></li>
-                <li><a href="#">Видеоаналитика в транспорте</a></li>
-                <li><a href="#">Спутниковая связь Iridium</a></li>
-                <li><a href="#">Спутниковый интернет VSAT</a></li>
-                <li><a href="#">Резервные каналы связи GSM</a></li>
+                <li><a href="#">GPS/GLONASS Fleet Monitoring</a></li>
+                <li><a href="#">Tachographs &amp; Driver Cards</a></li>
+                <li><a href="#">In-Vehicle Video Analytics</a></li>
+                <li><a href="#">Iridium Satellite Communications</a></li>
+                <li><a href="#">VSAT Satellite Internet</a></li>
+                <li><a href="#">GSM Backup Communication Channels</a></li>
             </ul>
         </div>
         <div class="f-col">
-            <h4 class="f-heading">Контакты</h4>
+            <h4 class="f-heading">Contacts</h4>
             <ul class="f-list">
                 <li><a href="tel:+73452689090">+7 (3452) 68-90-90</a></li>
                 <li><a href="mailto:ms@r72.ru">ms@r72.ru</a></li>
-                <li><span style="color:rgba(255,255,255,0.45)">ул. 50 лет Октября, 29<br>Тюмень, Россия</span></li>
-                <li><span style="color:rgba(255,255,255,0.45)">пн–пт 09:00–18:00</span></li>
+                <li><span style="color:rgba(255,255,255,0.45)">50 Let Oktyabrya St., 29<br>Tyumen, Russia</span></li>
+                <li><span style="color:rgba(255,255,255,0.45)">Mon–Fri 09:00–18:00</span></li>
             </ul>
         </div>
     </div>
     <div class="footer-bottom">
-        <p class="f-copy">© МобилСервис 2026. Все права защищены. &nbsp;·&nbsp; <a href="privacy.html" style="color:rgba(255,255,255,0.35);text-decoration:none;">Политика конфиденциальности</a></p>
-        <p class="f-dev">Тюмень, с 1998 года</p>
+        <p class="f-copy">© MobilService 2026. All rights reserved. &nbsp;·&nbsp; <a href="privacy-en.html" style="color:rgba(255,255,255,0.35);text-decoration:none;">Политика конфиденциальности</a></p>
+        <p class="f-dev">Tyumen, since 1998</p>
     </div>
-    <div class="footer-watermark">МОБИЛСЕРВИС</div>
+    <div class="footer-watermark">MOBILSERVICE</div>
 </footer>
 
 <!-- МОДАЛ ПРОЕКТА -->
@@ -246,24 +246,24 @@
     <button class="modal-close" onclick="closeLoginModal()">&times;</button>
     <div class="modal-header">
       <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-      <h2 class="modal-title">Вход в систему</h2>
-      <p class="modal-sub">МобилСервис — личный кабинет</p>
+      <h2 class="modal-title">Sign In</h2>
+      <p class="modal-sub">MobilService — personal account</p>
     </div>
     <form id="login-form" class="modal-form" onsubmit="handleLogin(event)">
       <div class="modal-field">
-        <label>Логин или E-mail</label>
-        <input id="login-username" type="text" placeholder="Введите логин" autocomplete="username" required>
+        <label>Username or E-mail</label>
+        <input id="login-username" type="text" placeholder="Enter username" autocomplete="username" required>
       </div>
       <div class="modal-field">
-        <label>Пароль</label>
-        <input id="login-password" type="password" placeholder="Введите пароль" autocomplete="current-password" required>
+        <label>Password</label>
+        <input id="login-password" type="password" placeholder="Enter password" autocomplete="current-password" required>
       </div>
       <p id="login-error" class="modal-error" hidden></p>
-      <button type="submit" id="login-submit" class="modal-btn">ВОЙТИ</button>
-      <button type="button" id="btn-forgot" class="modal-forgot" onclick="toggleForgotPassword()">Забыли пароль?</button>
+      <button type="submit" id="login-submit" class="modal-btn">SIGN IN</button>
+      <button type="button" id="btn-forgot" class="modal-forgot" onclick="toggleForgotPassword()">Forgot password?</button>
       <div id="forgot-info" class="modal-forgot-info" hidden>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13.6 19.79 19.79 0 0 1 1.61 5.08 2 2 0 0 1 3.59 3h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 10.6a16 16 0 0 0 6 6l.94-.94a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 17.92z"/></svg>
-        <span>Позвоните нам: <a href="tel:+73452689090" class="forgot-phone">+7 (3452) 68-90-90</a><br><span class="forgot-hours">пн–пт, 09:00–18:00</span></span>
+        <span>Call us: <a href="tel:+73452689090" class="forgot-phone">+7 (3452) 68-90-90</a><br><span class="forgot-hours">Mon–Fri, 09:00–18:00</span></span>
       </div>
     </form>
   </div>
@@ -274,6 +274,7 @@
 <script src="assets/js/cookies.js"></script>
 </body>
 </html>
+
 
 
 

@@ -372,7 +372,20 @@
 .prj-card.in-view { opacity: 1; transform: translateY(0); transition: opacity 0.45s ease, transform 0.45s ease; }
 
 @media (max-width: 768px) {
+    /* Hero */
+    .prj-hero { padding: 120px 1.5rem 60px; }
+    .prj-title-line1, .prj-title-line2 { font-size: clamp(2rem, 9vw, 3.5rem); }
+    .prj-hero-sub { max-width: 100%; }
+    /* Grid */
     .prj-grid { grid-template-columns: 1fr; }
+    .prj-grid-section { padding: 40px 1.5rem 60px; }
+    /* Trust section */
+    .prj-trust { padding: 60px 1.5rem 60px; }
+    .prj-trust-stats { flex-direction: column; gap: 2rem; padding-top: 32px; }
+    .prj-stat { padding: 0; }
+    .prj-stat-divider { display: none; }
+    /* Modal */
     .prj-modal-body { padding: 24px 20px 28px; }
     .prj-modal-title { font-size: 1.2rem; }
+    .prj-modal-backdrop { padding: 1rem 0.75rem; }
 }

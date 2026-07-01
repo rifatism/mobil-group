@@ -20,7 +20,7 @@
         <li><a href="#" class="active">ГЛАВНАЯ</a></li>
         <li><a href="about.html">О КОМПАНИИ</a></li>
         <li class="nav-has-drop">
-            <a href="#services" class="nav-drop-trigger">УСЛУГИ <span class="arrow">▾</span></a>
+            <a href="#services" class="nav-drop-trigger"><span>УСЛУГИ</span> <span class="arrow">▾</span></a>
             <div class="nav-dropdown">
                 <a href="#service-monitoring" class="nav-drop-item">Мониторинг транспорта</a>
                 <a href="#service-tachograph" class="nav-drop-item">Тахография</a>
@@ -33,7 +33,7 @@
         <li id="nav-knowledge-item" style="display:none"><a href="knowledge.html">БАЗА ЗНАНИЙ</a></li>
     </ul>
     <div class="nav-right">
-        <div class="lang-selector">RU <span class="arrow">▾</span></div>
+        <button class="lang-selector" onclick="toggleLang()">RU <span class="arrow">▾</span></button>
         <a href="#contact" class="btn-contacts">КОНТАКТЫ</a>
         <div id="client-dropdown-wrap" style="position:relative">
             <button id="btn-login-open" class="btn-login" onclick="loginBtnClick()">
@@ -46,29 +46,29 @@
             <div id="client-dropdown" class="client-dropdown">
                 <a id="cd-admin-link" class="cd-item cd-item--admin" href="admin.html" style="display:none">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                    Панель администратора
+                    <span>Панель администратора</span>
                 </a>
                 <a class="cd-item" href="profile.html">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-                    Профиль
+                    <span>Профиль</span>
                 </a>
                 <a class="cd-item" href="dashboard.html">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-                    Дашборд
+                    <span>Дашборд</span>
                 </a>
                 <a id="cd-knowledge-link" class="cd-item" href="knowledge.html" style="display:none">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-                    База знаний
+                    <span>База знаний</span>
                 </a>
                 <a class="cd-item cd-item--soon" href="#">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                    Поддержка
+                    <span>Поддержка</span>
                     <span class="cd-soon">Скоро</span>
                 </a>
                 <div class="cd-divider"></div>
                 <button class="cd-item cd-item--logout" onclick="clientLogout()">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-                    Выйти
+                    <span>Выйти</span>
                 </button>
             </div>
         </div>
@@ -143,11 +143,11 @@
                 Мониторинг транспорта,<br>
                 тахография <span class="title-accent">и спутниковая связь</span>
             </h1>
-            <p class="hero-subtitle">▶ &nbsp; Комплексные инновационные решения для вашего бизнеса с 1998 года</p>
+            <p class="hero-subtitle">▶ &nbsp; <span>Комплексные инновационные решения для вашего бизнеса с 1998 года</span></p>
         </div>
         <div class="hero-buttons">
             <a href="about.html" class="btn btn-white">ПОДРОБНЕЕ О НАС</a>
-            <a href="#services" class="btn btn-ghost"><span class="btn-circle"><img src="assets/images/arr.svg" alt="" class="btn-arr"></span> НАШИ УСЛУГИ</a>
+            <a href="#services" class="btn btn-ghost"><span class="btn-circle"><img src="assets/images/arr.svg" alt="" class="btn-arr"></span> <span>НАШИ УСЛУГИ</span></a>
         </div>
     </div>
 
@@ -223,7 +223,7 @@
         </div>
     </div>
     <div class="catalog-grid">
-        <div class="cat-item" id="service-monitoring">
+        <div class="cat-item" id="service-monitoring" onclick="toggleServicePanel('monitoring')">
             <img src="https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=700&q=80" alt="Мониторинг">
             <div class="cat-overlay"></div>
             <div class="cat-content">
@@ -237,9 +237,10 @@
                 </svg>
                 <h3 class="cat-title">Мониторинг транспорта</h3>
                 <p class="cat-sub">GPS/ГЛОНАСС</p>
+                <span class="cat-hint">Подробнее <span class="cat-hint-arrow">▾</span></span>
             </div>
         </div>
-        <div class="cat-item" id="service-tachograph">
+        <div class="cat-item" id="service-tachograph" onclick="toggleServicePanel('tachograph')">
             <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=700&q=80" alt="Тахография">
             <div class="cat-overlay"></div>
             <div class="cat-content">
@@ -252,9 +253,10 @@
                 </svg>
                 <h3 class="cat-title">Тахография</h3>
                 <p class="cat-sub">Установка и обслуживание</p>
+                <span class="cat-hint">Подробнее <span class="cat-hint-arrow">▾</span></span>
             </div>
         </div>
-        <div class="cat-item" id="service-satellite">
+        <div class="cat-item" id="service-satellite" onclick="toggleServicePanel('satellite')">
             <img src="https://images.unsplash.com/photo-1476134397686-16d0f6fe4b36?w=700&q=80" alt="Спутниковая связь">
             <div class="cat-overlay"></div>
             <div class="cat-content">
@@ -266,6 +268,84 @@
                 </svg>
                 <h3 class="cat-title">Спутниковая связь</h3>
                 <p class="cat-sub">Iridium · VSAT · GSM</p>
+                <span class="cat-hint">Подробнее <span class="cat-hint-arrow">▾</span></span>
+            </div>
+        </div>
+    </div>
+    <div class="cat-panels-wrap">
+        <div class="cat-panel" id="panel-monitoring">
+            <button class="cat-panel-close" onclick="toggleServicePanel('monitoring')">✕</button>
+            <div class="cat-panel-inner">
+                <div class="cat-panel-text">
+                    <h4 class="cat-panel-title">Мониторинг транспорта GPS/ГЛОНАСС</h4>
+                    <p class="cat-panel-desc">Оснащение транспортных средств сертифицированной аппаратурой спутниковой навигации в соответствии с ПП РФ № 2216. Обязательно для автобусов категорий M2, M3 и грузовиков N2, N3, перевозящих опасные грузы. Данные передаются в государственную систему АО «ГЛОНАСС» в режиме реального времени.</p>
+                    <ul class="cat-panel-list">
+                        <li>Соответствие ПП РФ № 2216 и Приказу Минтранса № 440</li>
+                        <li>Передача данных в государственную систему АО «ГЛОНАСС»</li>
+                        <li>Онлайн-отслеживание маршрута, скорости и событий</li>
+                        <li>Контроль топлива и режима работы водителей</li>
+                        <li>Штрафы за несоответствие: до 500 000 ₽ для юрлиц</li>
+                    </ul>
+                </div>
+                <div class="cat-panel-extra">
+                    <h5 class="cat-panel-extra-title">Видеорегистраторы и видеоаналитика</h5>
+                    <p class="cat-panel-desc">Профессиональные системы с поддержкой до 16 камер и ИИ-аналитикой на борту. Работают при −50…+70°C. Соответствие ПП РФ № 969 (сертификация с 01.09.2026).</p>
+                    <ul class="cat-panel-list">
+                        <li>ADAS: выезд за разметку, опасное сближение, пешеходы</li>
+                        <li>DSM: усталость водителя, отвлечение, использование телефона</li>
+                        <li>Архив более 3 месяцев (8 камер, HDD 2 ТБ)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="cat-panel" id="panel-tachograph">
+            <button class="cat-panel-close" onclick="toggleServicePanel('tachograph')">✕</button>
+            <div class="cat-panel-inner">
+                <div class="cat-panel-text">
+                    <h4 class="cat-panel-title">Тахография</h4>
+                    <p class="cat-panel-desc">Установка, обслуживание и замена блоков СКЗИ на российских тахографах. Оформление карт водителя и предприятия. Обязательно для грузовиков от 3,5 тонн (N2, N3) и автобусов с числом мест более 8 (M2, M3). Блок СКЗИ подлежит замене каждые 3 года.</p>
+                    <ul class="cat-panel-list">
+                        <li>Российские тахографы с СКЗИ (ШТРИХ-ТахоRUS, АТОЛ Drive 5)</li>
+                        <li>Замена блока СКЗИ каждые 3 года (от 34 500 ₽)</li>
+                        <li>Карты водителя (5 200 ₽) и предприятия (6 200 ₽)</li>
+                        <li>Поверка, калибровка и постановка на учёт в Росавтотрансе</li>
+                        <li>Штрафы за отсутствие тахографа: до 50 000 ₽ для юрлиц</li>
+                    </ul>
+                </div>
+                <div class="cat-panel-extra">
+                    <h5 class="cat-panel-extra-title">Блок СКЗИ: что нужно знать</h5>
+                    <p class="cat-panel-desc">Средство криптографической защиты информации шифрует данные о движении и режиме труда и отдыха в некорректируемом виде. По истечении 3 лет — блокируется.</p>
+                    <ul class="cat-panel-list">
+                        <li>Просроченный СКЗИ = штраф как за отсутствие тахографа</li>
+                        <li>Активация через реестр Росавтотранса</li>
+                        <li>Личное присутствие и оригиналы документов</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="cat-panel" id="panel-satellite">
+            <button class="cat-panel-close" onclick="toggleServicePanel('satellite')">✕</button>
+            <div class="cat-panel-inner">
+                <div class="cat-panel-text">
+                    <h4 class="cat-panel-title">Спутниковая связь Iridium / VSAT</h4>
+                    <p class="cat-panel-desc">Стабильная связь в удалённых районах, где отсутствует GSM-покрытие: нефтяные месторождения, тайга, Сибирь, Арктика. Iridium обеспечивает 100% покрытие поверхности Земли, VSAT — широкополосный корпоративный интернет на отдалённых объектах.</p>
+                    <ul class="cat-panel-list">
+                        <li>Iridium — голосовая связь и данные по всему земному шару</li>
+                        <li>VSAT — высокоскоростной интернет в труднодоступной местности</li>
+                        <li>SOS-сигнализация и тревожные кнопки для экипажей</li>
+                        <li>Применение: нефтегаз, лесозаготовка, арктические объекты</li>
+                        <li>Интеграция с системами GPS/ГЛОНАСС-мониторинга</li>
+                    </ul>
+                </div>
+                <div class="cat-panel-extra">
+                    <h5 class="cat-panel-extra-title">Когда это необходимо</h5>
+                    <p class="cat-panel-desc">Решение актуально для предприятий, работающих за пределами зон GSM-покрытия или требующих гарантированной связи вне зависимости от наземной инфраструктуры.</p>
+                    <ul class="cat-panel-list">
+                        <li>Нефтегазовые месторождения в Сибири и Арктике</li>
+                        <li>Лесозаготовительные предприятия в тайге</li>
+                        <li>Транспорт на маршрутах вне покрытия сотовых сетей</li>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
@@ -448,7 +528,7 @@
     </div>
     <div id="home-news-grid" class="news-grid"></div>
     <div class="news-footer">
-        <a href="news.html" class="btn-all-news">ВСЕ СТАТЬИ <span class="btn-arr-inline">→</span></a>
+        <a href="news.html" class="btn-all-news"><span>ВСЕ СТАТЬИ</span> <span class="btn-arr-inline">→</span></a>
     </div>
 </section>
 
@@ -479,7 +559,7 @@
                 <textarea id="cf-message" placeholder="Вопросы и предложения" required></textarea>
                 <label class="check-label">
                     <input type="checkbox" id="cf-consent">
-                    Я соглашаюсь с политикой компании и разрешаю обработку персональных данных
+                    <span>Я соглашаюсь с политикой компании и разрешаю обработку персональных данных</span>
                 </label>
                 <div id="cf-status" class="cf-status" hidden></div>
                 <button type="submit" id="cf-submit" class="btn-submit">ОТПРАВИТЬ</button>
@@ -639,3 +719,4 @@
 <script src="assets/js/cookies.js"></script>
 </body>
 </html>
+
